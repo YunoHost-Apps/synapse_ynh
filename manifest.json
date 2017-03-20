@@ -36,7 +36,7 @@
                                 "type": "boolean",
                                 "ask": {
                                         "en": "Is it a public server ?",
-                                        "fr": "Est-ce un serveur publique ?"
+                                        "fr": "Est-ce un serveur public ?"
                                 },
                                 "default": "0"
                         }
