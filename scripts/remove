@@ -33,7 +33,6 @@ closeport
 
 sudo rm -rf /etc/apt/sources.list.d/matrix.list
 sudo rm -rf /var/lib/matrix-synapse
-ynh_package_update
 
 sudo yunohost service remove matrix-synapse
 
