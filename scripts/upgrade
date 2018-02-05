@@ -66,12 +66,99 @@ then
     }
 fi
 
+#=================================================
+# ENSURE DOWNWARD COMPATIBILITY BIS
+#=================================================
+
+if [ -z "$final_path" ]; then
+	final_path="/opt/yunohost/matrix-$app"
+	ynh_app_setting_set $app final_path $final_path
+fi
+
+echo "domain=$domain" >&2
+if [ -z "$domain" ]; then
+	domain=$(ynh_app_setting_get $app domain)
+echo "domain=$domain" >&2
+	ynh_app_setting_set $app special_domain $domain
+	ynh_app_setting_delete $app domain
+fi
+
+if [ -z "$path_url" ]; then
+	path_url="/_matrix"
+	ynh_app_setting_set $app special_path $path_url
+	ynh_app_setting_delete $app path
+fi
+
+ynh_app_setting_delete $app skipped_uris
+
+#=================================================
+
 # We stop the service before to enable TRAP because if this command fail the restoration might be not possible.
 systemctl stop matrix-$app.service
 
-# Exit if an error occurs during the execution of the script
-ynh_abort_if_errors
+#=================================================
+# STANDARD UPGRADE STEPS
+#=================================================
+# UPGRADE DEPENDENCIES
+#=================================================
 
+ynh_install_app_dependencies coturn build-essential python2.7-dev libffi-dev python-pip python-setuptools sqlite3 libssl-dev python-virtualenv libxml2-dev libxslt1-dev python-lxml libjpeg-dev libpq-dev postgresql acl
+
+#=================================================
+# DOWNLOAD, CHECK AND UNPACK SOURCE
+#=================================================
+
+# Install synapse in virtualenv
+
+# WARRNING : theses command are used in INSTALL, UPGRADE (2 times)
+# For any update do it in all files
+if [ -n "$(uname -m | grep arm)" ]
+then
+    ynh_setup_source $final_path/ "armv7"
+else
+    # Install virtualenv if it don't exist
+    test -e $final_path/bin || virtualenv -p python2.7 $final_path
+
+    # Install synapse in virtualenv
+    PS1=""
+    cp ../conf/virtualenv_activate $final_path/bin/activate
+    ynh_replace_string __FINAL_PATH__ $final_path $final_path/bin/activate
+
+    # We set all necessary environement variable to create a python virtualenvironnement. 
+    source $final_path/bin/activate
+    pip install --upgrade pip
+    pip install --upgrade setuptools
+    pip install --upgrade cffi ndg-httpsclient psycopg2 lxml
+    wget -nv -O synapse_source.tar.gz https://github.com/matrix-org/synapse/archive/v$upstream_version.tar.gz
+    echo "${src_sum} synapse_source.tar.gz" | sha256sum -c --status \
+        || ynh_die "Corrupt source"
+    pip install --upgrade synapse_source.tar.gz
+
+    # Fix issue with msgpack see https://github.com/YunoHost-Apps/synapse_ynh/issues/29
+    test -e $final_path/lib/python2.7/site-packages/msgpack/__init__.py || (\
+            pip uninstall -y msgpack-python msgpack; \
+            pip install msgpack-python)
+
+    # This fonction was defined while we call "source $final_path/bin/activate". By this fonction de undo what does "$final_path/bin/activate"
+    deactivate
+fi
+
+#=================================================
+# NGINX CONFIGURATION
+#=================================================
+
+ynh_add_nginx_config
+
+#=================================================
+# CREATE DEDICATED USER
+#=================================================
+
+ynh_system_user_create $synapse_user /var/lib/matrix-synapse
+adduser $synapse_user ssl-cert
+adduser turnserver ssl-cert
+
+#=================================================
+# SPECIFIC UPGRADE
 #=================================================
 # UPGRADE FROM DIFFERENTS PACKAGE EVOLUTION
 #=================================================
@@ -88,15 +175,15 @@ then
     # UPDATE SETTINGS
     #=================================================
 
-    path_url="/_matrix"
-    domain=$(ynh_app_setting_get $app domain)
-    final_path="/opt/yunohost/matrix-synapse"
-    ynh_app_setting_set $app special_domain $domain
-    ynh_app_setting_set $app special_path $path_url
-    ynh_app_setting_set $app final_path $final_path
-    ynh_app_setting_delete $app domain
-    ynh_app_setting_delete $app path
-    ynh_app_setting_delete $app skipped_uris
+#     path_url="/_matrix"
+#     domain=$(ynh_app_setting_get $app domain)
+#     final_path="/opt/yunohost/matrix-synapse"
+#     ynh_app_setting_set $app special_domain $domain
+#     ynh_app_setting_set $app special_path $path_url
+#     ynh_app_setting_set $app final_path $final_path
+#     ynh_app_setting_delete $app domain
+#     ynh_app_setting_delete $app path
+#     ynh_app_setting_delete $app skipped_uris
 
     #=================================================
     # REMOVE OLD DEPENDDANCE
@@ -117,7 +204,6 @@ then
     # add new package as dependance and install dependance
     # WARRNING : theses command are used in INSTALL, UPGRADE, RESTORE
     # For any update do it in all files
-    ynh_install_app_dependencies coturn build-essential python2.7-dev libffi-dev python-pip python-setuptools sqlite3 libssl-dev python-virtualenv libxml2-dev libxslt1-dev python-lxml libjpeg-dev libpq-dev postgresql acl
     pip install --upgrade pip
     pip install --upgrade virtualenv
 
@@ -138,33 +224,33 @@ then
 
     # WARRNING : theses command are used in INSTALL, UPGRADE (2 times)
     # For any update do it in all files
-    if [ -n "$(uname -m | grep arm)" ]
-    then
-        ynh_setup_source $final_path/ "armv7"
-    else
-        # Install virtualenv if it don't exist
-        test -e $final_path/bin || virtualenv -p python2.7 $final_path
-
-        # Install synapse in virtualenv
-        PS1=""
-        cp ../conf/virtualenv_activate $final_path/bin/activate
-        ynh_replace_string __FINAL_PATH__ $final_path $final_path/bin/activate
-        source $final_path/bin/activate
-        pip install --upgrade pip
-        pip install --upgrade setuptools
-        pip install --upgrade cffi ndg-httpsclient psycopg2 lxml
-        pip install --upgrade https://github.com/matrix-org/synapse/archive/v$upstream_version.tar.gz
-
-        # Fix issue with msgpack see https://github.com/YunoHost-Apps/synapse_ynh/issues/29
-        test -e $final_path/lib/python2.7/site-packages/msgpack/__init__.py || (\
-                pip uninstall -y msgpack-python msgpack; \
-                pip install msgpack-python)
-
-        deactivate
-    fi
+#     if [ -n "$(uname -m | grep arm)" ]
+#     then
+#         ynh_setup_source $final_path/ "armv7"
+#     else
+#         # Install virtualenv if it don't exist
+#         test -e $final_path/bin || virtualenv -p python2.7 $final_path
+# 
+#         # Install synapse in virtualenv
+#         PS1=""
+#         cp ../conf/virtualenv_activate $final_path/bin/activate
+#         ynh_replace_string __FINAL_PATH__ $final_path $final_path/bin/activate
+#         source $final_path/bin/activate
+#         pip install --upgrade pip
+#         pip install --upgrade setuptools
+#         pip install --upgrade cffi ndg-httpsclient psycopg2 lxml
+#         pip install --upgrade https://github.com/matrix-org/synapse/archive/v$upstream_version.tar.gz
+# 
+#         # Fix issue with msgpack see https://github.com/YunoHost-Apps/synapse_ynh/issues/29
+#         test -e $final_path/lib/python2.7/site-packages/msgpack/__init__.py || (\
+#                 pip uninstall -y msgpack-python msgpack; \
+#                 pip install msgpack-python)
+# 
+#         deactivate
+#     fi
 
     # Move the dh file to the new directory
-    cp /etc/yunohost/certs/$domain/dh.pem /etc/matrix-synapse/dh.pem
+#     cp /etc/yunohost/certs/$domain/dh.pem /etc/matrix-synapse/dh.pem
 
     #=================================================
     # SECURE FILES AND DIRECTORIES
@@ -172,14 +258,14 @@ then
 
     # WARRNING : theses command are used in INSTALL, UPGRADE (2 times), RESTORE
     # For any update do it in all files
-    chown $synapse_user:root -R $final_path
-    chown $synapse_user:root -R /var/lib/matrix-$app
-    chown $synapse_user:root -R /var/log/matrix-$app
-    chown $synapse_user:root -R /etc/matrix-$app
-    chmod u=rwX,g=rX,o= -R /etc/matrix-$app
-    chmod 600 /etc/matrix-$app/dh.pem
-    setfacl -R -m user:turnserver:rX  /etc/matrix-$app
-    setfacl -R -m user:turnserver:rwX  /var/log/matrix-$app
+#     chown $synapse_user:root -R $final_path
+#     chown $synapse_user:root -R /var/lib/matrix-$app
+#     chown $synapse_user:root -R /var/log/matrix-$app
+#     chown $synapse_user:root -R /etc/matrix-$app
+#     chmod u=rwX,g=rX,o= -R /etc/matrix-$app
+#     chmod 600 /etc/matrix-$app/dh.pem
+#     setfacl -R -m user:turnserver:rX  /etc/matrix-$app
+#     setfacl -R -m user:turnserver:rwX  /var/log/matrix-$app
 
     #=================================================
     # UPDATE SSOWAT CONF
@@ -194,8 +280,8 @@ then
     #=================================================
 
     ynh_system_user_create $synapse_user /var/lib/matrix-synapse
-    adduser $synapse_user ssl-cert
-    adduser turnserver ssl-cert
+#     adduser $synapse_user ssl-cert
+#     adduser turnserver ssl-cert
 
     #=================================================
     # SETUP SYSTEMD
@@ -244,41 +330,44 @@ then
     # WARRNING : theses command are used in INSTALL, UPGRADE (2 times)
     # For any update do it in all files
 
-    homeserver_config_path="/etc/matrix-$app/homeserver.yaml"
+#     homeserver_config_path="/etc/matrix-$app/homeserver.yaml"
 
-    cp ../conf/homeserver.yaml "$homeserver_config_path"
-    cp ../conf/log.yaml /etc/matrix-$app/log.yaml
+#     cp ../conf/homeserver.yaml "$homeserver_config_path"
+#     cp ../conf/log.yaml /etc/matrix-$app/log.yaml
 
-    ynh_replace_string __APP__ $app "$homeserver_config_path"
-    ynh_replace_string __DOMAIN__ $domain "$homeserver_config_path"
-    ynh_replace_string __SYNAPSE_DB_USER__ $synapse_db_user "$homeserver_config_path"
-    ynh_replace_string __SYNAPSE_DB_PWD__ $synapse_db_pwd "$homeserver_config_path"
-    ynh_replace_string __PORT__ $port "$homeserver_config_path"
-    ynh_replace_string __TLS_PORT__ $synapse_tls_port "$homeserver_config_path"
-    ynh_replace_string __TURNSERVER_TLS_PORT__ $turnserver_tls_port "$homeserver_config_path"
-    ynh_replace_string __TURNPWD__ $turnserver_pwd "$homeserver_config_path"
+#     ynh_replace_string __APP__ $app "$homeserver_config_path"
+#     ynh_replace_string __DOMAIN__ $domain "$homeserver_config_path"
+#     ynh_replace_string __SYNAPSE_DB_USER__ $synapse_db_user "$homeserver_config_path"
+#     ynh_replace_string __SYNAPSE_DB_PWD__ $synapse_db_pwd "$homeserver_config_path"
+#     ynh_replace_string __PORT__ $port "$homeserver_config_path"
+#     ynh_replace_string __TLS_PORT__ $synapse_tls_port "$homeserver_config_path"
+#     ynh_replace_string __TURNSERVER_TLS_PORT__ $turnserver_tls_port "$homeserver_config_path"
+#     ynh_replace_string __TURNPWD__ $turnserver_pwd "$homeserver_config_path"
 
-    ynh_replace_string __APP__ $app "$homeserver_config_path"
+#     ynh_replace_string __APP__ $app "$homeserver_config_path"
 
-    if [ "$is_public" = "0" ]
-    then
-        ynh_replace_string __ALLOWED_ACCESS__ False "$homeserver_config_path"
-    else
-        ynh_replace_string __ALLOWED_ACCESS__ True "$homeserver_config_path"
-    fi
+#     if [ "$is_public" = "0" ]
+#     then
+#         ynh_replace_string __ALLOWED_ACCESS__ False "$homeserver_config_path"
+#     else
+#         ynh_replace_string __ALLOWED_ACCESS__ True "$homeserver_config_path"
+#     fi
 
-    ynh_store_file_checksum "$homeserver_config_path"
-    ynh_store_file_checksum /etc/matrix-$app/log.yaml
+#     ynh_store_file_checksum "$homeserver_config_path"
+#     ynh_store_file_checksum /etc/matrix-$app/log.yaml
 
     #=================================================
     # MIGRATE DATABASE
     #=================================================
 
     # We get the last version of the synapse_port_db script because an old version could be buggy.
-    cp ../sources/synapse_port_db /opt/yunohost/matrix-synapse/bin/synapse_port_db
+    cp ../sources/synapse_port_db $final_path/bin/synapse_port_db
+    chmod +x $final_path/bin/synapse_port_db
 
     # Migrate database (in virtualenv)
-    source $final_path/bin/activate
+#     PS1=""
+#     cp ../conf/virtualenv_activate $final_path/bin/activate
+#     source $final_path/bin/activate
     /opt/yunohost/matrix-synapse/bin/synapse_port_db --sqlite-database /var/lib/matrix-synapse/homeserver.db \
     --postgres-config /etc/matrix-synapse/homeserver.yaml
     deactivate
@@ -308,7 +397,7 @@ then
 
     ynh_app_setting_set $app turnserver_alt_tls_port $turnserver_alt_tls_port
     ynh_app_setting_set $app cli_port $cli_port
-    
+
     yunohost firewall allow --no-upnp Both $turnserver_alt_tls_port > /dev/null 2>&1
 
     # Configure systemd
@@ -330,11 +419,11 @@ fi
 #=================================================
 
 # Fix issue about certificates access
-if [[ ! $(grep "ssl-cert:x:[0-9]*:.*matrix-$app" /etc/group) ]]
-then
-    adduser $synapse_user ssl-cert
-    adduser turnserver ssl-cert
-fi
+# if [[ ! $(grep "ssl-cert:x:[0-9]*:.*matrix-$app" /etc/group) ]]
+# then
+#     adduser $synapse_user ssl-cert
+#     adduser turnserver ssl-cert
+# fi
 
 # In the old synapse instance we stored the dh.pem in /etc/yunohost/certs/DOMAIN.TLD/ but it was problematics with lets'encrypt witch made a link to the key. While the letsencrypt key was changed the dh.pem file was lost. So we decided to move to /etc/matrix-synapse/ witch is a directory witch is not managed by any other component.
 # Here we check if the dh.pem file is already moved. If not we try to copy the file from the old place. If the file in the old place was already removed (by letsencrypt) we create a new one.
@@ -352,42 +441,42 @@ test -e /etc/matrix-$app/dh.pem || \
 
 # WARRNING : theses command are used in INSTALL, UPGRADE (2 times)
 # For any update do it in all files
-if [ -n "$(uname -m | grep arm)" ]
-then
-    ynh_setup_source $final_path/ "armv7"
-else
-    # Install virtualenv if it don't exist
-    test -e $final_path/bin || virtualenv -p python2.7 $final_path
-
-    # Install synapse in virtualenv
-    PS1=""
-    cp ../conf/virtualenv_activate $final_path/bin/activate
-    ynh_replace_string __FINAL_PATH__ $final_path $final_path/bin/activate
-    
-    # We set all necessary environement variable to create a python virtualenvironnement. 
-    source $final_path/bin/activate
-    pip install --upgrade pip
-    pip install --upgrade setuptools
-    pip install --upgrade cffi ndg-httpsclient psycopg2 lxml
-    wget -nv -O synapse_source.tar.gz https://github.com/matrix-org/synapse/archive/v$upstream_version.tar.gz
-    echo "${src_sum} synapse_source.tar.gz" | sha256sum -c --status \
-        || ynh_die "Corrupt source"
-    pip install --upgrade synapse_source.tar.gz
-    
-    # Fix issue with msgpack see https://github.com/YunoHost-Apps/synapse_ynh/issues/29
-    test -e $final_path/lib/python2.7/site-packages/msgpack/__init__.py || (\
-            pip uninstall -y msgpack-python msgpack; \
-            pip install msgpack-python)
-    
-    # This fonction was defined while we call "source $final_path/bin/activate". By this fonction de undo what does "$final_path/bin/activate"
-    deactivate
-fi
+# if [ -n "$(uname -m | grep arm)" ]
+# then
+#     ynh_setup_source $final_path/ "armv7"
+# else
+#     # Install virtualenv if it don't exist
+#     test -e $final_path/bin || virtualenv -p python2.7 $final_path
+# 
+#     # Install synapse in virtualenv
+#     PS1=""
+#     cp ../conf/virtualenv_activate $final_path/bin/activate
+#     ynh_replace_string __FINAL_PATH__ $final_path $final_path/bin/activate
+# 
+#     # We set all necessary environement variable to create a python virtualenvironnement. 
+#     source $final_path/bin/activate
+#     pip install --upgrade pip
+#     pip install --upgrade setuptools
+#     pip install --upgrade cffi ndg-httpsclient psycopg2 lxml
+#     wget -nv -O synapse_source.tar.gz https://github.com/matrix-org/synapse/archive/v$upstream_version.tar.gz
+#     echo "${src_sum} synapse_source.tar.gz" | sha256sum -c --status \
+#         || ynh_die "Corrupt source"
+#     pip install --upgrade synapse_source.tar.gz
+# 
+#     # Fix issue with msgpack see https://github.com/YunoHost-Apps/synapse_ynh/issues/29
+#     test -e $final_path/lib/python2.7/site-packages/msgpack/__init__.py || (\
+#             pip uninstall -y msgpack-python msgpack; \
+#             pip install msgpack-python)
+# 
+#     # This fonction was defined while we call "source $final_path/bin/activate". By this fonction de undo what does "$final_path/bin/activate"
+#     deactivate
+# fi
 
 #=================================================
 # NGINX CONFIGURATION
 #=================================================
 
-ynh_add_nginx_config
+# ynh_add_nginx_config
 
 #=================================================
 # UPDATE SYNAPSE CONFIG
