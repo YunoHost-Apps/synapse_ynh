@@ -48,7 +48,7 @@ cli_port=$(ynh_app_setting_get $app cli_port)
 #=================================================
 
 # To be sure that the migration is sucessfull we check that the old synapse version is compatible with the synapse_port_db script.
-if [[ -z $synapse_old_version ]] && [[ $(dpkg -l | grep -c -E "ii.*matrix-synapse.*0.25") != 1 ]] && [[ $(dpkg -l | grep -c -E "ii.*matrix-synapse.*0.26") != 1 ]]
+if [[ -z $synapse_old_version ]] && [[ $(dpkg -l | grep -c -E "ii.*matrix-synapse.*0.27") != 1 ]] && [[ $(dpkg -l | grep -c -E "ii.*matrix-synapse.*0.26") != 1 ]]
 then
 	ynh_die "Update from this synapse version is not available now. You need to wait for the next update."
 fi

@@ -9,7 +9,7 @@
 		"en": "Instant messaging server who use matrix",
 		"fr": "Un serveur de messagerie instantané basé sur matrix"
 	},
-	"version": "0.26.1~ynh1",
+	"version": "0.27.2~ynh1",
 	"url": "http://matrix.org",
 	"license": "Apache-2.0",
 	"maintainer": {
