@@ -48,6 +48,10 @@ cli_port=$(ynh_app_setting_get $app cli_port)
 #=================================================
 
 # To be sure that the migration is sucessfull we check that the old synapse version is compatible with the synapse_port_db script.
+# We need to make the user able to do the migration to the new package.
+# While the official synapse version is updated, the idea is to test the migration with the new version.
+# If the migration pass we can update this next line with the new synapse package.
+# For more information see comment : https://github.com/YunoHost-Apps/synapse_ynh/pull/40#pullrequestreview-108680051
 if [[ -z $synapse_old_version ]] && [[ $(dpkg -l | grep -c -E "ii.*matrix-synapse.*0.27") != 1 ]] && [[ $(dpkg -l | grep -c -E "ii.*matrix-synapse.*0.26") != 1 ]]
 then
 	ynh_die "Update from this synapse version is not available now. You need to wait for the next update."
