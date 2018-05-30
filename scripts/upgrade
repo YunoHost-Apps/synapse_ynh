@@ -47,10 +47,10 @@ cli_port=$(ynh_app_setting_get $app cli_port)
 # ENSURE DOWNWARD COMPATIBILITY
 #=================================================
 
-# Following the discussion here https://github.com/YunoHost-Apps/synapse_ynh/pull/50 and https://github.com/YunoHost-Apps/synapse_ynh/pull/51 we decided to remove definitely the support of the old package migration.
+# Following the discussion here https://github.com/YunoHost-Apps/synapse_ynh/pull/51 we decided to remove definitely the support of the old package migration.
 if [[ -z $synapse_old_version ]]
 then
-	ynh_die "Update from this synapse version is not available."
+	ynh_die "Update from this synapse version is not available. You need to remove this package and reinstall the new package version."
 fi
 
 #=================================================
