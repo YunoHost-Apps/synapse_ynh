@@ -142,7 +142,7 @@ mkdir -p $final_path
 # For any update do it in all files
 if [ -n "$(uname -m | grep arm)" ]
 then
-    ynh_setup_source $final_path/ "armv7"
+    ynh_setup_source $final_path/ "armv7_$(lsb_release --codename --short)"
 else
     # Install virtualenv if it don't exist
     test -e $final_path/bin || virtualenv -p python2.7 $final_path

@@ -47,14 +47,10 @@ cli_port=$(ynh_app_setting_get $app cli_port)
 # ENSURE DOWNWARD COMPATIBILITY
 #=================================================
 
-# To be sure that the migration is sucessfull we check that the old synapse version is compatible with the synapse_port_db script.
-# We need to make the user able to do the migration to the new package.
-# While the official synapse version is updated, the idea is to test the migration with the new version.
-# If the migration pass we can update this next line with the new synapse package.
-# For more information see comment : https://github.com/YunoHost-Apps/synapse_ynh/pull/40#pullrequestreview-108680051
-if [[ -z $synapse_old_version ]] && [[ $(dpkg -l | grep -c -E "ii.*matrix-synapse.*0.27") != 1 ]] && [[ $(dpkg -l | grep -c -E "ii.*matrix-synapse.*0.28") != 1 ]]
+# Following the discussion here https://github.com/YunoHost-Apps/synapse_ynh/pull/51 we decided to remove definitely the support of the old package migration.
+if [[ -z $synapse_old_version ]]
 then
-	ynh_die "Update from this synapse version is not available now. You need to wait for the next update."
+	ynh_die "Update from this synapse version is not available. You need to remove this package and reinstall the new package version."
 fi
 
 #=================================================
@@ -74,79 +70,7 @@ then
 fi
 
 #=================================================
-# UPGRADE FROM DIFFERENTS PACKAGE EVOLUTION
-#=================================================
-# MIGRATION 1 : UPGRADE FROM OLD PACKAGE VERSION
-# DEBIAN PACKAGE-> PYTHON VIRTUALENVIRONNEMENT
-# SQLITE -> POSTGRESQL
-# PART NO 1
-#=================================================
-# Actually this package use pythonvirtualenvironnement. The old package used the debian package. So if the app is not already migrated from the old package version we need to migrade the app from the debian package to a python virtualenvironnement. In the same time the package migrated from sqlite to postgresql for the database. So we do these both things in the same time.
-
-if [[ -z $synapse_old_version ]]
-then
-
-    #=================================================
-    # UPDATE SETTINGS
-    #=================================================
-
-    path_url="/_matrix"
-    domain=$(ynh_app_setting_get $app domain)
-    final_path="/opt/yunohost/matrix-synapse"
-    ynh_app_setting_set $app special_domain $domain
-    ynh_app_setting_set $app special_path $path_url
-    ynh_app_setting_set $app final_path $final_path
-    ynh_app_setting_delete $app domain
-    ynh_app_setting_delete $app path
-    ynh_app_setting_delete $app skipped_uris
-
-    #=================================================
-    # REMOVE OLD DEPENDDANCE
-    #=================================================
-
-    ynh_secure_remove /etc/apt/sources.list.d/matrix.list
-    ynh_package_autoremove --purge matrix-synapse python-matrix-synapse-ldap3 || true
-
-    # If we don't remove these line in dpkg config, dpkg fail on every new package install
-    sudo sed --in-place ':a;N;$!ba;s@matrix-synapse nogroup 755 /var/lib/matrix-synapse\n@@g' /var/lib/dpkg/statoverride
-    sudo sed --in-place ':a;N;$!ba;s@matrix-synapse nogroup 755 /var/log/matrix-synapse\n@@g' /var/lib/dpkg/statoverride
-    sudo sed --in-place ':a;N;$!ba;s@matrix-synapse nogroup 755 /etc/matrix-synapse\n@@g' /var/lib/dpkg/statoverride
-
-    #=================================================
-    # INSTALL NEW DEPENDENCIES
-    #=================================================
-
-    # add new package as dependance and install dependance
-    # WARRNING : theses command are used in INSTALL, UPGRADE, RESTORE
-    # For any update do it in all files
-    ynh_install_app_dependencies coturn build-essential python2.7-dev libffi-dev python-pip python-setuptools sqlite3 libssl-dev python-virtualenv libxml2-dev libxslt1-dev python-lxml libjpeg-dev libpq-dev postgresql acl
-    pip install --upgrade virtualenv
-
-    #=================================================
-    # CREATE A POSTGRESQL DATABASE
-    #=================================================
-
-    synapse_db_pwd=$(ynh_string_random 30)
-    ynh_app_setting_set $app synapse_db_pwd $synapse_db_pwd
-
-    # Create postgresql database
-    ynh_psql_test_if_first_run
-    ynh_psql_create_user $synapse_db_user $synapse_db_pwd
-    ynh_psql_execute_as_root \
-    "CREATE DATABASE $synapse_db_name ENCODING 'UTF8' LC_COLLATE='C' LC_CTYPE='C' template=template0 OWNER $synapse_db_user;"
-
-    #=================================================
-    # CREATE EMPTY DIR FOR SYNAPSE
-    #=================================================
-    
-    # WARRNING : theses command are used in INSTALL, UPGRADE
-    # For any update do it in all files
-    mkdir -p /var/lib/matrix-$app
-    mkdir -p /var/log/matrix-$app
-    mkdir -p /etc/matrix-$app/conf.d
-    mkdir -p $final_path
-fi
-
+# STANDARD UPGRADE STEPS
 #=================================================
 # DOWNLOAD, CHECK AND UNPACK SOURCE
 #=================================================
@@ -158,7 +82,7 @@ fi
 
 if [ -n "$(uname -m | grep arm)" ]
 then
-    ynh_setup_source $final_path/ "armv7"
+    ynh_setup_source $final_path/ "armv7_$(lsb_release --codename --short)"
 else
     # Install virtualenv if it don't exist
     test -e $final_path/bin || virtualenv -p python2.7 $final_path
@@ -191,8 +115,6 @@ else
     deactivate
 fi
 
-#=================================================
-# STANDARD UPGRADE STEPS
 #=================================================
 # UPDATE SYNAPSE CONFIG
 #=================================================
@@ -227,81 +149,7 @@ ynh_store_file_checksum "$homeserver_config_path"
 ynh_store_file_checksum "/etc/matrix-$app/log.yaml"
 
 #=================================================
-# MIGRATION 1 : UPGRADE FROM OLD PACKAGE VERSION
-# DEBIAN PACKAGE-> PYTHON VIRTUALENVIRONNEMENT
-# SQLITE -> POSTGRESQL
-# PART NO 2
-#=================================================
-
-if [[ -z $synapse_old_version ]]
-then
-
-    #=================================================
-    # UPDATE SSOWAT CONF
-    #=================================================
-
-    cp ../conf/add_sso_conf.py $final_path
-    cp ../conf/remove_sso_conf.py $final_path
-    python3 $final_path/add_sso_conf.py || echo "Error while sso config, please add '/_matrix' in /etc/ssowat/conf.json.persistent"
-
-    #=================================================
-    # CREATE DEDICATED USER
-    #=================================================
-
-    ynh_system_user_create $synapse_user /var/lib/matrix-synapse
-    adduser $synapse_user ssl-cert
-    adduser turnserver ssl-cert
-
-    # In the old synapse instance we stored the dh.pem in /etc/yunohost/certs/DOMAIN.TLD/ but it was problematics with lets'encrypt witch made a link to the key. While the letsencrypt key was changed the dh.pem file was lost. So we decided to move to /etc/matrix-synapse/ witch is a directory witch is not managed by any other component.
-    # Here we check if the dh.pem file is already moved. If not we try to copy the file from the old place. If the file in the old place was already removed (by letsencrypt) we create a new one.
-    test -e /etc/matrix-$app/dh.pem || \
-        cp /etc/yunohost/certs/$domain/dh.pem /etc/matrix-$app/dh.pem || \
-            openssl dhparam -out /etc/matrix-$app/dh.pem 2048 > /dev/null
-    
-    #=================================================
-    # SETUP SYSTEMD
-    #=================================================
-
-    ynh_secure_remove /etc/init.d/matrix-synapse
-    ynh_secure_remove /lib/systemd/system/matrix-synapse.service
-    ynh_secure_remove /etc/systemd/system/matrix-synapse.service
-    systemctl daemon-reload
-    systemctl disable matrix-synapse.service
-
-    cp ../conf/default_matrix-synapse /etc/default/matrix-synapse
-    cp ../conf/matrix-synapse.service /etc/systemd/system/matrix-synapse.service
-    ynh_replace_string __APP__ $app /etc/systemd/system/matrix-synapse.service
-    systemctl daemon-reload
-    systemctl enable matrix-synapse.service
-
-    #=================================================
-    # ADVERTISE SERVICE IN ADMIN PANEL
-    #=================================================
-
-    yunohost service add matrix-$app -l "/var/log/matrix-$app/homeserver.log"
-    yunohost service add coturn-$app
-
-    #=================================================
-    # MIGRATE DATABASE
-    #=================================================
-
-    # We get the last version of the synapse_port_db script because an old version could be buggy.
-    cp ../sources/synapse_port_db /opt/yunohost/matrix-synapse/bin/synapse_port_db
-
-    # Fix "PS1: unbound variable" On ARM architecture
-    PS1=""
-    cp ../conf/virtualenv_activate $final_path/bin/activate
-    ynh_replace_string __FINAL_PATH__ $final_path $final_path/bin/activate
-
-    # Migrate database (in virtualenv)
-    source $final_path/bin/activate
-    /opt/yunohost/matrix-synapse/bin/synapse_port_db --sqlite-database /var/lib/matrix-synapse/homeserver.db \
-    --postgres-config /etc/matrix-synapse/homeserver.yaml
-    deactivate
-fi
-
-#=================================================
-# MIGRATION 2 : MULTINSTANCE SUPPORT
+# MIGRATION 1 : MULTINSTANCE SUPPORT
 #=================================================
 
 if [[ ! -e /etc/matrix-$app/coturn.conf ]]
@@ -339,7 +187,7 @@ then
 fi
 
 #=================================================
-# MIGRATION 3 : USE STANDARD ACCESS FOR CERTIFCATE
+# MIGRATION 2 : USE STANDARD ACCESS FOR CERTIFCATE
 # AND USE INDEPENDANT DH FILE
 #=================================================
 

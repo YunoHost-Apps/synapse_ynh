@@ -1,0 +1,11 @@
+SOURCE_URL=https://github.com/YunoHost-Apps/synapse_python_build/releases/download/v0.31.1/matrix-synapse_0.31.1-stretch-bin1_armv7l.tar.gz
+SOURCE_SUM=bed38a43b7e770234f5c3278066316fa261486a885913248c0750088309d87fd
+# (Optional) Program to check the integrity (sha256sum, md5sum...)
+# default: sha256
+SOURCE_SUM_PRG=sha256sum
+# (Optional) Archive format
+# default: tar.gz
+SOURCE_FORMAT=tar.gz
+# (Optional) Put false if sources are directly in the archive root
+# default: true
+SOURCE_IN_SUBDIR=true
