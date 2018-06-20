@@ -357,15 +357,6 @@ test -e /etc/matrix-$app/dh.pem || \
         openssl dhparam -out /etc/matrix-$app/dh.pem 2048 > /dev/null
 
 #=================================================
-# MIGRATION 4 : FIX TURNSERVER CONFIG
-#=================================================
-
-if ! yunohost firewall list | grep -q "\- 49152:49192$"
-then
-    yunohost firewall allow Both 49152:49192 > /dev/null 2>&1
-fi
-
-#=================================================
 # STANDARD UPGRADE STEPS
 #=================================================
 # NGINX CONFIGURATION

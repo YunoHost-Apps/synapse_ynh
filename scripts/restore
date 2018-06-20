@@ -128,12 +128,6 @@ yunohost firewall allow TCP $synapse_tls_port > /dev/null 2>&1
 yunohost firewall allow Both $turnserver_tls_port > /dev/null 2>&1
 yunohost firewall allow Both $turnserver_alt_tls_port > /dev/null 2>&1
 
-# Open the range 49152-49192 only if it as not been open by an other instance
-if ! yunohost firewall list | grep -q "\- 49152:49192$"
-then
-    yunohost firewall allow Both 49152:49192 > /dev/null 2>&1
-fi
-
 #=================================================
 # SETUP SSOWAT
 #=================================================
@@ -212,7 +206,7 @@ _matrix._tcp.$domain. 3600    IN      SRV     10 0 $synapse_tls_port $domain.
 
 You also need to open the TCP port $synapse_tls_port on your ISP box if it's not automatically done.
 
-Your synapse server also implements a turnserver (for VoIP), to have this fully functional open the TCP and UDP port $turnserver_tls_port, $turnserver_alt_tls_port and the range 49152 - 49192 (if it's not automatically done).
+Your synapse server also implements a turnserver (for VoIP), to have this fully functional open the TCP and UDP port $turnserver_tls_port, $turnserver_alt_tls_port and the range 49153 - 49193 (if it's not automatically done).
 
 If you're facing an issue or want to improve this app, please open a new issue in this project: https://github.com/YunoHost-Apps/synapse_ynh"
 

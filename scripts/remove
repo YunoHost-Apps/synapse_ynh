@@ -58,7 +58,6 @@ closeport() {
 closeport $synapse_tls_port
 closeport $turnserver_tls_port
 closeport $turnserver_alt_tls_port
-closeport '49152:49192'
 
 #=================================================
 # SETUP SSOWAT
