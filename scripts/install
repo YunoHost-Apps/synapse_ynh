@@ -278,6 +278,16 @@ ynh_store_file_checksum "$coturn_config_path"
 ynh_use_logrotate /var/log/matrix-$app
 
 #=================================================
+# ADD SCRIPT FOR COTURN CRON
+#=================================================
+
+# WARRNING : theses command are used in INSTALL, UPGRADE
+# For any update do it in all files
+
+cp ../sources/Coturn_config_rotate.sh $final_path/
+ynh_replace_string __APP__ $app "$final_path/Coturn_config_rotate.sh"
+
+#=================================================
 # GENERIC FINALIZATION
 #=================================================
 # SETUP SSOWAT
