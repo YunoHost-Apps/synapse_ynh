@@ -200,13 +200,16 @@ ynh_check_starting "Synapse now listening on port $synapse_tls_port" "/var/log/m
 # SEND A README FOR THE ADMIN
 #=================================================
 
+# WARRNING : theses command are used in INSTALL, RESTORE
+# For any update do it in all files
+
 message="To federate this app you need to add this line in your DNS configuration:
 
 _matrix._tcp.$domain. 3600    IN      SRV     10 0 $synapse_tls_port $domain.
 
 You also need to open the TCP port $synapse_tls_port on your ISP box if it's not automatically done.
 
-Your synapse server also implements a turnserver (for VoIP), to have this fully functional open the TCP and UDP port $turnserver_tls_port, $turnserver_alt_tls_port and the range 49153 - 49193 (if it's not automatically done).
+Your synapse server also implements a turnserver (for VoIP), to have this fully functional server it's recommended to read the 'Turnserver' section in the README available here : https://github.com/YunoHost-Apps/synapse_ynh .
 
 If you're facing an issue or want to improve this app, please open a new issue in this project: https://github.com/YunoHost-Apps/synapse_ynh"
 
