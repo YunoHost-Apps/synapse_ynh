@@ -11,7 +11,7 @@
         setup_private=0
         setup_public=1
         upgrade=1
-        upgrade=1   from_commit=a907e39c738997b0e30e9637a5b150bfecf06b18
+        upgrade=1   from_commit=db374d2bff981d2660ebdac52ee77c684383c00d
         backup_restore=1
         multi_instance=1
         incorrect_path=0
@@ -30,5 +30,5 @@
     Level 9=0
     Level 10=0
 ;;; Upgrade options
-	; commit=a907e39c738997b0e30e9637a5b150bfecf06b18
+	; commit=db374d2bff981d2660ebdac52ee77c684383c00d
 		name=Before multi_instance
