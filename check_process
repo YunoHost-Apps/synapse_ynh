@@ -31,4 +31,4 @@
     Level 10=0
 ;;; Upgrade options
 	; commit=db374d2bff981d2660ebdac52ee77c684383c00d
-		name=Before multi_instance
+		name=Fix postgresql helper from old_version_for_CI_2 branch
