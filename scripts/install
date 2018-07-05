@@ -151,27 +151,27 @@ else
     PS1=""
     cp ../conf/virtualenv_activate $final_path/bin/activate
     ynh_replace_string __FINAL_PATH__ $final_path $final_path/bin/activate
-    
-    # We set all necessary environement variable to create a python virtualenvironnement. 
+
+    # We set all necessary environement variable to create a python virtualenvironnement.
     source $final_path/bin/activate
     pip install --upgrade pip
     pip install --upgrade setuptools
     pip install --upgrade cffi ndg-httpsclient psycopg2 lxml
-    
+
     # Download and check the checksum for the synapse source
     src_url=$(grep 'SOURCE_URL=' "$YNH_CWD/../conf/python_source.src" | cut -d= -f2-)
     src_sum=$(grep 'SOURCE_SUM=' "$YNH_CWD/../conf/python_source.src" | cut -d= -f2-)
-    
+
     wget -nv -O synapse_source.tar.gz "$src_url"
     echo "${src_sum} synapse_source.tar.gz" | sha256sum -c --status \
         || ynh_die "Corrupt source"
     pip install --upgrade synapse_source.tar.gz
-    
+
     # Fix issue with msgpack see https://github.com/YunoHost-Apps/synapse_ynh/issues/29
     test -e $final_path/lib/python2.7/site-packages/msgpack/__init__.py || (\
             pip uninstall -y msgpack-python msgpack; \
             pip install msgpack-python)
-    
+
     # This fonction was defined while we call "source $final_path/bin/activate". By this fonction de undo what does "$final_path/bin/activate"
     deactivate
 fi
@@ -262,7 +262,7 @@ else
     ynh_replace_string '__IPV4__,' "" "$coturn_config_path"
 fi
 
-if [[ -n "$public_ip6" ]] && ynh_valide_ip6 "$public_ip6"
+if [[ -n "$public_ip6" ]] && ynh_validate_ip6 "$public_ip6"
 then
     ynh_replace_string '__IPV6__' "$public_ip6" "$coturn_config_path"
 else
@@ -341,7 +341,7 @@ _matrix._tcp.$domain. 3600    IN      SRV     10 0 $synapse_tls_port $domain.
 
 You also need to open the TCP port $synapse_tls_port on your ISP box if it's not automatically done.
 
-Your synapse server also implements a turnserver (for VoIP), to have this fully functional server it's recommended to read the 'Turnserver' section in the README available here : https://github.com/YunoHost-Apps/synapse_ynh .
+Your synapse server also implements a turnserver (for VoIP), to have this fully functional please read the 'Turnserver' section in the README available here: https://github.com/YunoHost-Apps/synapse_ynh .
 
 If you're facing an issue or want to improve this app, please open a new issue in this project: https://github.com/YunoHost-Apps/synapse_ynh"
 

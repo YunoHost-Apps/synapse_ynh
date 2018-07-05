@@ -77,7 +77,7 @@ fi
 
 # Install/upgrade synapse in virtualenv
 
-# WARRNING : theses command are used in INSTALL, UPGRADE
+# WARNING : these commands are used in INSTALL, UPGRADE
 # For any update do it in all files
 
 if [ -n "$(uname -m | grep arm)" ]
@@ -91,26 +91,26 @@ else
     PS1=""
     cp ../conf/virtualenv_activate $final_path/bin/activate
     ynh_replace_string __FINAL_PATH__ $final_path $final_path/bin/activate
-    
-    # We set all necessary environement variable to create a python virtualenvironnement. 
+
+    # We set all necessary environement variable to create a python virtualenvironnement.
     source $final_path/bin/activate
     pip install --upgrade setuptools
     pip install --upgrade cffi ndg-httpsclient psycopg2 lxml
-    
+
     # Download and check the checksum for the synapse source
     src_url=$(grep 'SOURCE_URL=' "$YNH_CWD/../conf/python_source.src" | cut -d= -f2-)
     src_sum=$(grep 'SOURCE_SUM=' "$YNH_CWD/../conf/python_source.src" | cut -d= -f2-)
-    
+
     wget -nv -O synapse_source.tar.gz "$src_url"
     echo "${src_sum} synapse_source.tar.gz" | sha256sum -c --status \
         || ynh_die "Corrupt source"
     pip install --upgrade synapse_source.tar.gz
-    
+
     # Fix issue with msgpack see https://github.com/YunoHost-Apps/synapse_ynh/issues/29
     test -e $final_path/lib/python2.7/site-packages/msgpack/__init__.py || (\
             pip uninstall -y msgpack-python msgpack; \
             pip install msgpack-python)
-    
+
     # This fonction was defined while we call "source $final_path/bin/activate". By this fonction de undo what does "$final_path/bin/activate"
     deactivate
 fi
@@ -172,7 +172,7 @@ then
 
     ynh_app_setting_set $app turnserver_alt_tls_port $turnserver_alt_tls_port
     ynh_app_setting_set $app cli_port $cli_port
-    
+
     yunohost firewall allow Both $turnserver_alt_tls_port > /dev/null 2>&1
 
     # Configure systemd
@@ -242,7 +242,7 @@ else
     ynh_replace_string '__IPV4__,' "" "$coturn_config_path"
 fi
 
-if [[ -n "$public_ip6" ]] && ynh_valide_ip6 "$public_ip6"
+if [[ -n "$public_ip6" ]] && ynh_validate_ip6 "$public_ip6"
 then
     ynh_replace_string '__IPV6__' "$public_ip6" "$coturn_config_path"
 else

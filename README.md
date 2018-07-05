@@ -57,9 +57,9 @@ yunohost app setting synapse turnserver_tls_port
 yunohost app setting synapse turnserver_alt_tls_port
 
 ```
-The turnserver will also chose a port dynamicly when a new call start. The is between 49153 - 49193.
+The turnserver will also choose a port dynamically when a new call starts. The range is between 49153 - 49193.
 
-For some security reason the ports range (49153 - 49193) isn't automatically open by default. If you want to use the synapse server for voip or conferencing you will need to open this port range manually. To do this just run this command :
+For some security reason the ports range (49153 - 49193) isn't automatically open by default. If you want to use the synapse server for voip or conferencing you will need to open this port range manually. To do this just run this command:
 
 ```
 yunohost firewall allow Both 49153:49193
@@ -67,9 +67,9 @@ yunohost firewall allow Both 49153:49193
 
 You might also need to open these ports (if it is not automatically done) on your ISP box.
 
-To prevent the situation when the server is behind a NAT, the public IP is written in the turnserver config. By this the turnserver can send his real public IP to the client. For more information see [the coturn example config file](https://github.com/coturn/coturn/blob/master/examples/etc/turnserver.conf#L102-L120). So if your IP change you could run the script `/opt/yunohost/__SYNAPSE_INSTANCE_NAME__/Coturn_config_rotate.sh` to update your config.
+To prevent the situation when the server is behind a NAT, the public IP is written in the turnserver config. By this the turnserver can send its real public IP to the client. For more information see [the coturn example config file](https://github.com/coturn/coturn/blob/master/examples/etc/turnserver.conf#L102-L120).So if your IP changes, you could run the script `/opt/yunohost/__SYNAPSE_INSTANCE_NAME__/Coturn_config_rotate.sh` to update your config.
 
-If you have a dynamic ip adresse you also might need to update this config automatically. To do that just edit a file named : `/etc/cron.d/coturn_config_rotate` and add the fooling contenant (just adapt the __SYNAPSE_INSTANCE_NAME__ which could be `synapse` or mybe `synapse__1`).
+If you have a dynamic IP address, you also might need to update this config automatically. To do that just edit a file named `/etc/cron.d/coturn_config_rotate` and add the following content (just adapt the __SYNAPSE_INSTANCE_NAME__ which could be `synapse` or maybe `synapse__2`).
 
 ```
 */15 * * * * root bash /opt/yunohost/__SYNAPSE_INSTANCE_NAME__/Coturn_config_rotate.sh;

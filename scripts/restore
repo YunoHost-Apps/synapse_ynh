@@ -74,15 +74,15 @@ adduser turnserver ssl-cert
 # RECONFIGURE THE TURNSERVER
 #=================================================
 
-# To be sure that a the restoration the IP adress in coturn config is same than the real adress we remake the coturn config
+# To be sure that at the restoration the IP address in coturn config is the same as the real address we remake the coturn config
 
-# Retrive specific settings
+# Retrieve specific settings
 turnserver_tls_port=$(ynh_app_setting_get $app turnserver_tls_port)
 turnserver_alt_tls_port=$(ynh_app_setting_get $app turnserver_alt_tls_port)
 turnserver_pwd=$(ynh_app_setting_get $app turnserver_pwd)
 cli_port=$(ynh_app_setting_get $app cli_port)
 
-# WARRNING : theses command are used in INSTALL, UPGRADE
+# WARNING : these commands are used in INSTALL, UPGRADE
 # For any update do it in all files
 
 coturn_config_path="/etc/matrix-$app/coturn.conf"
@@ -170,7 +170,7 @@ ynh_use_logrotate /var/log/matrix-$app
 # SECURE FILES AND DIRECTORIES
 #=================================================
 
-# WARRNING : theses command are used in INSTALL, UPGRADE, RESTORE
+# WARNING : these commands are used in INSTALL, UPGRADE, RESTORE
 # For any update do it in all files
 chown $synapse_user:root -R $final_path
 chown $synapse_user:root -R /var/lib/matrix-$app
@@ -209,7 +209,7 @@ _matrix._tcp.$domain. 3600    IN      SRV     10 0 $synapse_tls_port $domain.
 
 You also need to open the TCP port $synapse_tls_port on your ISP box if it's not automatically done.
 
-Your synapse server also implements a turnserver (for VoIP), to have this fully functional server it's recommended to read the 'Turnserver' section in the README available here : https://github.com/YunoHost-Apps/synapse_ynh .
+Your synapse server also implements a turnserver (for VoIP), to have this fully functional please read the 'Turnserver' section in the README available here: https://github.com/YunoHost-Apps/synapse_ynh .
 
 If you're facing an issue or want to improve this app, please open a new issue in this project: https://github.com/YunoHost-Apps/synapse_ynh"
 
