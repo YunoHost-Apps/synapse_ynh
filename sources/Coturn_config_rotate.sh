@@ -25,4 +25,6 @@ fi
 
 ynh_replace_string "^external-ip=.*\$" "$external_IP_line" "/etc/matrix-$app_instance/coturn.conf"
 
+setfacl -R -m user:turnserver:rX  /etc/matrix-$app
+
 exit 0
