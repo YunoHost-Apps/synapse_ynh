@@ -173,6 +173,7 @@ ynh_use_logrotate /var/log/matrix-$app
 # WARNING : these commands are used in INSTALL, UPGRADE, RESTORE
 # For any update do it in all files
 chown $synapse_user:root -R $final_path
+chmod 770 $final_path/Coturn_config_rotate.sh
 chown $synapse_user:root -R /var/lib/matrix-$app
 chown $synapse_user:root -R /var/log/matrix-$app
 chown $synapse_user:root -R /etc/matrix-$app
