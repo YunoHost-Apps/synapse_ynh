@@ -75,10 +75,22 @@ fi
 #=================================================
 # STANDARD UPGRADE STEPS
 #=================================================
+# INSTALL DEPENDENCIES
+#=================================================
+
+# WARNING : theses command are used in INSTALL, UPGRADE, RESTORE
+# For any update do it in all files
+ynh_install_app_dependencies $dependances
+pip install --upgrade virtualenv
+
+#=================================================
 # DOWNLOAD, CHECK AND UNPACK SOURCE
 #=================================================
 
 # Install/upgrade synapse in virtualenv
+
+# Clean venv is it was on python2.7
+test -e $final_path/bin/python3 || ynh_secure_remove $final_path
 
 # WARNING : these commands are used in INSTALL, UPGRADE
 # For any update do it in all files
@@ -88,7 +100,7 @@ then
     ynh_setup_source $final_path/ "armv7_$(lsb_release --codename --short)"
 else
     # Install virtualenv if it don't exist
-    test -e $final_path/bin || virtualenv -p python2.7 $final_path
+    test -e $final_path/bin/python3 || python3 -m venv $final_path
 
     # Install synapse in virtualenv
     PS1=${PS1:-}
@@ -97,17 +109,12 @@ else
 
     # We set all necessary environement variable to create a python virtualenvironnement.
     source $final_path/bin/activate
-    pip install --upgrade setuptools
-    pip install --upgrade cffi ndg-httpsclient psycopg2 lxml
+    pip3 install --upgrade setuptools
+    pip3 install --upgrade cffi ndg-httpsclient psycopg2 lxml
 
     # Download and check the checksum for the synapse source
     ynh_setup_source "/tmp" "python_source"
-    pip install --upgrade "/tmp/synapse_source.tar.gz"
-
-    # Fix issue with msgpack see https://github.com/YunoHost-Apps/synapse_ynh/issues/29
-    test -e $final_path/lib/python2.7/site-packages/msgpack/__init__.py || (\
-            pip uninstall -y msgpack-python msgpack; \
-            pip install msgpack-python)
+    pip3 install --upgrade "/tmp/synapse_source.tar.gz"
 
     # This function was defined when we called "source $final_path/bin/activate". With this function we undo what "$final_path/bin/activate" does
     deactivate

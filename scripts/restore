@@ -59,7 +59,7 @@ ynh_restore
 
 # WARNING : theses command are used in INSTALL, UPGRADE, RESTORE
 # For any update do it in all files
-ynh_install_app_dependencies coturn build-essential python2.7-dev libffi-dev python-pip python-setuptools sqlite3 libssl-dev python-virtualenv libxml2-dev libxslt1-dev python-lxml libjpeg-dev libpq-dev postgresql acl
+ynh_install_app_dependencies  $dependances
 pip install --upgrade virtualenv
 
 #=================================================
