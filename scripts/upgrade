@@ -81,7 +81,7 @@ fi
 # WARNING : theses command are used in INSTALL, UPGRADE, RESTORE
 # For any update do it in all files
 ynh_install_app_dependencies $dependances
-pip install --upgrade virtualenv
+pip3 install --upgrade virtualenv
 
 #=================================================
 # DOWNLOAD, CHECK AND UNPACK SOURCE
