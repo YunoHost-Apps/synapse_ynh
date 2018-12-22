@@ -7,7 +7,7 @@
         pkg_linter=1
         setup_sub_dir=1
         setup_root=0
-        setup_nourl=1
+        setup_nourl=0
         setup_private=0
         setup_public=1
         upgrade=1
