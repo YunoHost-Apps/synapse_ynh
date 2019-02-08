@@ -36,7 +36,7 @@ If you want a web client you can also install riot with this package: https://gi
 
 ### Access by federation
 
-If your server name is identical to the domain on wich synapse is installed, and the default port 8448 is used, your server is normally already accessible by the federation.
+If your server name is identical to the domain on which synapse is installed, and the default port 8448 is used, your server is normally already accessible by the federation.
 
 If not, you may need to put the following line in the dns configuration:
 
