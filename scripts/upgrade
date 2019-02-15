@@ -333,4 +333,4 @@ ynh_app_setting_set $app synapse_version $upstream_version
 #=================================================
 
 systemctl restart coturn-$app.service
-ynh_check_starting "Synapse now listening on port $synapse_tls_port" "/var/log/matrix-$app/homeserver.log" 300 "matrix-$app"
+ynh_check_starting "Synapse now listening on TCP port $synapse_tls_port" "/var/log/matrix-$app/homeserver.log" 300 "matrix-$app"
