@@ -354,7 +354,7 @@ ynh_check_starting "Synapse now listening on port $synapse_tls_port" "/var/log/m
 # WARNING : theses command are used in INSTALL, UPGRADE
 # For any update do it in all files
 
-ynh_add_fail2ban_config
+ynh_add_fail2ban_config -t
 
 #=================================================
 # SEND A README FOR THE ADMIN

@@ -148,10 +148,18 @@ $(yunohost tools diagnosis | grep -B 100 "services:" | sed '/services:/d')"
 
 # Create a dedicated fail2ban config (jail and filter conf files)
 #
-# usage: ynh_add_fail2ban_config "list of others variables to replace"
+# usage 1: ynh_add_fail2ban_config --logpath=log_file --failregex=filter [--max_retry=max_retry] [--ports=ports]
+# | arg: -l, --logpath=   - Log file to be checked by fail2ban
+# | arg: -r, --failregex= - Failregex to be looked for by fail2ban
+# | arg: -m, --max_retry= - Maximum number of retries allowed before banning IP address - default: 3
+# | arg: -p, --ports=     - Ports blocked for a banned IP address - default: http,https
 #
-# | arg: list of others variables to replace separeted by a space
-# |      for example : 'var_1 var_2 ...'
+# -----------------------------------------------------------------------------
+#
+# usage 2: ynh_add_fail2ban_config --use_template [--others_var="list of others variables to replace"]
+# | arg: -t, --use_template - Use this helper in template mode
+# | arg: -v, --others_var=  - List of others variables to replace separeted by a space
+# |                           for example : 'var_1 var_2 ...'
 #
 # This will use a template in ../conf/f2b_jail.conf and ../conf/f2b_filter.conf
 #   __APP__      by  $app
@@ -159,17 +167,6 @@ $(yunohost tools diagnosis | grep -B 100 "services:" | sed '/services:/d')"
 #  You can dynamically replace others variables by example :
 #   __VAR_1__    by $var_1
 #   __VAR_2__    by $var_2
-#
-# Note about the "failregex" option:
-#          regex to match the password failure messages in the logfile. The
-#          host must be matched by a group named "host". The tag "<HOST>" can
-#          be used for standard IP/hostname matching and is only an alias for
-#          (?:::f{4,6}:)?(?P<host>[\w\-.^_]+)
-#
-#          You can find some more explainations about how to make a regex here :
-#          https://www.fail2ban.org/wiki/index.php/MANUAL_0_8#Filters
-#
-# Note that the logfile need to exist before to call this helper !!
 #
 # Generally your template will look like that by example (for synapse):
 #
@@ -194,32 +191,87 @@ $(yunohost tools diagnosis | grep -B 100 "services:" | sed '/services:/d')"
 #
 #     ignoreregex =
 #
+# -----------------------------------------------------------------------------
+#
+# Note about the "failregex" option:
+#          regex to match the password failure messages in the logfile. The
+#          host must be matched by a group named "host". The tag "<HOST>" can
+#          be used for standard IP/hostname matching and is only an alias for
+#          (?:::f{4,6}:)?(?P<host>[\w\-.^_]+)
+#
+#          You can find some more explainations about how to make a regex here :
+#          https://www.fail2ban.org/wiki/index.php/MANUAL_0_8#Filters
+#
+# Note that the logfile need to exist before to call this helper !!
+#
 # To validate your regex you can test with this command:
 # fail2ban-regex /var/log/YOUR_LOG_FILE_PATH /etc/fail2ban/filter.d/YOUR_APP.conf
+#
 ynh_add_fail2ban_config () {
-  local others_var=${1:-}
+  # Declare an array to define the options of this helper.
+  local legacy_args=lrmptv
+  declare -Ar args_array=( [l]=logpath= [r]=failregex= [m]=max_retry= [p]=ports= [t]=use_template [v]=others_var=)
+  local logpath
+  local failregex
+  local max_retry
+  local ports
+  local others_var
+  local use_template
+  # Manage arguments with getopts
+  ynh_handle_getopts_args "$@"
+  use_template="${use_template:-0}"
+  max_retry=${max_retry:-3}
+  ports=${ports:-http,https}
 
   finalfail2banjailconf="/etc/fail2ban/jail.d/$app.conf"
   finalfail2banfilterconf="/etc/fail2ban/filter.d/$app.conf"
   ynh_backup_if_checksum_is_different "$finalfail2banjailconf"
   ynh_backup_if_checksum_is_different "$finalfail2banfilterconf"
 
-  cp ../conf/f2b_jail.conf $finalfail2banjailconf
-  cp ../conf/f2b_filter.conf $finalfail2banfilterconf
+  if [ $use_template -eq 1 ]
+  then
+    # Usage 2, templates
+    cp ../conf/f2b_jail.conf $finalfail2banjailconf
+    cp ../conf/f2b_filter.conf $finalfail2banfilterconf
 
-  if test -n "${app:-}"; then
-    ynh_replace_string "__APP__" "$app" "$finalfail2banjailconf"
-    ynh_replace_string "__APP__" "$app" "$finalfail2banfilterconf"
+    if [ -n "${app:-}" ]
+    then
+      ynh_replace_string "__APP__" "$app" "$finalfail2banjailconf"
+      ynh_replace_string "__APP__" "$app" "$finalfail2banfilterconf"
+    fi
+
+    # Replace all other variable given as arguments
+    for var_to_replace in ${others_var:-}; do
+      # ${var_to_replace^^} make the content of the variable on upper-cases
+      # ${!var_to_replace} get the content of the variable named $var_to_replace
+      ynh_replace_string --match_string="__${var_to_replace^^}__" --replace_string="${!var_to_replace}" --target_file="$finalfail2banjailconf"
+      ynh_replace_string --match_string="__${var_to_replace^^}__" --replace_string="${!var_to_replace}" --target_file="$finalfail2banfilterconf"
+    done
+
+  else
+    # Usage 1, no template. Build a config file from scratch.
+    test -n "$logpath" || ynh_die "ynh_add_fail2ban_config expects a logfile path as first argument and received nothing."
+    test -n "$failregex" || ynh_die "ynh_add_fail2ban_config expects a failure regex as second argument and received nothing."
+
+    tee $finalfail2banjailconf <<EOF
+[$app]
+enabled = true
+port = $ports
+filter = $app
+logpath = $logpath
+maxretry = $max_retry
+EOF
+
+    tee $finalfail2banfilterconf <<EOF
+[INCLUDES]
+before = common.conf
+[Definition]
+failregex = $failregex
+ignoreregex =
+EOF
   fi
 
-  # Replace all other variable given as arguments
-  for var_to_replace in $others_var; do
-    # ${var_to_replace^^} make the content of the variable on upper-cases
-    # ${!var_to_replace} get the content of the variable named $var_to_replace
-    ynh_replace_string --match_string="__${var_to_replace^^}__" --replace_string="${!var_to_replace}" --target_file="$finalfail2banjailconf"
-    ynh_replace_string --match_string="__${var_to_replace^^}__" --replace_string="${!var_to_replace}" --target_file="$finalfail2banfilterconf"
-  done
-
+  # Common to usage 1 and 2.
   ynh_store_file_checksum "$finalfail2banjailconf"
   ynh_store_file_checksum "$finalfail2banfilterconf"
 
@@ -227,8 +279,8 @@ ynh_add_fail2ban_config () {
 
   local fail2ban_error="$(journalctl -u fail2ban | tail -n50 | grep "WARNING.*$app.*")"
   if [[ -n "$fail2ban_error" ]]; then
-    echo "[ERR] Fail2ban failed to load the jail for $app" >&2
-    echo "WARNING${fail2ban_error#*WARNING}" >&2
+    ynh_print_err --message="Fail2ban failed to load the jail for $app"
+    ynh_print_warn --message="${fail2ban_error#*WARNING}"
   fi
 }
 
