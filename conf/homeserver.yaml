@@ -4,13 +4,13 @@
 # autogenerates on launch with your own SSL certificate + key pair
 # if you like.  Any required intermediary certificates can be
 # appended after the primary certificate in hierarchical order.
-tls_certificate_path: "/etc/matrix-__APP__/__DOMAIN__.tls.crt"
+tls_certificate_path: "/etc/yunohost/certs/__DOMAIN__/crt.pem"
 
 # PEM encoded private key for TLS
-tls_private_key_path: "/etc/matrix-__APP__/__DOMAIN__.tls.key"
+tls_private_key_path: "/etc/yunohost/certs/__DOMAIN__/key.pem"
 
 # PEM dh parameters for ephemeral keys
-tls_dh_params_path: "/etc/matrix-__APP__/__DOMAIN__.tls.dh"
+tls_dh_params_path: "/etc/ssl/private/dh2048.pem"
 
 # Don't bind to the https port
 no_tls: False

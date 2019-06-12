@@ -16,7 +16,7 @@ Instant messaging server matrix network.
 
 Yunohost chatroom with matrix : [https://riot.im/app/#/room/#yunohost:matrix.org](https://riot.im/app/#/room/#yunohost:matrix.org)
 
-**Shipped version:** 0.33.9
+**Shipped version:** 0.99.5.1
 
 Configuration
 -------------
@@ -36,7 +36,9 @@ If you want a web client you can also install riot with this package: https://gi
 
 ### Access by federation
 
-To be accessible by the federation you need to put the following line in the dns configuration:
+If your server name is identical to the domain on which synapse is installed, and the default port 8448 is used, your server is normally already accessible by the federation.
+
+If not, you may need to put the following line in the dns configuration:
 
 ```
 _matrix._tcp.<yourdomain.com> <ttl> IN SRV 10 0 <port> <server.name>
@@ -47,7 +49,11 @@ _matrix._tcp.example.com. 3600    IN      SRV     10 0 SYNAPSE_PORT example.com.
 ```
 You need to replace SYNAPSE_PORT by the real port. This port can be obtained by the command: `yunohost app setting SYNAPSE_INSTANCE_NAME synapse_tls_port`
 
+For more details, see : https://github.com/matrix-org/synapse#setting-up-federation
+
 If it is not automatically done, you need to open this in your ISP box.
+
+You also need a valid TLS certificate for the domain used by synapse. To do that you can refer to the documentation here : https://yunohost.org/#/certificate_en
 
 ### Turnserver
 

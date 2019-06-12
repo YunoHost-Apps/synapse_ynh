@@ -1,0 +1,47 @@
+[{
+        "id": "update_turnserver_ip",
+        "name": "Update turnserver ip",
+        "command": "/opt/yunohost/matrix-$YNH_APP_INSTANCE_NAME/Coturn_config_rotate.sh",
+        "user": "root",
+        "accepted_return_codes": [0],
+        "description": {
+            "en": "Update the ip in the turnserver config"
+        }
+},{
+        "id": "open_turnserver_firewall_ports",
+        "name": "Open ports for turnserver",
+        "command": "yunohost firewall allow Both 49153:49193",
+        "user": "root",
+        "accepted_return_codes": [0],
+        "description": {
+            "en": "Open the ports range 49153:49193 with TCP and UDP to be able to use correctly the turnserver."
+        }
+},{
+        "id": "close_turnserver_firewall_ports",
+        "name": "Close ports for turnserver",
+        "command": "yunohost firewall disallow Both 49153:49193",
+        "user": "root",
+        "accepted_return_codes": [0],
+        "description": {
+            "en": "Close the ports range 49153:49193 with TCP and UDP. (Undo \"Open ports for turnserver\" action)"
+        }
+},{
+        "id": "set_admin_user",
+        "name": "Set a user as admin",
+        "command": "[[ \"$(su --command=\"psql matrix_synapse\" postgres <<< \"UPDATE users SET admin = 1 WHERE name = '@$YNH_ACTION_USERNAME:$(yunohost app setting $YNH_APP_INSTANCE_NAME special_domain)'\")\" == 'UPDATE 1' ]]",
+        "user": "root",
+        "accepted_return_codes": [0],
+        "description": {
+            "en": "Set a synapse user as admin in the synapse server. It probably usefull only to manage the community function."
+        },
+        "arguments": [
+            {
+                "name": "username",
+                "type": "string",
+                "ask": {
+                    "en": "username of the user to set as admin"
+                },
+                "example": "bob"
+            }
+        ]
+}]

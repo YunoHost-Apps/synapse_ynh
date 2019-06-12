@@ -79,3 +79,10 @@ ynh_psql_dump_db "$synapse_db_name" > ${YNH_CWD}/dump.sql
 #=================================================
 
 ynh_backup "/var/log/matrix-$app"
+
+#=================================================
+# BACKUP FAIL2BAN CONFIG
+#=================================================
+
+ynh_backup "/etc/fail2ban/jail.d/$app.conf"
+ynh_backup "/etc/fail2ban/filter.d/$app.conf"

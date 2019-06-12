@@ -1,0 +1,39 @@
+{
+    "name": "Synapse configuration panel",
+    "version": "0.1",
+    "panel": [{
+        "name": "Synapse config",
+        "id": "synapse_config",
+        "sections": [{
+            "name": "Synapse server configuration",
+            "id": "server_config",
+            "options": [{
+                "name": "Server statistics",
+                "id": "server_statistics",
+                "type": "bool",
+                "help": "True to send anonymous statistics about synapse to improve the performances",
+                "default": false
+            },{
+                "name": "Server public",
+                "id": "is_public",
+                "type": "bool",
+                "help": "Is it a public server",
+                "default": false
+            }]
+        }]
+    },{
+        "name": "Package config",
+        "id": "package_config",
+        "sections": [{
+            "name": "Synapse server configuration",
+            "id": "package_config",
+            "options": [{
+                "name": "Backup before upgrade",
+                "id": "backup_before_upgrade",
+                "type": "bool",
+                "help": "True to do a backup before every upgrade",
+                "default": true
+            }]
+        }]
+    }]
+}

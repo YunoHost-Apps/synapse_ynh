@@ -1,7 +1,7 @@
 ;; General
     ; Manifest
         domain="domain.tld"    (DOMAIN)
-        path="/_matrix/client/#/login"	(PATH)
+        path="/_matrix/static/"	(PATH)
         is_public=1 (PUBLIC|public=1|private=0)
     ; Checks
         pkg_linter=1
@@ -12,6 +12,7 @@
         setup_public=1
         upgrade=1
         upgrade=1   from_commit=db374d2bff981d2660ebdac52ee77c684383c00d
+        upgrade=1   from_commit=ca5bc8dba9f7594bf985c69543f0c10a093fc097
         backup_restore=1
         multi_instance=1
         incorrect_path=0
@@ -32,3 +33,5 @@
 ;;; Upgrade options
 	; commit=db374d2bff981d2660ebdac52ee77c684383c00d
 		name=Fix postgresql helper from old_version_for_CI_2 branch
+    ; commit=ca5bc8dba9f7594bf985c69543f0c10a093fc097
+        name=Migrate from self signed certificate to cert managed by Yunohost

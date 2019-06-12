@@ -75,10 +75,21 @@ fi
 #=================================================
 # STANDARD UPGRADE STEPS
 #=================================================
+# INSTALL DEPENDENCIES
+#=================================================
+
+# WARNING : theses command are used in INSTALL, UPGRADE, RESTORE
+# For any update do it in all files
+ynh_install_app_dependencies $dependances
+
+#=================================================
 # DOWNLOAD, CHECK AND UNPACK SOURCE
 #=================================================
 
 # Install/upgrade synapse in virtualenv
+
+# Clean venv is it was on python2.7
+test -e $final_path/bin/python3 || ynh_secure_remove $final_path
 
 # WARNING : these commands are used in INSTALL, UPGRADE
 # For any update do it in all files
@@ -88,33 +99,24 @@ then
     ynh_setup_source $final_path/ "armv7_$(lsb_release --codename --short)"
 else
     # Install virtualenv if it don't exist
-    test -e $final_path/bin || virtualenv -p python2.7 $final_path
+    test -e $final_path/bin/python3 || python3 -m venv $final_path
 
     # Install synapse in virtualenv
-    PS1=${PS1:-}
     cp ../conf/virtualenv_activate $final_path/bin/activate
     ynh_replace_string __FINAL_PATH__ $final_path $final_path/bin/activate
 
     # We set all necessary environement variable to create a python virtualenvironnement.
     source $final_path/bin/activate
-    pip install --upgrade setuptools
-    pip install --upgrade cffi ndg-httpsclient psycopg2 lxml
-
-    # Download and check the checksum for the synapse source
-    ynh_setup_source "/tmp" "python_source"
-    pip install --upgrade "/tmp/synapse_source.tar.gz"
-
-    # Fix issue with msgpack see https://github.com/YunoHost-Apps/synapse_ynh/issues/29
-    test -e $final_path/lib/python2.7/site-packages/msgpack/__init__.py || (\
-            pip uninstall -y msgpack-python msgpack; \
-            pip install msgpack-python)
+    pip3 install --upgrade setuptools wheel
+    pip3 install --upgrade cffi ndg-httpsclient psycopg2 lxml
+    pip3 install --upgrade matrix-synapse==$upstream_version matrix-synapse-ldap3
 
     # This function was defined when we called "source $final_path/bin/activate". With this function we undo what "$final_path/bin/activate" does
     deactivate
 fi
 
 #=================================================
-# MIGRATION 1 : USE SYNAPSE OWN KEYS
+# MIGRATION 1 : GENERATE SYNAPSE SECRET
 #=================================================
 
 if [[ -z "$registration_shared_secret" ]]
@@ -123,10 +125,6 @@ then
     PS1=${PS1:-}
     source $final_path/bin/activate
 
-    # Get the dh.pem if exist
-    test -e /etc/matrix-$app/dh.pem && mv /etc/matrix-$app/dh.pem /etc/matrix-$app/$domain.tls.dh
-    test -e /etc/matrix-$app/homeserver.signing.key && mv /etc/matrix-$app/homeserver.signing.key /etc/matrix-$app/$domain.signing.key
-
     # Generate config and keys
     python -m synapse.app.homeserver --keys-directory /etc/matrix-$app/ --generate-config --generate-keys --server-name $domain --report-stats=no -c homeserver.yml
 
@@ -134,8 +132,8 @@ then
     deactivate
 
     # Get random values from config
-    registration_shared_secret=$(egrep "registration_shared_secret" homeserver.yml | cut -d'"' -f2)
-    form_secret=$(egrep "form_secret" homeserver.yml | cut -d'"' -f1)
+    registration_shared_secret=$(egrep "^registration_shared_secret" homeserver.yml | cut -d'"' -f2)
+    form_secret=$(egrep "^form_secret" homeserver.yml | cut -d'"' -f1)
 
     # store in yunohost settings
     ynh_app_setting_set $app registration_shared_secret "$registration_shared_secret"
@@ -146,10 +144,13 @@ fi
 # UPDATE SYNAPSE CONFIG
 #=================================================
 
-# WARNING : theses command are used in INSTALL, UPGRADE
+# WARNING : theses command are used in INSTALL, UPGRADE, CONFIG
 # For any update do it in all files
 
 homeserver_config_path="/etc/matrix-$app/homeserver.yaml"
+
+ynh_backup_if_checksum_is_different "$homeserver_config_path"
+ynh_backup_if_checksum_is_different /etc/matrix-$app/log.yaml
 
 cp ../conf/homeserver.yaml "$homeserver_config_path"
 cp ../conf/log.yaml /etc/matrix-$app/log.yaml
@@ -161,8 +162,8 @@ ynh_replace_string __SYNAPSE_DB_PWD__ $synapse_db_pwd "$homeserver_config_path"
 ynh_replace_string __PORT__ $port "$homeserver_config_path"
 ynh_replace_string __TLS_PORT__ $synapse_tls_port "$homeserver_config_path"
 ynh_replace_string __TURNSERVER_TLS_PORT__ $turnserver_tls_port "$homeserver_config_path"
-ynh_replace_string __TURNPWD__ $turnserver_pwd "$homeserver_config_path"
-ynh_replace_string __REGISTRATION_SECRET__ "$registration_shared_secret" "$homeserver_config_path"
+ynh_replace_special_string __TURNPWD__ $turnserver_pwd "$homeserver_config_path"
+ynh_replace_special_string __REGISTRATION_SECRET__ "$registration_shared_secret" "$homeserver_config_path"
 ynh_replace_string __FORM_SECRET__ "$form_secret" "$homeserver_config_path"
 ynh_replace_string __REPORT_STATS__ "$report_stats" "$homeserver_config_path"
 
@@ -221,6 +222,21 @@ if [[ ! $(grep "ssl-cert:x:[0-9]*:.*matrix-$app" /etc/group) ]]
 then
     adduser $synapse_user ssl-cert
     adduser turnserver ssl-cert
+fi
+
+#=================================================
+# MIGRATION 4 : CREATE A DH FILE
+#=================================================
+
+# WARNING : theses command are used in INSTALL, UPGRADE, RESTORE
+# For any update do it in all files
+
+# Make dh cert for synapse if it doesn't exist
+if [[ ! -e /etc/ssl/private/dh2048.pem ]]
+then
+    openssl dhparam -out /etc/ssl/private/dh2048.pem -outform PEM -2 2048 -dsaparam 2> /dev/null
+    chown root:ssl-cert /etc/ssl/private/dh2048.pem
+    chmod 640 /etc/ssl/private/dh2048.pem
 fi
 
 #=================================================
@@ -292,6 +308,15 @@ cp ../conf/default_coturn /etc/default/coturn-$app
 ynh_add_systemd_config coturn-$app coturn-synapse.service
 
 #=================================================
+# SETUP FAIL2BAN
+#=================================================
+
+# WARNING : theses command are used in INSTALL, UPGRADE
+# For any update do it in all files
+
+ynh_add_fail2ban_config -t
+
+#=================================================
 # GENERIC FINALIZATION
 #=================================================
 # SECURE FILES AND DIRECTORIES
@@ -305,7 +330,7 @@ chown $synapse_user:root -R /var/lib/matrix-$app
 chown $synapse_user:root -R /var/log/matrix-$app
 chown $synapse_user:root -R /etc/matrix-$app
 chmod u=rwX,g=rX,o= -R /etc/matrix-$app
-chmod 600 /etc/matrix-$app/{$domain.signing.key,$domain.tls.crt,$domain.tls.dh,$domain.tls.key}
+chmod 600 /etc/matrix-$app/$domain.signing.key
 setfacl -R -m user:turnserver:rX  /etc/matrix-$app
 setfacl -R -m user:turnserver:rwX  /var/log/matrix-$app
 
@@ -320,4 +345,4 @@ ynh_app_setting_set $app synapse_version $upstream_version
 #=================================================
 
 systemctl restart coturn-$app.service
-ynh_check_starting "Synapse now listening on port $synapse_tls_port" "/var/log/matrix-$app/homeserver.log" 300 "matrix-$app"
+ynh_check_starting "Synapse now listening on TCP port $synapse_tls_port" "/var/log/matrix-$app/homeserver.log" 300 "matrix-$app"

@@ -1,5 +1,5 @@
-SOURCE_URL=https://github.com/YunoHost-Apps/synapse_python_build/releases/download/v0.33.9/matrix-synapse_0.33.9-jessie-bin1_armv7l.tar.gz
-SOURCE_SUM=ffa759ee9ae7aa0c96cc9c00a039df7e8f723dd81719bb603f2a535168a4e382
+SOURCE_URL=https://github.com/YunoHost-Apps/synapse_python_build/releases/download/v0.99.5.1/matrix-synapse_0.99.5.1-jessie-bin1_armv7l.tar.gz
+SOURCE_SUM=da24c88adb88e31179aab03aeec6f73394ebf8078166e141340a243b3b81bc8e
 # (Optional) Program to check the integrity (sha256sum, md5sum...)
 # default: sha256
 SOURCE_SUM_PRG=sha256sum

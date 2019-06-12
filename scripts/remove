@@ -64,7 +64,7 @@ closeport $turnserver_alt_tls_port
 #=================================================
 
 # Remove the skipped url
-python3 $final_path/remove_sso_conf.py
+python3 ../conf/remove_sso_conf.py
 
 #=================================================
 # REMOVE DEPENDENCIES
@@ -100,6 +100,12 @@ ynh_psql_remove_db $synapse_db_name $synapse_db_user
 #=================================================
 
 ynh_system_user_delete $synapse_user
+
+#=================================================
+# REMOVE FAIL2BAN CONFIG
+#=================================================
+
+ynh_remove_fail2ban_config $synapse_user
 
 #=================================================
 # REMOVE LOGROTATE CONFIGURATION
