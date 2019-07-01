@@ -240,6 +240,32 @@ then
     chmod 640 /etc/ssl/private/dh2048.pem
 fi
 
+
+#=================================================
+# MIGRATION 5 : CREATE A .well-known FILE
+#=================================================
+
+# Create .well-known redirection for access by federation if it doesn't exist
+if [[ $server_name != $domain ]]; then
+if [[ ! -e /var/www/.well-known/${domain}/server_name.json ]]; then
+    cat > /var/www/.well-known/${domain}/server_name.json <<EOF
+   {
+          "m.server": "$domain"
+   }
+EOF
+fi
+
+if [[ ! -e /etc/nginx/conf.d/${domain}.d/name_server.conf ]]
+  cat > /etc/nginx/conf.d/${domain}.d/name_server.conf <<EOF
+  {
+    location /.well-known/matrix/server {
+        alias /var/www/.well-known/${domain}/server_name.json;
+        }
+  }
+EOF
+fi
+fi
+
 #=================================================
 # STANDARD UPGRADE STEPS
 #=================================================
