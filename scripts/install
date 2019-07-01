@@ -193,6 +193,23 @@ form_secret=$(egrep "^form_secret" homeserver.yml | cut -d'"' -f2)
 ynh_app_setting_set $app registration_shared_secret "$registration_shared_secret"
 ynh_app_setting_set $app form_secret "$form_secret"
 
+# Create .well-known redirection for access by federation
+if [[ $server_name != $domain ]]; then
+    cat > /var/www/.well-known/${domain}/server_name.json <<EOF
+   {
+          "m.server": "$domain"
+   }
+EOF
+
+  cat > /etc/nginx/conf.d/${domain}.d/name_server.conf <<EOF
+  {
+    location /.well-known/matrix/server {
+        alias /var/www/.well-known/${domain}/server_name.json;
+        }
+  }
+EOF
+fi
+
 #=================================================
 # SETUP SYSTEMD
 #=================================================
