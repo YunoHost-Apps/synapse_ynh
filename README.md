@@ -38,7 +38,7 @@ If you want a web client you can also install riot with this package: https://gi
 
 If your server name is identical to the domain on which synapse is installed, and the default port 8448 is used, your server is normally already accessible by the federation.
 
-If not, you may need to put the following line in the dns configuration:
+If not, you can add the following line in the dns configuration but you normally don't need it as a .well-known file is edited during the install to declare your server name to the federation. DNS configuration is thus optionnal for new install :
 
 ```
 _matrix._tcp.<server_name-you-choose-at-install> <ttl> IN SRV 10 0 <port> <domain-or-subdomain-of-synapse>
