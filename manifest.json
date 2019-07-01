@@ -42,12 +42,12 @@
 			},
 			{
 				"name": "is_public",
-				"type": "boolean",
-				"ask": {
-					"en": "Is it a public server ?",
-					"fr": "Est-ce un serveur public ?"
-				},
-				"default": 0
+             			"ask": {
+                    			"en": "Is it a public server?",
+                    			"fr": "Est-ce un serveur public?"
+               			},
+                		"choices": ["Yes", "No"],
+				"default": "Yes"
 			}
 		]
 	}
