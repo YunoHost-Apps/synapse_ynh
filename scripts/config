@@ -69,6 +69,7 @@ apply_config() {
     fi
 
     domain=$(ynh_app_setting_get $app special_domain)
+    server_name=$(ynh_app_setting_get $app server_name)
     synapse_db_pwd=$(ynh_app_setting_get $app synapse_db_pwd)
     is_public=$(ynh_app_setting_get $app is_public)
     port=$(ynh_app_setting_get $app synapse_port)
@@ -96,6 +97,7 @@ apply_config() {
 
     ynh_replace_string __APP__ $app "$homeserver_config_path"
     ynh_replace_string __DOMAIN__ $domain "$homeserver_config_path"
+    ynh_replace_string __SERVER_NAME__ $server_name "$homeserver_config_path"    
     ynh_replace_string __SYNAPSE_DB_USER__ $synapse_db_user "$homeserver_config_path"
     ynh_replace_string __SYNAPSE_DB_PWD__ $synapse_db_pwd "$homeserver_config_path"
     ynh_replace_string __PORT__ $port "$homeserver_config_path"

@@ -29,6 +29,15 @@
 					"en": "Choose a domain for Synapse",
 					"fr": "Choisissez un domaine pour Synapse"
 				},
+				"example": "synapse.domain.org"
+			},
+			{
+				"name": "server_name",
+				"type": "string",
+				"ask": {
+					"en": "If your synapse domain is a subdomain, you can choose a name for your Synapse server to have your matrix user-ids looking like @user:domain.org instead of @user:synapse.domain.org",
+					"fr": "Si votre domaine pour synapse est un sous-domaine, vous pouvez choisir un nom pour votre serveur Synapse afin que vos identifiants matrix soient @utilisateur:domain.org plutôt que @utilisateur:synapse.domain.org"
+				},
 				"example": "domain.org"
 			},
 			{

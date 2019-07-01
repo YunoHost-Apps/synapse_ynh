@@ -192,7 +192,7 @@ chown $synapse_user:root -R /var/lib/matrix-$app
 chown $synapse_user:root -R /var/log/matrix-$app
 chown $synapse_user:root -R /etc/matrix-$app
 chmod u=rwX,g=rX,o= -R /etc/matrix-$app
-chmod 600 /etc/matrix-$app/$domain.signing.key
+chmod 600 /etc/matrix-$app/$server_name.signing.key
 setfacl -R -m user:turnserver:rX  /etc/matrix-$app
 setfacl -R -m user:turnserver:rwX  /var/log/matrix-$app
 

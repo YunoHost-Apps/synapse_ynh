@@ -41,11 +41,11 @@ If your server name is identical to the domain on which synapse is installed, an
 If not, you may need to put the following line in the dns configuration:
 
 ```
-_matrix._tcp.<yourdomain.com> <ttl> IN SRV 10 0 <port> <server.name>
+_matrix._tcp.<server_name-you-choose-at-install> <ttl> IN SRV 10 0 <port> <domain-or-subdomain-of-synapse>
 ```
 for example
 ```
-_matrix._tcp.example.com. 3600    IN      SRV     10 0 SYNAPSE_PORT example.com.
+_matrix._tcp.example.com. 3600    IN      SRV     10 0 SYNAPSE_PORT synapse.example.com.
 ```
 You need to replace SYNAPSE_PORT by the real port. This port can be obtained by the command: `yunohost app setting SYNAPSE_INSTANCE_NAME synapse_tls_port`
 

@@ -50,7 +50,7 @@ tls_fingerprints: []
 # This is used by remote servers to connect to this server,
 # e.g. matrix.org, localhost:8080, etc.
 # This is also the last part of your UserID.
-server_name: "__DOMAIN__"
+server_name: "__SERVER_NAME__"
 
 # When running as a daemon, the file to store the pid in
 pid_file: "/var/run/matrix-__APP__.pid"
