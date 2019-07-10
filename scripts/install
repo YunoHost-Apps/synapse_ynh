@@ -195,15 +195,11 @@ ynh_app_setting_set $app form_secret "$form_secret"
 
 # Create .well-known redirection for access by federation
 if [[ $server_name != $domain ]]; then
-    cat > /var/www/.well-known/${server_name}/server_name.json <<EOF
-   {
-          "m.server": "$domain"
-   }
-EOF
-
   cat > /etc/nginx/conf.d/${server_name}.d/server_name.conf <<EOF
-    location = /.well-known/matrix/server {
-        alias /var/www/.well-known/${server_name}/server_name.json;
+    location /.well-known/matrix/ {
+        return 200 '{"m.server": "$domain", "m.homeserver": "https://$domain"}';
+        add_header Content-Type application/json;
+        add_header Access-Control-Allow-Origin '*';
         }
 EOF
 fi
