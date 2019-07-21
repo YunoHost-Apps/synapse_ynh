@@ -164,7 +164,7 @@ else
     source $final_path/bin/activate
     pip3 install --upgrade pip
     pip3 install --upgrade setuptools wheel
-    pip3 install --upgrade cffi ndg-httpsclient psycopg2 lxml
+    pip3 install --upgrade cffi ndg-httpsclient psycopg2 lxml jinja2
     pip3 install --upgrade matrix-synapse==$upstream_version matrix-synapse-ldap3
 
     # This function was defined when we called "source $final_path/bin/activate". With this function we undo what "$final_path/bin/activate" does
