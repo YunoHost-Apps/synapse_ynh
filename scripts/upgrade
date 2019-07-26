@@ -246,8 +246,8 @@ fi
 #=================================================
 
 # Create .well-known redirection for access by federation if it doesn't exist
-if [[ $server_name != $domain ]]; then
-if [[ ! -e /etc/nginx/conf.d/${server_name}.d/server_name.conf ]]
+if [[ $server_name != $domain ]] && [[ ! -e /etc/nginx/conf.d/${server_name}.d/server_name.conf ]]
+then
   cat > /etc/nginx/conf.d/${server_name}.d/server_name.conf <<EOF
     location /.well-known/matrix/ {
         return 200 '{"m.server": "$domain", "m.homeserver": "https://$domain"}';
@@ -255,7 +255,6 @@ if [[ ! -e /etc/nginx/conf.d/${server_name}.d/server_name.conf ]]
         add_header Access-Control-Allow-Origin '*';
         }
 EOF
-fi
 fi
 
 #=================================================
