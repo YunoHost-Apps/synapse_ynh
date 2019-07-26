@@ -194,7 +194,8 @@ ynh_app_setting_set $app registration_shared_secret "$registration_shared_secret
 ynh_app_setting_set $app form_secret "$form_secret"
 
 # Create .well-known redirection for access by federation
-if [[ $server_name != $domain ]]; then
+if [[ $server_name != $domain ]]
+then
   cat > /etc/nginx/conf.d/${server_name}.d/server_name.conf <<EOF
     location /.well-known/matrix/ {
         return 200 '{"m.server": "$domain", "m.homeserver": "https://$domain"}';
