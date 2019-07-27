@@ -158,6 +158,7 @@ cp ../conf/log.yaml /etc/matrix-$app/log.yaml
 
 ynh_replace_string __APP__ $app "$homeserver_config_path"
 ynh_replace_string __DOMAIN__ $domain "$homeserver_config_path"
+ynh_replace_string __SERVER_NAME__ $server_name "$homeserver_config_path"
 ynh_replace_string __SYNAPSE_DB_USER__ $synapse_db_user "$homeserver_config_path"
 ynh_replace_string __SYNAPSE_DB_PWD__ $synapse_db_pwd "$homeserver_config_path"
 ynh_replace_string __PORT__ $port "$homeserver_config_path"
