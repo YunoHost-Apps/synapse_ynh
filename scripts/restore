@@ -122,7 +122,7 @@ else
     ynh_replace_string '__IPV4__,' "" "$coturn_config_path"
 fi
 
-if [[ -n "$public_ip6" ]] && ynh_valide_ip6 "$public_ip6"
+if [[ -n "$public_ip6" ]] && ynh_validate_ip6 "$public_ip6"
 then
     ynh_replace_string '__IPV6__' "$public_ip6" "$coturn_config_path"
 else
