@@ -28,6 +28,7 @@ upstream_version=$(ynh_app_upstream_version)
 #=================================================
 
 domain=$(ynh_app_setting_get $app special_domain)
+server_name=$(ynh_app_setting_get $app server_name)
 final_path=$(ynh_app_setting_get $app final_path)
 synapse_tls_port=$(ynh_app_setting_get $app synapse_tls_port)
 turnserver_tls_port=$(ynh_app_setting_get $app turnserver_tls_port)
@@ -82,6 +83,7 @@ ynh_secure_remove /var/log/matrix-$app
 ynh_secure_remove /etc/matrix-$app
 ynh_secure_remove /etc/default/matrix-$app
 ynh_secure_remove /etc/default/coturn-$app
+ynh_secure_remove /etc/nginx/conf.d/${server_name}.d/server_name.conf
 
 #=================================================
 # REMOVE NGINX CONFIGURATION
