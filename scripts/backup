@@ -31,6 +31,7 @@ upstream_version=$(ynh_app_upstream_version)
 #=================================================
 
 domain=$(ynh_app_setting_get $app special_domain)
+server_name=$(ynh_app_setting_get $app server_name)
 final_path=$(ynh_app_setting_get $app final_path)
 
 #=================================================
