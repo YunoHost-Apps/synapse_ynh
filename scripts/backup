@@ -40,6 +40,7 @@ final_path=$(ynh_app_setting_get $app final_path)
 #=================================================
 
 ynh_backup "/etc/nginx/conf.d/${domain}.d/${app}.conf"
+ynh_backup "/etc/nginx/conf.d/${server_name}.d/server_name.conf"
 
 #=================================================
 # BACKUP SYNAPSE CONFIG
