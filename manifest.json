@@ -9,7 +9,7 @@
 		"en": "Instant messaging server who use matrix",
 		"fr": "Un serveur de messagerie instantané basé sur matrix"
 	},
-	"version": "1.2.1~ynh1",
+	"version": "1.3.1~ynh1",
 	"url": "http://matrix.org",
 	"license": "Apache-2.0",
 	"maintainer": {
@@ -42,12 +42,16 @@
 			},
 			{
 				"name": "is_public",
-             			"ask": {
-                    			"en": "Is it a public server?",
-                    			"fr": "Est-ce un serveur public?"
-               			},
-                		"choices": ["Yes", "No"],
-				"default": "Yes"
+				"type": "boolean",
+				"ask": {
+					"en": "Is it a public server ?",
+					"fr": "Est-ce un serveur public ?"
+				},
+				"help": { 
+					"en": "A public server means that anybody will be able to register on this server.",
+					"fr": "Un serveur public signifie que n'importe qui pourra s'enregistrer sur ce serveur."
+				},
+				"default": 0
 			}
 		]
 	}
