@@ -283,7 +283,7 @@ fi
 #=================================================
 
 # Create .well-known redirection for access by federation if it doesn't exist
-if [[ $server_name != $domain ]] && [[ ! -e /etc/nginx/conf.d/${server_name}.d/server_name.conf ]]
+if yunohost --output-as plain domain list | grep -q "^$server_name$"
 then
 cp ../conf/server_name.conf /etc/nginx/conf.d/${server_name}.d/server_name.conf
 fi
