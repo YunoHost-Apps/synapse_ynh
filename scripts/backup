@@ -44,9 +44,6 @@ upstream_version=$(ynh_app_upstream_version)
 #=================================================
 ynh_script_progression --message="Backing up the main app directory..." --weight=1
 
-ynh_backup --src_path="$final_path"
-
-
 #=================================================
 # BACKUP THE NGINX CONFIGURATION
 #=================================================
