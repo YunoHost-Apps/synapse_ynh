@@ -1,16 +1,14 @@
-Synapse for YunoHost
-====================
+# Synapse for YunoHost
 
 ![](https://matrix.org/blog/wp-content/uploads/2015/01/logo1.png)
 
-[![Integration level](https://dash.yunohost.org/integration/synapse.svg)](https://ci-apps.yunohost.org/jenkins/job/synapse%20%28Community%29/lastBuild/consoleFull)  
+[![Integration level](https://dash.yunohost.org/integration/synapse.svg)](https://dash.yunohost.org/appci/app/synapse)  
 [![Install Synapse with YunoHost](https://install-app.yunohost.org/install-with-yunohost.png)](https://install-app.yunohost.org/?app=synapse)
 
-> *This package allows you to install synapse quickly and simply on a YunoHost server.  
+> *This package allows you to install Synapse quickly and simply on a YunoHost server.  
 If you don't have YunoHost, please see [here](https://yunohost.org/#/install) to know how to install and enjoy it.*
 
-Overview
---------
+## Overview
 
 Instant messaging server matrix network.
 
@@ -18,8 +16,7 @@ Yunohost chatroom with matrix : [https://riot.im/app/#/room/#yunohost:matrix.org
 
 **Shipped version:** 1.3.1
 
-Configuration
--------------
+## Configuration
 
 ### Install for ARM arch (or slow arch)
 
@@ -41,7 +38,7 @@ If your server name is identical to the domain on which synapse is installed, an
 If not, you can add the following line in the dns configuration but you normally don't need it as a .well-known file is edited during the install to declare your server name to the federation. DNS configuration is thus optionnal for new install :
 
 ```
-_matrix._tcp.<server_name-you-choose-at-install> <ttl> IN SRV 10 0 <port> <domain-or-subdomain-of-synapse>
+_matrix._tcp.<server_name.tld> <ttl> IN SRV 10 0 <port> <domain-or-subdomain-of-synapse.tld>
 ```
 for example
 ```
@@ -93,14 +90,12 @@ We have put some coarse mitigations into place to try to protect against this
 situation, but it's still not a good practice to do it in the first place. See
 https://github.com/vector-im/riot-web/issues/1977 for more details.
 
-Documentation
--------------
+## Documentation
 
 - Official documentation: https://github.com/matrix-org/synapse
 - YunoHost documentation: to be created; feel free to help!
 
-YunoHost specific features
---------------------------
+## YunoHost specific features
 
 ### Multi-users support
 
@@ -108,30 +103,20 @@ Supported with LDAP.
 
 ### Supported architectures
 
-- Tested on x86_64
-- Tested on ARM (with specific build)
 
-Limitations
------------
+* x86-64b - [![Build Status](https://ci-apps.yunohost.org/ci/logs/synapse%20%28Apps%29.svg)](https://ci-apps.yunohost.org/ci/apps/synapse/)
+* ARMv8-A - [![Build Status](https://ci-apps-arm.yunohost.org/ci/logs/synapse%20%28Apps%29.svg)](https://ci-apps-arm.yunohost.org/ci/apps/synapse/)
+* Jessie x86-64b - [![Build Status](https://ci-stretch.nohost.me/ci/logs/synapse%20%28Apps%29.svg)](https://ci-stretch.nohost.me/ci/apps/synapse/)
+
+## Limitations
 
 Synapse uses a lot of ressource. So on slow architecture (like small ARM board), this app could take a lot of CPU and RAM.
 
 This app doesn't provide any real good web interface. So it's recommended to use Riot client to connect to this app. This app is available [here](https://github.com/YunoHost-Apps/riot_ynh)
 
-Links
------
+## Additional information
 
-- Report a bug: https://github.com/YunoHost-Apps/synapse_ynh/issues
-- Matrix website: https://matrix.org/
-- YunoHost website: https://yunohost.org/
-
-Additional information
------
-
-
-
-Administation
--------------
+## Administation
 
 **All documentation of this section is not warranted. A bad use of command could break the app and all the data. So use these commands at your own risk.**
 
@@ -182,17 +167,24 @@ If anything fails while you are doing the upgrade please create an issue here: h
 
 Synapse is published under the Apache License: https://github.com/matrix-org/synapse/blob/master/LICENSE
 
+## Links
+
+- Report a bug: https://github.com/YunoHost-Apps/synapse_ynh/issues
+- Matrix website: https://matrix.org/
+- Synapse repository: https://github.com/matrix-org/synapse
+- YunoHost website: https://yunohost.org/
+
 ---
 
 Developers infos
 ----------------
 
-Please do your pull request to the testing branch.
+Please do your pull request to the [testing branch](https://github.com/YunoHost-Apps/synapse_ynh/tree/testing).
 
 To try the testing branch, please proceed like that:
 
 ```bash
-sudo yunohost app install https://github.com/YunoHost-Apps/synapse_ynh/tree/testing --verbose
+sudo yunohost app install https://github.com/YunoHost-Apps/synapse_ynh/tree/testing --debug
 or
-sudo yunohost app upgrade synapse -u https://github.com/YunoHost-Apps/synapse_ynh/tree/testing --verbose
+sudo yunohost app upgrade synapse -u https://github.com/YunoHost-Apps/synapse_ynh/tree/testing --debug
 ```

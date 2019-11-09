@@ -15,8 +15,6 @@ handlers:
     class: logging.handlers.RotatingFileHandler
     formatter: precise
     filename: /var/log/matrix-__APP__/homeserver.log
-    maxBytes: 104857600
-    backupCount: 10
     filters: [context]
     level: INFO
   console:

@@ -6,78 +6,94 @@
 # IMPORT GENERIC HELPERS
 #=================================================
 
+source _common.sh
+source experimental_helper.sh
 source /usr/share/yunohost/helpers
 
-# Stop script if errors
-ynh_abort_if_errors
+#=================================================
+# LOAD SETTINGS
+#=================================================
+ynh_script_progression --message="Loading installation settings..." --weight=3
 
-# Import common cmd
-source ./psql.sh
-source ./experimental_helper.sh
-source ./_common.sh
+app=$YNH_APP_INSTANCE_NAME
+
+domain=$(ynh_app_setting_get --app=$app --key=special_domain)
+server_name=$(ynh_app_setting_get --app=$app --key=server_name)
+path_url=$(ynh_app_setting_get --app=$app --key=special_path)
+final_path=$(ynh_app_setting_get --app=$app --key=final_path)
+synapse_old_version=$(ynh_app_setting_get --app=$app --key=synapse_version)
+is_public=$(ynh_app_setting_get --app=$app --key=is_public)
+port=$(ynh_app_setting_get --app=$app --key=synapse_port)
+synapse_tls_port=$(ynh_app_setting_get --app=$app --key=synapse_tls_port)
+turnserver_tls_port=$(ynh_app_setting_get --app=$app --key=turnserver_tls_port)
+turnserver_alt_tls_port=$(ynh_app_setting_get --app=$app --key=turnserver_alt_tls_port)
+cli_port=$(ynh_app_setting_get --app=$app --key=cli_port)
+report_stats=$(ynh_app_setting_get --app=$app --key=report_stats)
+ynh_print_OFF
+synapse_db_pwd=$(ynh_app_setting_get --app=$app --key=synapse_db_pwd)
+turnserver_pwd=$(ynh_app_setting_get --app=$app --key=turnserver_pwd)
+registration_shared_secret=$(ynh_app_setting_get --app=$app --key=registration_shared_secret)
+form_secret=$(ynh_app_setting_get --app=$app --key=form_secret)
+ynh_print_ON
 
 #=================================================
 # SET ALL CONSTANT
 #=================================================
 
-app=$YNH_APP_INSTANCE_NAME
 synapse_user="matrix-$app"
 synapse_db_name="matrix_$app"
 synapse_db_user="matrix_$app"
 upstream_version=$(ynh_app_upstream_version)
 
 #=================================================
-# LOAD SETTINGS
+# CHECK VERSION
 #=================================================
 
-domain=$(ynh_app_setting_get $app special_domain)
-server_name=$(ynh_app_setting_get $app server_name)
-path_url=$(ynh_app_setting_get $app special_path)
-final_path=$(ynh_app_setting_get $app final_path)
-synapse_old_version=$(ynh_app_setting_get $app synapse_version)
-synapse_db_pwd=$(ynh_app_setting_get $app synapse_db_pwd)
-is_public=$(ynh_app_setting_get $app is_public)
-port=$(ynh_app_setting_get $app synapse_port)
-synapse_tls_port=$(ynh_app_setting_get $app synapse_tls_port)
-turnserver_tls_port=$(ynh_app_setting_get $app turnserver_tls_port)
-turnserver_alt_tls_port=$(ynh_app_setting_get $app turnserver_alt_tls_port)
-turnserver_pwd=$(ynh_app_setting_get $app turnserver_pwd)
-cli_port=$(ynh_app_setting_get $app cli_port)
-registration_shared_secret=$(ynh_app_setting_get $app registration_shared_secret)
-form_secret=$(ynh_app_setting_get $app form_secret)
-report_stats=$(ynh_app_setting_get $app report_stats)
+upgrade_type=$(ynh_check_app_version_changed)
 
 #=================================================
 # ENSURE DOWNWARD COMPATIBILITY
 #=================================================
+ynh_script_progression --message="Ensuring downward compatibility..." --weight=1
 
 # Following the discussion here https://github.com/YunoHost-Apps/synapse_ynh/pull/51 we decided to remove definitely the support of the old package migration.
-if [[ -z $synapse_old_version ]]
+if [ -z "$synapse_old_version" ]
 then
-	ynh_die "Update from this synapse version is not available. You need to remove this package and reinstall the new package version."
+	ynh_die --message="Update from this synapse version is not available. You need to remove this package and reinstall the new package version."
 fi
 
+if [ -z $server_name ]; then
+   server_name=$domain
+   ynh_app_setting_set $app server_name  $domain
+fi
 #=================================================
-# BACKUP BEFORE UPGRADE
+# BACKUP BEFORE UPGRADE THEN ACTIVE TRAP
 #=================================================
+ynh_script_progression --message="Backing up the app before upgrading (may take a while)..." --weight=30
 
 # We stop the service before to set ynh_clean_setup
-systemctl stop matrix-$app.service
+ynh_systemd_action --service_name=matrix-$app.service --action=stop
 
 # Backup the current version of the app
-if [[ $(ynh_app_setting_get $app disable_backup_before_upgrade) != '1' ]]
+if [ "$(ynh_app_setting_get --app=$app --key=disable_backup_before_upgrade)" != '1' ]
 then
     ynh_backup_before_upgrade
     ynh_clean_setup () {
+        # Clean installation remainings that are not handled by the remove script.
+        ynh_clean_check_starting
+
         ynh_restore_upgradebackup
     }
 fi
+# Exit if an error occurs during the execution of the script
+ynh_abort_if_errors
 
 #=================================================
 # STANDARD UPGRADE STEPS
 #=================================================
 # INSTALL DEPENDENCIES
 #=================================================
+ynh_script_progression --message="Upgrading dependencies..." --weight=6
 
 # WARNING : theses command are used in INSTALL, UPGRADE, RESTORE
 # For any update do it in all files
@@ -87,41 +103,50 @@ ynh_install_app_dependencies $dependances
 # DOWNLOAD, CHECK AND UNPACK SOURCE
 #=================================================
 
-# Install/upgrade synapse in virtualenv
-
-# Clean venv is it was on python2.7
-test -e $final_path/bin/python3 || ynh_secure_remove $final_path
-
-# WARNING : these commands are used in INSTALL, UPGRADE
-# For any update do it in all files
-
-if [ -n "$(uname -m | grep arm)" ]
+if [ "$upgrade_type" == "UPGRADE_APP" ]
 then
-    ynh_setup_source $final_path/ "armv7_$(lsb_release --codename --short)"
-else
-    # Install virtualenv if it don't exist
-    test -e $final_path/bin/python3 || python3 -m venv $final_path
+	ynh_script_progression --message="Upgrading source files..." --weight=6
 
-    # Install synapse in virtualenv
-    cp ../conf/virtualenv_activate $final_path/bin/activate
-    ynh_replace_string __FINAL_PATH__ $final_path $final_path/bin/activate
+	# Install/upgrade synapse in virtualenv
 
-    # We set all necessary environement variable to create a python virtualenvironnement.
-    source $final_path/bin/activate
-    pip3 install --upgrade setuptools wheel
-    pip3 install --upgrade cffi ndg-httpsclient psycopg2 lxml jinja2
-    pip3 install --upgrade matrix-synapse==$upstream_version matrix-synapse-ldap3
+	# Clean venv is it was on python2.7
+	test -e $final_path/bin/python3 || ynh_secure_remove --file=$final_path
 
-    # This function was defined when we called "source $final_path/bin/activate". With this function we undo what "$final_path/bin/activate" does
-    deactivate
+	# WARNING : these commands are used in INSTALL, UPGRADE
+	# For any update do it in all files
+
+	if [ -n "$(uname -m | grep arm)" ]
+	then
+		ynh_setup_source --dest_dir=$final_path/ --source_id="armv7_$(lsb_release --codename --short)"
+	else
+		# Install virtualenv if it don't exist
+		test -e $final_path/bin/python3 || python3 -m venv $final_path
+
+		# Install synapse in virtualenv
+		cp ../conf/virtualenv_activate $final_path/bin/activate
+		ynh_replace_string --match_string=__FINAL_PATH__ --replace_string=$final_path --target_file=$final_path/bin/activate
+
+		# We set all necessary environement variable to create a python virtualenvironnement.
+		source $final_path/bin/activate
+		pip3 install --upgrade setuptools wheel
+		pip3 install --upgrade cffi ndg-httpsclient psycopg2 lxml jinja2
+		pip3 install --upgrade matrix-synapse==$upstream_version matrix-synapse-ldap3
+
+		# This function was defined when we called "source $final_path/bin/activate". With this function we undo what "$final_path/bin/activate" does
+		deactivate
+	fi
 fi
 
 #=================================================
 # MIGRATION 1 : GENERATE SYNAPSE SECRET
 #=================================================
 
-if [[ -z "$registration_shared_secret" ]]
+ynh_print_OFF
+if [ -z "$registration_shared_secret" ]
 then
+    ynh_print_ON
+    ynh_script_progression --message="Generating synapse secret..." --weight=1
+
     # Go in virtualenvironnement
     PS1=${PS1:-}
     source $final_path/bin/activate
@@ -133,60 +158,67 @@ then
     deactivate
 
     # Get random values from config
+    ynh_print_OFF
     registration_shared_secret=$(egrep "^registration_shared_secret" homeserver.yml | cut -d'"' -f2)
     form_secret=$(egrep "^form_secret" homeserver.yml | cut -d'"' -f1)
 
     # store in yunohost settings
-    ynh_app_setting_set $app registration_shared_secret "$registration_shared_secret"
-    ynh_app_setting_set $app form_secret "$form_secret"
+    ynh_app_setting_set --app=$app --key=registration_shared_secret --value="$registration_shared_secret"
+    ynh_app_setting_set --app=$app --key=form_secret --value="$form_secret"
+    ynh_print_ON
 fi
+ynh_print_ON
 
 #=================================================
 # UPDATE SYNAPSE CONFIG
 #=================================================
+ynh_script_progression --message="Updating synapse config..." --weight=2
 
 # WARNING : theses command are used in INSTALL, UPGRADE, CONFIG
 # For any update do it in all files
 
 homeserver_config_path="/etc/matrix-$app/homeserver.yaml"
 
-ynh_backup_if_checksum_is_different "$homeserver_config_path"
-ynh_backup_if_checksum_is_different /etc/matrix-$app/log.yaml
+ynh_backup_if_checksum_is_different --file="$homeserver_config_path"
+ynh_backup_if_checksum_is_different --file=/etc/matrix-$app/log.yaml
 
 cp ../conf/homeserver.yaml "$homeserver_config_path"
 cp ../conf/log.yaml /etc/matrix-$app/log.yaml
 
-ynh_replace_string __APP__ $app "$homeserver_config_path"
-ynh_replace_string __DOMAIN__ $domain "$homeserver_config_path"
-ynh_replace_string __SERVER_NAME__ $server_name "$homeserver_config_path"
-ynh_replace_string __SYNAPSE_DB_USER__ $synapse_db_user "$homeserver_config_path"
-ynh_replace_string __SYNAPSE_DB_PWD__ $synapse_db_pwd "$homeserver_config_path"
-ynh_replace_string __PORT__ $port "$homeserver_config_path"
-ynh_replace_string __TLS_PORT__ $synapse_tls_port "$homeserver_config_path"
-ynh_replace_string __TURNSERVER_TLS_PORT__ $turnserver_tls_port "$homeserver_config_path"
-ynh_replace_special_string __TURNPWD__ $turnserver_pwd "$homeserver_config_path"
-ynh_replace_special_string __REGISTRATION_SECRET__ "$registration_shared_secret" "$homeserver_config_path"
-ynh_replace_string __FORM_SECRET__ "$form_secret" "$homeserver_config_path"
-ynh_replace_string __REPORT_STATS__ "$report_stats" "$homeserver_config_path"
+ynh_replace_string --match_string=__APP__ --replace_string=$app --target_file="$homeserver_config_path"
+ynh_replace_string --match_string=__DOMAIN__ --replace_string=$domain --target_file="$homeserver_config_path"
+ynh_replace_string --match_string=__SERVER_NAME__ --replace_string=$server_name --target_file="$homeserver_config_path"
+ynh_replace_string --match_string=__SYNAPSE_DB_USER__ --replace_string=$synapse_db_user --target_file="$homeserver_config_path"
+ynh_replace_string --match_string=__PORT__ --replace_string=$port --target_file="$homeserver_config_path"
+ynh_replace_string --match_string=__TLS_PORT__ --replace_string=$synapse_tls_port --target_file="$homeserver_config_path"
+ynh_replace_string --match_string=__TURNSERVER_TLS_PORT__ --replace_string=$turnserver_tls_port --target_file="$homeserver_config_path"
+ynh_replace_string --match_string=__REPORT_STATS__ --replace_string="$report_stats" --target_file="$homeserver_config_path"
+ynh_print_OFF
+ynh_replace_string --match_string=__SYNAPSE_DB_PWD__ --replace_string=$synapse_db_pwd --target_file="$homeserver_config_path"
+ynh_replace_special_string --match_string=__TURNPWD__ --replace_string=$turnserver_pwd --target_file="$homeserver_config_path"
+ynh_replace_special_string --match_string=__REGISTRATION_SECRET__ --replace_string="$registration_shared_secret" --target_file="$homeserver_config_path"
+ynh_replace_string --match_string=__FORM_SECRET__ --replace_string="$form_secret" --target_file="$homeserver_config_path"
+ynh_print_ON
 
-ynh_replace_string __APP__ $app "/etc/matrix-$app/log.yaml"
+ynh_replace_string --match_string=__APP__ --replace_string=$app --target_file="/etc/matrix-$app/log.yaml"
 
 if [ "$is_public" = "0" ]
 then
-    ynh_replace_string __ALLOWED_ACCESS__ False "$homeserver_config_path"
+    ynh_replace_string --match_string=__ALLOWED_ACCESS__ --replace_string=False --target_file="$homeserver_config_path"
 else
-    ynh_replace_string __ALLOWED_ACCESS__ True "$homeserver_config_path"
+    ynh_replace_string --match_string=__ALLOWED_ACCESS__ --replace_string=True --target_file="$homeserver_config_path"
 fi
 
-ynh_store_file_checksum "$homeserver_config_path"
-ynh_store_file_checksum "/etc/matrix-$app/log.yaml"
+ynh_store_file_checksum --file="$homeserver_config_path"
+ynh_store_file_checksum --file="/etc/matrix-$app/log.yaml"
 
 #=================================================
 # MIGRATION 2 : MULTINSTANCE SUPPORT
 #=================================================
 
-if [[ ! -e /etc/matrix-$app/coturn.conf ]]
+if [ ! -e /etc/matrix-$app/coturn.conf ]
 then
+    ynh_script_progression --message="Creating an independant service for coturn..." --weight=1
 
     #=================================================
     # CREATE AN INDEPENDANT SERVICE FOR COTURN
@@ -197,14 +229,14 @@ then
 
     # Set by default the system config for coturn
     echo "" > /etc/turnserver.conf
-    ynh_replace_string "TURNSERVER_ENABLED=1" "TURNSERVER_ENABLED=0" /etc/default/coturn
+    ynh_replace_string --match_string="TURNSERVER_ENABLED=1" --replace_string="TURNSERVER_ENABLED=0" --target_file=/etc/default/coturn
 
     # Set a port for each service in turnserver
-    turnserver_alt_tls_port=$(ynh_find_port $((turnserver_tls_port+1)))
-    cli_port=$(ynh_find_port 5766)
+    turnserver_alt_tls_port=$(ynh_find_port --port=$((turnserver_tls_port+1)))
+    cli_port=$(ynh_find_port --port=5766)
 
-    ynh_app_setting_set $app turnserver_alt_tls_port $turnserver_alt_tls_port
-    ynh_app_setting_set $app cli_port $cli_port
+    ynh_app_setting_set --app=$app --key=turnserver_alt_tls_port --value=$turnserver_alt_tls_port
+    ynh_app_setting_set --app=$app --key=cli_port --value=$cli_port
 
     yunohost firewall allow Both $turnserver_alt_tls_port > /dev/null 2>&1
 
@@ -212,7 +244,7 @@ then
     # MAKE A CLEAN LOGROTATE CONFIG
     #=================================================
 
-    ynh_use_logrotate /var/log/matrix-$app --non-append
+    ynh_use_logrotate --logfile /var/log/matrix-$app --nonappend
 fi
 
 #=================================================
@@ -220,8 +252,10 @@ fi
 #=================================================
 
 # Fix issue about certificates access
-if [[ ! $(grep "ssl-cert:x:[0-9]*:.*matrix-$app" /etc/group) ]]
+if [ ! $(grep "ssl-cert:x:[0-9]*:.*matrix-$app" /etc/group) ]
 then
+    ynh_script_progression --message="Use standard access for certificate..." --weight=1
+
     adduser $synapse_user ssl-cert
     adduser turnserver ssl-cert
 fi
@@ -234,8 +268,10 @@ fi
 # For any update do it in all files
 
 # Make dh cert for synapse if it doesn't exist
-if [[ ! -e /etc/ssl/private/dh2048.pem ]]
+if [ ! -e /etc/ssl/private/dh2048.pem ]
 then
+    ynh_script_progression --message="Creating a dh file..." --weight=1
+
     openssl dhparam -out /etc/ssl/private/dh2048.pem -outform PEM -2 2048 -dsaparam 2> /dev/null
     chown root:ssl-cert /etc/ssl/private/dh2048.pem
     chmod 640 /etc/ssl/private/dh2048.pem
@@ -257,12 +293,17 @@ fi
 #=================================================
 # NGINX CONFIGURATION
 #=================================================
+ynh_script_progression --message="Upgrading nginx web server configuration..." --weight=2
 
+# Create a dedicated nginx config
 ynh_add_nginx_config
 
 #=================================================
+# SPECIFIC UPGRADE
+#=================================================
 # UPDATE COTURN CONFIG
 #=================================================
+ynh_script_progression --message="Updating coturn config..." --weight=1
 
 # WARNING : theses command are used in INSTALL, UPGRADE
 # For any update do it in all files
@@ -271,33 +312,35 @@ coturn_config_path="/etc/matrix-$app/coturn.conf"
 
 cp ../conf/turnserver.conf "$coturn_config_path"
 
-ynh_replace_string __APP__ $app "$coturn_config_path"
-ynh_replace_string __TURNPWD__ $turnserver_pwd "$coturn_config_path"
-ynh_replace_string __DOMAIN__ $domain "$coturn_config_path"
-ynh_replace_string __TLS_PORT__ $turnserver_tls_port "$coturn_config_path"
-ynh_replace_string __TLS_ALT_PORT__ $turnserver_alt_tls_port "$coturn_config_path"
-ynh_replace_string __CLI_PORT__ $cli_port "$coturn_config_path"
+ynh_replace_string --match_string=__APP__ --replace_string=$app --target_file="$coturn_config_path"
+ynh_replace_string --match_string=__DOMAIN__ --replace_string=$domain --target_file="$coturn_config_path"
+ynh_replace_string --match_string=__TLS_PORT__ --replace_string=$turnserver_tls_port --target_file="$coturn_config_path"
+ynh_replace_string --match_string=__TLS_ALT_PORT__ --replace_string=$turnserver_alt_tls_port --target_file="$coturn_config_path"
+ynh_replace_string --match_string=__CLI_PORT__ --replace_string=$cli_port --target_file="$coturn_config_path"
+ynh_print_OFF
+ynh_replace_string --match_string=__TURNPWD__ --replace_string=$turnserver_pwd --target_file="$coturn_config_path"
+ynh_print_ON
 
 # Get public IP and set as external IP for coturn
 # note : '|| true' is used to ignore the errors if we can't get the public ipv4 or ipv6
 public_ip4="$(curl ip.yunohost.org)" || true
 public_ip6="$(curl ipv6.yunohost.org)" || true
 
-if [[ -n "$public_ip4" ]] && ynh_validate_ip4 "$public_ip4"
+if [ -n "$public_ip4" ] && ynh_validate_ip4 --ip_address="$public_ip4"
 then
-    ynh_replace_string '__IPV4__' "$public_ip4" "$coturn_config_path"
+    ynh_replace_string --match_string='__IPV4__' --replace_string="$public_ip4" --target_file="$coturn_config_path"
 else
-    ynh_replace_string '__IPV4__,' "" "$coturn_config_path"
+    ynh_replace_string --match_string='__IPV4__,' --replace_string="" --target_file="$coturn_config_path"
 fi
 
-if [[ -n "$public_ip6" ]] && ynh_validate_ip6 "$public_ip6"
+if [ -n "$public_ip6" ] && ynh_validate_ip6 --ip_address="$public_ip6"
 then
-    ynh_replace_string '__IPV6__' "$public_ip6" "$coturn_config_path"
+    ynh_replace_string --match_string='__IPV6__' --replace_string="$public_ip6" --target_file="$coturn_config_path"
 else
-    ynh_replace_string ',__IPV6__' "" "$coturn_config_path"
+    ynh_replace_string --match_string=',__IPV6__' --replace_string="" --target_file="$coturn_config_path"
 fi
 
-ynh_store_file_checksum "$coturn_config_path"
+ynh_store_file_checksum --file="$coturn_config_path"
 
 #=================================================
 # ADD SCRIPT FOR COTURN CRON
@@ -307,27 +350,29 @@ ynh_store_file_checksum "$coturn_config_path"
 # For any update do it in all files
 
 cp ../sources/Coturn_config_rotate.sh $final_path/
-ynh_replace_string __APP__ $app "$final_path/Coturn_config_rotate.sh"
+ynh_replace_string --match_string=__APP__ --replace_string=$app --target_file="$final_path/Coturn_config_rotate.sh"
 
 #=================================================
 # UPDATE SYSTEMD
 #=================================================
+ynh_script_progression --message="Upgrading systemd configuration..." --weight=3
 
 # Create systemd service for synapse and turnserver
 cp ../conf/default_matrix-synapse /etc/default/matrix-$app
-ynh_add_systemd_config matrix-$app matrix-synapse.service
+ynh_add_systemd_config --service=matrix-$app --template=matrix-synapse.service
 
 cp ../conf/default_coturn /etc/default/coturn-$app
-ynh_add_systemd_config coturn-$app coturn-synapse.service
+ynh_add_systemd_config --service=coturn-$app --template=coturn-synapse.service
 
 #=================================================
-# SETUP FAIL2BAN
+# UPGRADE FAIL2BAN
 #=================================================
+ynh_script_progression --message="Reconfiguring fail2ban..." --weight=8
 
 # WARNING : theses command are used in INSTALL, UPGRADE
 # For any update do it in all files
 
-ynh_add_fail2ban_config -t
+ynh_add_fail2ban_config --use_template
 
 #=================================================
 # GENERIC FINALIZATION
@@ -348,14 +393,30 @@ setfacl -R -m user:turnserver:rX  /etc/matrix-$app
 setfacl -R -m user:turnserver:rwX  /var/log/matrix-$app
 
 #=================================================
+# UPDATE HOOKS
+#=================================================
+
+# WARNING : theses command are used in INSTALL, UPGRADE
+# For any update do it in all files
+ynh_replace_string __APP__ $app ../hooks/post_cert_update
+ynh_replace_string __DOMAIN__ $domain ../hooks/post_cert_update
+
+#=================================================
 # UPDATE VERSION SETTINGS
 #=================================================
 
-ynh_app_setting_set $app synapse_version $upstream_version
+ynh_app_setting_set --app=$app --key=synapse_version --value=$upstream_version
 
 #=================================================
 # RELOAD SERVICES
 #=================================================
+ynh_script_progression --message="Restarting synapse services..." --weight=5
 
-systemctl restart coturn-$app.service
-ynh_check_starting "Synapse now listening on TCP port $synapse_tls_port" "/var/log/matrix-$app/homeserver.log" 300 "matrix-$app"
+ynh_systemd_action --service_name=coturn-$app.service --action=restart
+ynh_systemd_action --service_name=matrix-$app --action=restart --line_match="Synapse now listening on TCP port $synapse_tls_port" --log_path="/var/log/matrix-$app/homeserver.log" --timeout=300
+
+#=================================================
+# END OF SCRIPT
+#=================================================
+
+ynh_script_progression --message="Upgrade of $app completed" --last

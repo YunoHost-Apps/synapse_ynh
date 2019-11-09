@@ -29,16 +29,16 @@ app=$YNH_APP_INSTANCE_NAME
 show_config() {
     # here you are supposed to read some config file/database/other then print the values
     # echo "YNH_CONFIG_${PANEL_ID}_${SECTION_ID}_${OPTION_ID}=value"
-    echo "YNH_CONFIG_SYNAPSE_CONFIG_SERVER_CONFIG_SERVER_STATISTICS=$(ynh_app_setting_get $app report_stats)"
+    echo "YNH_CONFIG_SYNAPSE_CONFIG_SERVER_CONFIG_SERVER_STATISTICS=$(ynh_app_setting_get --app $app --key report_stats)"
 
-    backup_before_upgrade=$(ynh_app_setting_get $app disable_backup_before_upgrade)
+    backup_before_upgrade=$(ynh_app_setting_get --app $app --key disable_backup_before_upgrade)
     if [[ ${backup_before_upgrade:-0} -eq 1 ]]
     then
         echo "YNH_CONFIG_PACKAGE_CONFIG_PACKAGE_CONFIG_BACKUP_BEFORE_UPGRADE=False"
     else
         echo "YNH_CONFIG_PACKAGE_CONFIG_PACKAGE_CONFIG_BACKUP_BEFORE_UPGRADE=True"
     fi
-    is_public=$(ynh_app_setting_get $app is_public)
+    is_public=$(ynh_app_setting_get --app $app --key is_public)
     if [[ ${is_public} -eq 1 ]]
     then
         echo "YNH_CONFIG_SYNAPSE_CONFIG_SERVER_CONFIG_IS_PUBLIC=False"
@@ -52,33 +52,33 @@ show_config() {
 #=================================================
 
 apply_config() {
-    ynh_app_setting_set $app report_stats $YNH_CONFIG_SYNAPSE_CONFIG_SERVER_CONFIG_SERVER_STATISTICS
+    ynh_app_setting_set --app $app --key report_stats --value $YNH_CONFIG_SYNAPSE_CONFIG_SERVER_CONFIG_SERVER_STATISTICS
 
     if ${YNH_CONFIG_PACKAGE_CONFIG_PACKAGE_CONFIG_BACKUP_BEFORE_UPGRADE,,}
     then
-        ynh_app_setting_set $app disable_backup_before_upgrade 0
+        ynh_app_setting_set --app $app --key disable_backup_before_upgrade --value 0
     else
-        ynh_app_setting_set $app disable_backup_before_upgrade 1
+        ynh_app_setting_set --app $app --key disable_backup_before_upgrade --value 1
     fi
 
     if ${YNH_CONFIG_SYNAPSE_CONFIG_SERVER_CONFIG_IS_PUBLIC,,}
     then
-        ynh_app_setting_set $app is_public 1
+        ynh_app_setting_set --app $app --key is_public --value 1
     else
-        ynh_app_setting_set $app is_public 0
+        ynh_app_setting_set --app $app --key is_public --value 0
     fi
 
-    domain=$(ynh_app_setting_get $app special_domain)
-    server_name=$(ynh_app_setting_get $app server_name)
-    synapse_db_pwd=$(ynh_app_setting_get $app synapse_db_pwd)
-    is_public=$(ynh_app_setting_get $app is_public)
-    port=$(ynh_app_setting_get $app synapse_port)
-    synapse_tls_port=$(ynh_app_setting_get $app synapse_tls_port)
-    turnserver_tls_port=$(ynh_app_setting_get $app turnserver_tls_port)
-    turnserver_pwd=$(ynh_app_setting_get $app turnserver_pwd)
-    registration_shared_secret=$(ynh_app_setting_get $app registration_shared_secret)
-    form_secret=$(ynh_app_setting_get $app form_secret)
-    report_stats=$(ynh_app_setting_get $app report_stats)
+    domain=$(ynh_app_setting_get --app $app --key special_domain)
+    server_name=$(ynh_app_setting_get --app $app --key server_name)
+    synapse_db_pwd=$(ynh_app_setting_get --app $app --key synapse_db_pwd)
+    is_public=$(ynh_app_setting_get --app $app --key is_public)
+    port=$(ynh_app_setting_get --app $app --key synapse_port)
+    synapse_tls_port=$(ynh_app_setting_get --app $app --key synapse_tls_port)
+    turnserver_tls_port=$(ynh_app_setting_get --app $app --key turnserver_tls_port)
+    turnserver_pwd=$(ynh_app_setting_get --app $app --key turnserver_pwd)
+    registration_shared_secret=$(ynh_app_setting_get --app $app --key registration_shared_secret)
+    form_secret=$(ynh_app_setting_get --app $app --key form_secret)
+    report_stats=$(ynh_app_setting_get --app $app --key report_stats)
     synapse_user="matrix-$app"
     synapse_db_name="matrix_$app"
     synapse_db_user="matrix_$app"
@@ -95,18 +95,18 @@ apply_config() {
     cp ../conf/homeserver.yaml "$homeserver_config_path"
     cp ../conf/log.yaml /etc/matrix-$app/log.yaml
 
-    ynh_replace_string __APP__ $app "$homeserver_config_path"
-    ynh_replace_string __DOMAIN__ $domain "$homeserver_config_path"
-    ynh_replace_string __SERVER_NAME__ $server_name "$homeserver_config_path"    
-    ynh_replace_string __SYNAPSE_DB_USER__ $synapse_db_user "$homeserver_config_path"
-    ynh_replace_string __SYNAPSE_DB_PWD__ $synapse_db_pwd "$homeserver_config_path"
-    ynh_replace_string __PORT__ $port "$homeserver_config_path"
-    ynh_replace_string __TLS_PORT__ $synapse_tls_port "$homeserver_config_path"
-    ynh_replace_string __TURNSERVER_TLS_PORT__ $turnserver_tls_port "$homeserver_config_path"
-    ynh_replace_string __TURNPWD__ $turnserver_pwd "$homeserver_config_path"
-    ynh_replace_string __REGISTRATION_SECRET__ "$registration_shared_secret" "$homeserver_config_path"
-    ynh_replace_string __FORM_SECRET__ "$form_secret" "$homeserver_config_path"
-    ynh_replace_string __REPORT_STATS__ "$report_stats" "$homeserver_config_path"
+    ynh_replace_string --match_string __APP__ --replace_string $app --target_file "$homeserver_config_path"
+    ynh_replace_string --match_string __DOMAIN__ --replace_string $domain --target_file "$homeserver_config_path"
+    ynh_replace_string --match_string __SERVER_NAME__ --replace_string $server_name --target_file "$homeserver_config_path"   
+    ynh_replace_string --match_string __SYNAPSE_DB_USER__ --replace_string $synapse_db_user --target_file "$homeserver_config_path"
+    ynh_replace_string --match_string __SYNAPSE_DB_PWD__ --replace_string $synapse_db_pwd --target_file "$homeserver_config_path"
+    ynh_replace_string --match_string __PORT__ --replace_string $port --target_file "$homeserver_config_path"
+    ynh_replace_string --match_string __TLS_PORT__ --replace_string $synapse_tls_port --target_file "$homeserver_config_path"
+    ynh_replace_string --match_string __TURNSERVER_TLS_PORT__ --replace_string $turnserver_tls_port --target_file "$homeserver_config_path"
+    ynh_replace_string --match_string __TURNPWD__ --replace_string $turnserver_pwd --target_file "$homeserver_config_path"
+    ynh_replace_string --match_string __REGISTRATION_SECRET__ --replace_string "$registration_shared_secret" --target_file "$homeserver_config_path"
+    ynh_replace_string --match_string __FORM_SECRET__ --replace_string "$form_secret" --target_file "$homeserver_config_path"
+    ynh_replace_string --match_string __REPORT_STATS__ --replace_string "$report_stats" --target_file "$homeserver_config_path"
 
     if [ "$is_public" = "0" ]
     then
@@ -115,7 +115,7 @@ apply_config() {
         ynh_replace_string __ALLOWED_ACCESS__ True "$homeserver_config_path"
     fi
 
-    ynh_store_file_checksum "$homeserver_config_path"
+    ynh_store_file_checksum --file "$homeserver_config_path"
     setfacl -R -m user:turnserver:rX  /etc/matrix-$app
 
     systemctl restart matrix-$app

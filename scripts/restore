@@ -6,95 +6,160 @@
 # IMPORT GENERIC HELPERS
 #=================================================
 
+#Keep this path for calling _common.sh inside the execution's context of backup and restore scripts
+source ../settings/scripts/_common.sh
+source ../settings/scripts/experimental_helper.sh
 source /usr/share/yunohost/helpers
 
-# Stop script if errors
+#=================================================
+# MANAGE SCRIPT FAILURE
+#=================================================
+
+ynh_clean_setup () {
+# Clean installation remainings that are not handled by the remove script.
+	ynh_clean_check_starting
+}
+# Exit if an error occurs during the execution of the script
 ynh_abort_if_errors
 
-# Import common cmd
-source ../settings/scripts/psql.sh
-source ../settings/scripts/experimental_helper.sh
-source ../settings/scripts/_common.sh
+#=================================================
+# LOAD SETTINGS
+#=================================================
+ynh_script_progression --message="Loading settings..."
+
+app=$YNH_APP_INSTANCE_NAME
+
+domain=$(ynh_app_setting_get --app=$app --key=special_domain)
+server_name=$(ynh_app_setting_get --app=$app --key=server_name)
+path_url=$(ynh_app_setting_get --app=$app --key=special_path)
+final_path=$(ynh_app_setting_get --app=$app --key=final_path)
+synapse_tls_port=$(ynh_app_setting_get --app=$app --key=synapse_tls_port)
+turnserver_tls_port=$(ynh_app_setting_get --app=$app --key=turnserver_tls_port)
+turnserver_alt_tls_port=$(ynh_app_setting_get --app=$app --key=turnserver_alt_tls_port)
+ynh_print_OFF
+synapse_db_pwd=$(ynh_app_setting_get --app=$app --key=synapse_db_pwd)
+ynh_print_ON
 
 #=================================================
 # SET ALL CONSTANT
 #=================================================
 
-app=$YNH_APP_INSTANCE_NAME
 synapse_user="matrix-$app"
 synapse_db_name="matrix_$app"
 synapse_db_user="matrix_$app"
 upstream_version=$(ynh_app_upstream_version)
 
 #=================================================
-# LOAD SETTINGS
-#=================================================
-
-domain=$(ynh_app_setting_get $app special_domain)
-path_url=$(ynh_app_setting_get $app special_path)
-final_path=$(ynh_app_setting_get $app final_path)
-synapse_db_pwd=$(ynh_app_setting_get $app synapse_db_pwd)
-synapse_tls_port=$(ynh_app_setting_get $app synapse_tls_port)
-turnserver_tls_port=$(ynh_app_setting_get $app turnserver_tls_port)
-turnserver_alt_tls_port=$(ynh_app_setting_get $app turnserver_alt_tls_port)
-
-#=================================================
 # CHECK IF THE APP CAN BE RESTORED
 #=================================================
+ynh_script_progression --message="Validating restoration parameters..." --weight=2
 
-ynh_webpath_available $domain $path_url || ynh_die "$domain/$path_url is not available, please use an other domain."
+ynh_webpath_available --domain=$domain --path_url=$path_url \
+	|| ynh_die --message="Path not available: ${domain}${path_url}"
+test ! -d $final_path \
+	|| ynh_die --message="There is already a directory: $final_path "
 
 #=================================================
 # STANDARD RESTORATION STEPS
 #=================================================
-# RESTORE ALL FILES
+# RESTORE ALL CONFIG AND DATA
 #=================================================
 
-# Restore all config and data
+ynh_script_progression --message="Restoring directory and configuration..." --weight=10
 ynh_restore
+
+#=================================================
+# RESTORE FAIL2BAN CONFIGURATION
+#=================================================
+
+ynh_script_progression --message="Reload fail2ban..." --weight=6
+ynh_systemd_action --action=restart --service_name=fail2ban
+
+#=================================================
+# SPECIFIC RESTORATION
+#=================================================
+# REINSTALL DEPENDENCIES
+#=================================================
+ynh_script_progression --message="Reinstalling dependencies..." --weight=70
+
+# WARNING : theses command are used in INSTALL, UPGRADE, RESTORE
+# For any update do it in all files
+ynh_install_app_dependencies $dependances
+
+#=================================================
+# RECREATE THE DEDICATED USER
+#=================================================
+ynh_script_progression --message="Recreating the dedicated system user..." --weight=3
+
+# Create the dedicated user (if not existing)
+ynh_system_user_create --username=$synapse_user --home_dir=/var/lib/matrix-$app
+adduser $synapse_user ssl-cert
+adduser turnserver ssl-cert
+
+#=================================================
+# RESTORE THE POSTGRESQL DATABASE
+#=================================================
+ynh_script_progression --message="Restoring the PostgreSQL database..." --weight=13
+
+ynh_psql_test_if_first_run
+ynh_print_OFF
+ynh_psql_create_user $synapse_db_user $synapse_db_pwd
+ynh_print_ON
+ynh_psql_execute_as_root \
+--sql="CREATE DATABASE $synapse_db_name
+ ENCODING 'UTF8'
+ LC_COLLATE='C'
+ LC_CTYPE='C'
+ template=template0
+ OWNER $synapse_db_user;"
+ynh_psql_execute_file_as_root --file="${YNH_CWD}/dump.sql" --database="$synapse_db_name"
+
+#=================================================
+# RESTORE SYSTEMD
+#=================================================
+ynh_script_progression --message="Enable systemd services" --weight=2
+
+# systemctl daemon-reload
+systemctl enable matrix-$app.service
+systemctl enable coturn-$app.service
+
+#=================================================
+# ADVERTISE SERVICE IN ADMIN PANEL
+#=================================================
+
+yunohost service add matrix-$app -l "/var/log/matrix-$app/homeserver.log"
+yunohost service add coturn-$app
 
 #=================================================
 # CREATE A DH FILE
 #=================================================
+ynh_script_progression --message="Creating a dh file..." --weight=40
 
 # WARNING : theses command are used in INSTALL, UPGRADE, RESTORE
 # For any update do it in all files
 
 # Make dh cert for synapse if it doesn't exist
-if [[ ! -e /etc/ssl/private/dh2048.pem ]]
+if [ ! -e /etc/ssl/private/dh2048.pem ]
 then
-    openssl dhparam -out /etc/ssl/private/dh2048.pem -outform PEM -2 2048 -dsaparam 2> /dev/null
+    ynh_exec_warn_less openssl dhparam -out /etc/ssl/private/dh2048.pem -outform PEM -2 2048 -dsaparam
     chown root:ssl-cert /etc/ssl/private/dh2048.pem
     chmod 640 /etc/ssl/private/dh2048.pem
 fi
 
 #=================================================
-# REINSTALL DEPENDENCIES
-#=================================================
-
-# WARNING : theses command are used in INSTALL, UPGRADE, RESTORE
-# For any update do it in all files
-ynh_install_app_dependencies  $dependances
-
-#=================================================
-# RECREATE THE DEDICATED USER
-#=================================================
-
-ynh_system_user_create $synapse_user /var/lib/matrix-$app
-adduser $synapse_user ssl-cert
-adduser turnserver ssl-cert
-
-#=================================================
 # RECONFIGURE THE TURNSERVER
 #=================================================
+ynh_script_progression --message="Reconfiguring coturn..." --weight=23
 
 # To be sure that at the restoration the IP address in coturn config is the same as the real address we remake the coturn config
 
 # Retrieve specific settings
-turnserver_tls_port=$(ynh_app_setting_get $app turnserver_tls_port)
-turnserver_alt_tls_port=$(ynh_app_setting_get $app turnserver_alt_tls_port)
-turnserver_pwd=$(ynh_app_setting_get $app turnserver_pwd)
-cli_port=$(ynh_app_setting_get $app cli_port)
+turnserver_tls_port=$(ynh_app_setting_get --app=$app --key=turnserver_tls_port)
+turnserver_alt_tls_port=$(ynh_app_setting_get --app=$app --key=turnserver_alt_tls_port)
+cli_port=$(ynh_app_setting_get --app=$app --key=cli_port)
+ynh_print_OFF
+turnserver_pwd=$(ynh_app_setting_get --app=$app --key=turnserver_pwd)
+ynh_print_ON
 
 # WARNING : these commands are used in INSTALL, UPGRADE
 # For any update do it in all files
@@ -103,80 +168,60 @@ coturn_config_path="/etc/matrix-$app/coturn.conf"
 
 cp ../settings/conf/turnserver.conf "$coturn_config_path"
 
-ynh_replace_string __APP__ $app "$coturn_config_path"
-ynh_replace_string __TURNPWD__ $turnserver_pwd "$coturn_config_path"
-ynh_replace_string __DOMAIN__ $domain "$coturn_config_path"
-ynh_replace_string __TLS_PORT__ $turnserver_tls_port "$coturn_config_path"
-ynh_replace_string __TLS_ALT_PORT__ $turnserver_alt_tls_port "$coturn_config_path"
-ynh_replace_string __CLI_PORT__ $cli_port "$coturn_config_path"
+ynh_replace_string --match_string=__APP__ --replace_string=$app --target_file="$coturn_config_path"
+ynh_replace_string --match_string=__DOMAIN__ --replace_string=$domain --target_file="$coturn_config_path"
+ynh_replace_string --match_string=__TLS_PORT__ --replace_string=$turnserver_tls_port --target_file="$coturn_config_path"
+ynh_replace_string --match_string=__TLS_ALT_PORT__ --replace_string=$turnserver_alt_tls_port --target_file="$coturn_config_path"
+ynh_replace_string --match_string=__CLI_PORT__ --replace_string=$cli_port --target_file="$coturn_config_path"
+ynh_print_OFF
+ynh_replace_string --match_string=__TURNPWD__ --replace_string=$turnserver_pwd --target_file="$coturn_config_path"
+ynh_print_ON
 
 # Get public IP and set as external IP for coturn
 # note : '|| true' is used to ignore the errors if we can't get the public ipv4 or ipv6
 public_ip4="$(curl ip.yunohost.org)" || true
 public_ip6="$(curl ipv6.yunohost.org)" || true
 
-if [[ -n "$public_ip4" ]] && ynh_validate_ip4 "$public_ip4"
+if [ -n "$public_ip4" ] && ynh_validate_ip4 --ip_address="$public_ip4"
 then
-    ynh_replace_string '__IPV4__' "$public_ip4" "$coturn_config_path"
+    ynh_replace_string --match_string='__IPV4__' --replace_string="$public_ip4" --target_file="$coturn_config_path"
 else
-    ynh_replace_string '__IPV4__,' "" "$coturn_config_path"
+    ynh_replace_string --match_string='__IPV4__,' --replace_string="" --target_file="$coturn_config_path"
 fi
 
-if [[ -n "$public_ip6" ]] && ynh_validate_ip6 "$public_ip6"
+if [ -n "$public_ip6" ] && ynh_validate_ip6 --ip_address="$public_ip6"
 then
-    ynh_replace_string '__IPV6__' "$public_ip6" "$coturn_config_path"
+    ynh_replace_string --match_string='__IPV6__' --replace_string="$public_ip6" --target_file="$coturn_config_path"
 else
-    ynh_replace_string ',__IPV6__' "" "$coturn_config_path"
+    ynh_replace_string --match_string=',__IPV6__' --replace_string="" --target_file="$coturn_config_path"
 fi
 
-ynh_store_file_checksum "$coturn_config_path"
+ynh_store_file_checksum --file="$coturn_config_path"
 
-#=================================================
-# SPECIFIC RESTORATION
 #=================================================
 # OPEN THE PORT
 #=================================================
 
 # Ouvre le port dans le firewall
-yunohost firewall allow TCP $synapse_tls_port > /dev/null 2>&1
-yunohost firewall allow Both $turnserver_tls_port > /dev/null 2>&1
-yunohost firewall allow Both $turnserver_alt_tls_port > /dev/null 2>&1
+ynh_exec_warn_less yunohost firewall allow TCP $synapse_tls_port
+ynh_exec_warn_less yunohost firewall allow Both $turnserver_tls_port
+ynh_exec_warn_less yunohost firewall allow Both $turnserver_alt_tls_port
 
 #=================================================
 # SETUP SSOWAT
 #=================================================
+ynh_script_progression --message="Configuring SSOwat..."
 
 # Open access to server without a button the home
 # The script "add_sso_conf.py" will just add en entry for the path "/_matrix" in the sso conf.json.persistent file in the cathegory "skipped_urls".
-python3 ../settings/conf/add_sso_conf.py || ynh_die "Your file /etc/ssowat/conf.json.persistent doesn't respect the json syntax. Please fix the syntax to install this app. For more information see here: https://github.com/YunoHost-Apps/synapse_ynh/issues/32"
-
-#=================================================
-# RESTORE THE POSTGRESQL DATABASE
-#=================================================
-
-ynh_psql_test_if_first_run
-ynh_psql_create_user $synapse_db_user $synapse_db_pwd
-ynh_psql_execute_as_root \
-"CREATE DATABASE $synapse_db_name
- ENCODING 'UTF8'
- LC_COLLATE='C'
- LC_CTYPE='C'
- template=template0
- OWNER $synapse_db_user;"
-ynh_psql_execute_file_as_root "${YNH_CWD}/dump.sql" "$synapse_db_name"
-
-#=================================================
-# RESTORE SYSTEMD
-#=================================================
-
-systemctl daemon-reload
-systemctl enable matrix-$app.service
+python3 ../settings/conf/add_sso_conf.py || ynh_die --message="Your file /etc/ssowat/conf.json.persistent doesn't respect the json syntax. Please fix the syntax to install this app. For more information see here: https://github.com/YunoHost-Apps/synapse_ynh/issues/32"
 
 #=================================================
 # SETUP LOGROTATE
 #=================================================
+ynh_script_progression --message="Configuring log rotation..."
 
-ynh_use_logrotate /var/log/matrix-$app
+ynh_use_logrotate --logfile /var/log/matrix-$app
 
 #=================================================
 # GENERIC FINALIZATION
@@ -197,25 +242,12 @@ setfacl -R -m user:turnserver:rX  /etc/matrix-$app
 setfacl -R -m user:turnserver:rwX  /var/log/matrix-$app
 
 #=================================================
-# ADVERTISE SERVICE IN ADMIN PANEL
-#=================================================
-
-yunohost service add matrix-$app -l "/var/log/matrix-$app/homeserver.log"
-yunohost service add coturn-$app
-
-#=================================================
 # RELOAD NGINX, SYNAPSE AND COTURN
 #=================================================
+ynh_script_progression --message="Restarting synapse services..." --weight=7
 
-systemctl reload nginx.service
-systemctl restart coturn-$app.service
-ynh_check_starting "Synapse now listening on TCP port $synapse_tls_port" "/var/log/matrix-$app/homeserver.log" 300 "matrix-$app"
-
-#=================================================
-# SETUP FAIL2BAN
-#=================================================
-
-systemctl try-reload-or-restart fail2ban
+ynh_systemd_action --service_name=coturn-$app.service --action=restart
+ynh_systemd_action --service_name=matrix-$app --action=restart --line_match="Synapse now listening on TCP port $synapse_tls_port" --log_path="/var/log/matrix-$app/homeserver.log" --timeout=300
 
 #=================================================
 # SEND A README FOR THE ADMIN
@@ -224,7 +256,7 @@ systemctl try-reload-or-restart fail2ban
 # WARNING : theses command are used in INSTALL, RESTORE
 # For any update do it in all files
 
-message="To federate this app you need to add this line in your DNS configuration:
+echo "To federate this app you need to add this line in your DNS configuration:
 
 _matrix._tcp.$domain. 3600    IN      SRV     10 0 $synapse_tls_port $domain.
 
@@ -232,6 +264,21 @@ You also need to open the TCP port $synapse_tls_port on your ISP box if it's not
 
 Your synapse server also implements a turnserver (for VoIP), to have this fully functional please read the 'Turnserver' section in the README available here: https://github.com/YunoHost-Apps/synapse_ynh .
 
-If you're facing an issue or want to improve this app, please open a new issue in this project: https://github.com/YunoHost-Apps/synapse_ynh"
+If you're facing an issue or want to improve this app, please open a new issue in this project: https://github.com/YunoHost-Apps/synapse_ynh" > mail_to_send
 
-ynh_send_readme_to_admin "$message"
+ynh_send_readme_to_admin --app_message="mail_to_send" --type="restore"
+
+#=================================================
+# GENERIC FINALIZATION
+#=================================================
+# RELOAD NGINX
+#=================================================
+ynh_script_progression --message="Reloading nginx web server..."
+
+ynh_systemd_action --service_name=nginx --action=reload
+
+#=================================================
+# END OF SCRIPT
+#=================================================
+
+ynh_script_progression --message="Restoration completed for $app" --last

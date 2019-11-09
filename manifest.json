@@ -2,9 +2,6 @@
 	"name": "Synapse",
 	"id": "synapse",
 	"packaging_format": 1,
-	"requirements": {
-		"yunohost": ">= 3.5.0"
-	},
 	"description": {
 		"en": "Instant messaging server who use matrix",
 		"fr": "Un serveur de messagerie instantané basé sur matrix"
@@ -15,6 +12,9 @@
 	"maintainer": {
 		"name": "Josué Tille",
 		"email": "josue@tille.ch"
+	},
+	"requirements": {
+		"yunohost": ">= 3.5"
 	},
 	"multi_instance": true,
 	"services": [
@@ -38,7 +38,8 @@
 					"en": "If your synapse domain is a subdomain, you can choose a name for your Synapse server to have your matrix user-ids looking like @user:domain.org instead of @user:synapse.domain.org",
 					"fr": "Si votre domaine pour synapse est un sous-domaine, vous pouvez choisir un nom pour votre serveur Synapse afin que vos identifiants matrix soient @utilisateur:domain.org plutôt que @utilisateur:synapse.domain.org"
 				},
-				"example": "domain.org"
+				"example": "domain.org",
+				"default": "Same than the domain"
 			},
 			{
 				"name": "is_public",
@@ -47,11 +48,11 @@
 					"en": "Is it a public server ?",
 					"fr": "Est-ce un serveur public ?"
 				},
+				"default": false,
 				"help": { 
 					"en": "A public server means that anybody will be able to register on this server.",
 					"fr": "Un serveur public signifie que n'importe qui pourra s'enregistrer sur ce serveur."
-				},
-				"default": 0
+				}
 			}
 		]
 	}

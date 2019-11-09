@@ -6,85 +6,113 @@
 # IMPORT GENERIC HELPERS
 #=================================================
 
+source ../settings/scripts/_common.sh
+source ../settings/scripts/experimental_helper.sh
 source /usr/share/yunohost/helpers
 
-# Stop script if errors
+#=================================================
+# MANAGE SCRIPT FAILURE
+#=================================================
+
+# Exit if an error occurs during the execution of the script
 ynh_abort_if_errors
 
-# Import common cmd
-source ../settings/scripts/psql.sh
-source ../settings/scripts/experimental_helper.sh
-source ../settings/scripts/_common.sh
-
 #=================================================
-# SET ALL CONSTANT
+# LOAD SETTINGS
 #=================================================
+ynh_script_progression --message="Loading installation settings..." --weight=2
 
 app=$YNH_APP_INSTANCE_NAME
+
+domain=$(ynh_app_setting_get --app=$app --key=special_domain)
+server_name=$(ynh_app_setting_get --app=$app --key=server_name)
+final_path=$(ynh_app_setting_get --app=$app --key=final_path)
+
+#=================================================
+# SET CONSTANTS
+#=================================================
+
 synapse_user="matrix-$app"
 synapse_db_name="matrix_$app"
 synapse_db_user="matrix_$app"
 upstream_version=$(ynh_app_upstream_version)
 
 #=================================================
-# LOAD SETTINGS
-#=================================================
-
-domain=$(ynh_app_setting_get $app special_domain)
-server_name=$(ynh_app_setting_get $app server_name)
-final_path=$(ynh_app_setting_get $app final_path)
-
-#=================================================
 # STANDARD BACKUP STEPS
-#=================================================
-# BACKUP THE NGINX CONFIGURATION
-#=================================================
-
-ynh_backup "/etc/nginx/conf.d/${domain}.d/${app}.conf"
-ynh_backup "/etc/nginx/conf.d/${server_name}.d/server_name.conf"
-
-#=================================================
-# BACKUP SYNAPSE CONFIG
-#=================================================
-
-ynh_backup "/etc/matrix-$app"
-
-#=================================================
-# BACKUP SYSTEMD
-#=================================================
-
-ynh_backup "/etc/default/matrix-$app"
-ynh_backup "/etc/systemd/system/matrix-$app.service"
-ynh_backup "/etc/default/coturn-$app"
-ynh_backup "/etc/systemd/system/coturn-$app.service"
-
 #=================================================
 # BACKUP THE APP MAIN DIR
 #=================================================
+ynh_script_progression --message="Backing up the main app directory..." --weight=1
 
-ynh_backup "$final_path" "bin"
+ynh_backup --src_path="$final_path"
+
 
 #=================================================
-# BACKUP SYNAPSE DATA
+# BACKUP THE NGINX CONFIGURATION
 #=================================================
+ynh_script_progression --message="Backing up nginx web server configuration..." --weight=1
 
-ynh_backup "/var/lib/matrix-$app" "data" 1
+ynh_backup --src_path="/etc/nginx/conf.d/$domain.d/$app.conf"
+ynh_backup --src_path="/etc/nginx/conf.d/${server_name}.d/server_name.conf"
 
 #=================================================
 # BACKUP THE POSTGRESQL DATABASE
 #=================================================
+ynh_script_progression --message="Backing up the PostgreSQL database..." --weight=2
 
-ynh_psql_dump_db "$synapse_db_name" > ${YNH_CWD}/dump.sql
+ynh_psql_dump_db --database="$synapse_db_name" > ${YNH_CWD}/dump.sql
+
+#=================================================
+# BACKUP FAIL2BAN CONFIGURATION
+#=================================================
+ynh_script_progression --message="Backing up fail2ban configuration" --weight=1
+
+ynh_backup --src_path="/etc/fail2ban/jail.d/$app.conf"
+ynh_backup --src_path="/etc/fail2ban/filter.d/$app.conf"
+
+#=================================================
+# SPECIFIC BACKUP
+#=================================================
+# BACKUP SYNAPSE CONFIG
+#=================================================
+ynh_script_progression --message="Backing up synapse configuration..." --weight=2
+
+ynh_backup --src_path="/etc/matrix-$app"
+
+#=================================================
+# BACKUP SYSTEMD
+#=================================================
+ynh_script_progression --message="Backing up systemd configuration..." --weight=1
+
+ynh_backup --src_path="/etc/default/matrix-$app"
+ynh_backup --src_path="/etc/systemd/system/matrix-$app.service"
+ynh_backup --src_path="/etc/default/coturn-$app"
+ynh_backup --src_path="/etc/systemd/system/coturn-$app.service"
+
+#=================================================
+# BACKUP SYNAPSE DATA
+#=================================================
+ynh_script_progression --message="Backing up synapse data..." --weight=1
+
+ynh_backup --src_path="/var/lib/matrix-$app"
 
 #=================================================
 # BACKUP SYNAPSE LOG
 #=================================================
+ynh_script_progression --message="Backing up synapse log..." --weight=1
 
-ynh_backup "/var/log/matrix-$app"
+ynh_backup --src_path="/var/log/matrix-$app"
 
 #=================================================
-# BACKUP FAIL2BAN CONFIG
+# BACKUP HOOKS
+#=================================================
+ynh_script_progression --message="Backing up synapse hook..." --weight=1
+
+# Copy hook
+ynh_backup --src_path "/etc/yunohost/hooks.d/post_cert_update/50-$app"
+
+#=================================================
+# END OF SCRIPT
 #=================================================
 
-ynh_backup "/etc/fail2ban/jail.d/$app.conf"
-ynh_backup "/etc/fail2ban/filter.d/$app.conf"
+ynh_script_progression --message="Backup script completed for $app. (YunoHost will then actually copy those files to the archive)." --last
