@@ -227,7 +227,7 @@ ynh_app_setting_set --app=$app --key=form_secret --value="$form_secret"
 ynh_print_ON
 
 # Create .well-known redirection for access by federation
-if [[ $server_name != $domain ]]
+if yunohost --output-as plain domain list | grep -q "^$server_name$"
 then
 cp ../conf/server_name.conf /etc/nginx/conf.d/${server_name}.d/server_name.conf
 fi
