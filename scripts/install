@@ -226,12 +226,6 @@ ynh_app_setting_set --app=$app --key=registration_shared_secret --value="$regist
 ynh_app_setting_set --app=$app --key=form_secret --value="$form_secret"
 ynh_print_ON
 
-# Create .well-known redirection for access by federation
-if yunohost --output-as plain domain list | grep -q "^$server_name$"
-then
-    cp ../conf/server_name.conf /etc/nginx/conf.d/${server_name}.d/server_name.conf
-fi
-
 #=================================================
 # SETUP SYSTEMD
 #=================================================
@@ -298,6 +292,13 @@ fi
 
 ynh_store_file_checksum --file="$homeserver_config_path"
 ynh_store_file_checksum --file="/etc/matrix-$app/log.yaml"
+
+
+# Create .well-known redirection for access by federation
+if yunohost --output-as plain domain list | grep -q "^$server_name$"
+then
+    cp ../conf/server_name.conf /etc/nginx/conf.d/${server_name}.d/server_name.conf
+fi
 
 #=================================================
 # SET COTURN CONFIG
