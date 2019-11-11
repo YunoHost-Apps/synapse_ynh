@@ -218,6 +218,8 @@ then
     cp ../conf/server_name.conf /etc/nginx/conf.d/${server_name}.d/server_name.conf
 fi
 
+ynh_store_file_checksum --file="/etc/nginx/conf.d/${server_name}.d/server_name.conf"
+
 #=================================================
 # MIGRATION 2 : MULTINSTANCE SUPPORT
 #=================================================
