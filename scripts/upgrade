@@ -212,6 +212,12 @@ fi
 ynh_store_file_checksum --file="$homeserver_config_path"
 ynh_store_file_checksum --file="/etc/matrix-$app/log.yaml"
 
+# Create .well-known redirection for access by federation if it doesn't exist
+if yunohost --output-as plain domain list | grep -q "^$server_name$"
+then
+    cp ../conf/server_name.conf /etc/nginx/conf.d/${server_name}.d/server_name.conf
+fi
+
 #=================================================
 # MIGRATION 2 : MULTINSTANCE SUPPORT
 #=================================================
@@ -281,12 +287,6 @@ fi
 #=================================================
 # MIGRATION 5 : CREATE A .well-known FILE
 #=================================================
-
-# Create .well-known redirection for access by federation if it doesn't exist
-if yunohost --output-as plain domain list | grep -q "^$server_name$"
-then
-cp ../conf/server_name.conf /etc/nginx/conf.d/${server_name}.d/server_name.conf
-fi
 
 #=================================================
 # STANDARD UPGRADE STEPS
