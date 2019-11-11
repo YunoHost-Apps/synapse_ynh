@@ -285,7 +285,6 @@ then
     chmod 640 /etc/ssl/private/dh2048.pem
 fi
 
-
 #=================================================
 # MIGRATION 5 : CREATE A .well-known FILE
 #=================================================
