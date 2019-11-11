@@ -94,7 +94,6 @@ ynh_secure_remove --file=/etc/default/matrix-$app
 ynh_secure_remove --file=/etc/default/coturn-$app
 ynh_secure_remove --file=/etc/nginx/conf.d/${server_name}.d/server_name.conf
 
-
 #=================================================
 # REMOVE NGINX CONFIGURATION
 #=================================================
