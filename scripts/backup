@@ -50,7 +50,10 @@ ynh_script_progression --message="Backing up the main app directory..." --weight
 ynh_script_progression --message="Backing up nginx web server configuration..." --weight=1
 
 ynh_backup --src_path="/etc/nginx/conf.d/$domain.d/$app.conf"
-ynh_backup --src_path="/etc/nginx/conf.d/${server_name}.d/server_name.conf"
+if yunohost --output-as plain domain list | grep -q "^$server_name$"
+then
+    ynh_backup --src_path="/etc/nginx/conf.d/${server_name}.d/server_name.conf"
+fi
 
 #=================================================
 # BACKUP THE POSTGRESQL DATABASE
