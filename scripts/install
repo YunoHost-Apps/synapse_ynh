@@ -299,7 +299,7 @@ if yunohost --output-as plain domain list | grep -q "^$server_name$"
 then
     cp ../conf/server_name.conf /etc/nginx/conf.d/${server_name}.d/server_name.conf
     ynh_replace_string --match_string=__DOMAIN__ --replace_string=$domain --target_file="/etc/nginx/conf.d/${server_name}.d/${app}_server_name.conf"
-    ynh_replace_string --match_string=__PORT__ --replace_string=$synapse_tls_port --target_file="/etc/nginx/conf.d/${server_name}.d/server_name.conf"
+   ynh_replace_string --match_string=__PORT__ --replace_string=$synapse_tls_port --target_file="/etc/nginx/conf.d/${server_name}.d/${app}_server_name.conf"
     ynh_store_file_checksum --file="/etc/nginx/conf.d/${server_name}.d/${app}_server_name.conf"
 fi
 
