@@ -29,7 +29,7 @@ The script to build the binary is also available.
 
 ### Web client
 
-If you want a web client you can also install riot with this package: https://github.com/YunoHost-Apps/element_ynh .
+If you want a web client you can also install Element with this package: https://github.com/YunoHost-Apps/element_ynh .
 
 ### Access by federation
 
@@ -80,15 +80,15 @@ If you have a dynamic IP address, you also might need to update this config auto
 
 ### Important Security Note
 
-We do not recommend running Riot from the same domain name as your Matrix
+We do not recommend running Element from the same domain name as your Matrix
 homeserver (synapse).  The reason is the risk of XSS (cross-site-scripting)
-vulnerabilities that could occur if someone caused Riot to load and render
+vulnerabilities that could occur if someone caused Element to load and render
 malicious user generated content from a Matrix API which then had trusted
-access to Riot (or other apps) due to sharing the same domain.
+access to Element (or other apps) due to sharing the same domain.
 
 We have put some coarse mitigations into place to try to protect against this
 situation, but it's still not a good practice to do it in the first place. See
-https://github.com/vector-im/riot-web/issues/1977 for more details.
+https://github.com/vector-im/element-web/issues/1977 for more details.
 
 ## Documentation
 
@@ -111,7 +111,7 @@ Supported with LDAP.
 
 Synapse uses a lot of ressource. So on slow architecture (like small ARM board), this app could take a lot of CPU and RAM.
 
-This app doesn't provide any real good web interface. So it's recommended to use Riot client to connect to this app. This app is available [here](https://github.com/YunoHost-Apps/riot_ynh)
+This app doesn't provide any real good web interface. So it's recommended to use Element client to connect to this app. This app is available [here](https://github.com/YunoHost-Apps/element_ynh)
 
 ## Additional information
 
