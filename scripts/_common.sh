@@ -56,7 +56,7 @@ install_sources() {
         chown $synapse_user:root -R $final_path
         sudo -u $synapse_user env PATH=$PATH pip3 install --upgrade 'cryptography>=3.3'
         pip3 install --upgrade cffi ndg-httpsclient psycopg2 lxml jinja2
-        pip3 install --upgrade 'Twisted>=20.3.0<21' matrix-synapse==$upstream_version matrix-synapse-ldap3
+        pip3 install --upgrade 'Twisted>=20.3.0,<21' matrix-synapse==$upstream_version matrix-synapse-ldap3
 
         # This function was defined when we called "source $final_path/bin/activate". With this function we undo what "$final_path/bin/activate" does
         set +u;
