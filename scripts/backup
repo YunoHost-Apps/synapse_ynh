@@ -27,6 +27,7 @@ app=$YNH_APP_INSTANCE_NAME
 domain=$(ynh_app_setting_get --app=$app --key=domain)
 server_name=$(ynh_app_setting_get --app=$app --key=server_name)
 final_path=$(ynh_app_setting_get --app=$app --key=final_path)
+phpversion=$(ynh_app_setting_get --app=$app --key=phpversion)
 
 if [[ ! "$(systemctl status matrix-$app.service)" =~ "Active: inactive (dead)" ]]; then
     ynh_print_warn --message="It's hightly recommended to make your backup when the service is stopped. Please stop $app service with this command before to run the backup 'systemctl stop matrix-$app.service'"
@@ -60,7 +61,7 @@ ynh_backup --src_path="$final_www_path"
 ynh_print_info --message="Backing up nginx web server configuration..."
 
 # BACKUP THE PHP-FPM CONFIGURATION
-ynh_backup --src_path "/etc/php/7.0/fpm/pool.d/$app.conf"
+ynh_backup --src_path "/etc/php/$phpversion/fpm/pool.d/$app.conf"
 
 ynh_backup --src_path="/etc/nginx/conf.d/$domain.d/$app.conf"
 if yunohost --output-as plain domain list | grep -q "^$server_name$"
