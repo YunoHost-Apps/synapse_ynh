@@ -13,6 +13,11 @@
 		"name": "Josué Tille",
 		"email": "josue@tille.ch"
 	},
+    "upstream": {
+        "license": "free",
+        "website": "https://matrix.org/",
+        "code": "https://github.com/matrix-org/synapse"
+    },
 	"requirements": {
 		"yunohost": ">= 4.1"
 	},
@@ -66,4 +71,67 @@
 			}
 		]
 	}
+}
+
+
+
+{
+    "name": "Gitea",
+    "id": "gitea",
+    "packaging_format": 1,
+    "description": {
+        "en": "Lightweight Git forge",
+        "fr": "Forge Git légère"
+    },
+    "upstream": {
+        "license": "free",
+        "website": "https://gitea.io/",
+        "admindoc": "https://docs.gitea.io/",
+        "code": "https://github.com/go-gitea/gitea"
+    },
+    "url": "http://gitea.io",
+    "license": "MIT",
+    "version": "1.16.6~ynh1",
+    "maintainer": {
+        "name": "Josué Tille",
+        "email": "josue@tille.ch"
+    },
+    "previous_maintainers": {
+        "name": "rafi59",
+        "email": "rafi59_dev@srvmaison.fr.nf"
+    },
+    "multi_instance": true,
+    "services": [
+        "nginx",
+        "mysql"
+    ],
+    "requirements": {
+        "yunohost": ">= 4.2.6.1"
+    },
+    "arguments": {
+        "install" : [
+            {
+                "name": "domain",
+                "type": "domain"
+            },
+            {
+                "name": "path",
+                "type": "path",
+                "default": "/gitea"
+            },
+            {
+                "name": "admin",
+                "type": "user"
+            },
+            {
+                "name": "is_public",
+                "type": "boolean",
+				"help": { 
+					"en": "A public server means that everybody is able to access to the main page of the forge, on the public profile of the user and on the public repository. But you still can limit the access to each repository if you set it as private. Note that to be able to use the remote Git command (clone, pull, push) with HTTP and to use the API by (by example with a smartphone), you need to set this application as public.",
+					"fr": "Un serveur public signifie que tout le monde peut accéder à la page principale de la forge, au profil public des utilisateurs et aux dépôts publics. Vous pouvez également définir les dépôts comme étant privés. Notez que pour pouvoir utiliser les commandes Git distantes (clone, pull, push) avec HTTP et pour pouvoir utiliser l'API (par exemple avec un smartphone), vous devez paramétrer cette application comme étant publique."
+				},
+                "default": true
+            }
+        ]
+    }
 }
