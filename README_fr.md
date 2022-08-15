@@ -35,6 +35,10 @@ After that you can install it without problem.
 The package uses a prebuilt python virtual environnement. The binary are taken from this repository: https://github.com/Josue-T/synapse_python_build
 The script to build the binary is also available.
 
+### Amélioration de la performance
+
+En fonction de la quantité de RAM de votre système, vous voudrez peut-être augmenter ou diminuer la taille des caches dans `/etc/matrix-synapse/homeserver.yaml`
+
 ### Web client
 
 If you want a web client you can also install Element with this package: https://github.com/YunoHost-Apps/element_ynh .
