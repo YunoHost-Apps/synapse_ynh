@@ -439,6 +439,12 @@ elif yunohost --output-as plain domain list | grep -q "^$server_name"'$'; then
                           --protected=true
 fi
 
+if ! ynh_permission_exists --permission=admin_api; then
+    ynh_permission_create --permission=admin_api --url=$domain/_synapse \
+                          --label="Server administration API." --show_tile=false \
+                          --auth_header=false
+fi
+
 #=================================================
 # SECURE FILES AND DIRECTORIES
 #=================================================
