@@ -336,6 +336,9 @@ ynh_permission_update --permission=main --show_tile=false --protected=true
 ynh_permission_create --permission=server_api --url=$domain/_matrix \
                       --label="Server access for client apps." --show_tile=false --allowed=visitors \
                       --auth_header=false --protected=true
+ynh_permission_create --permission=admin_api --url=$domain/_synapse \
+                      --label="Server administration API." --show_tile=false \
+                      --auth_header=false
 if yunohost --output-as plain domain list | grep -q "^$server_name$"; then
     ynh_permission_create --permission=server_client_infos --url=$server_name/.well-known/matrix \
                           --label="Server info for clients. (well-known)" --show_tile=false --allowed=visitors \
