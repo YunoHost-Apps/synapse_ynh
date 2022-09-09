@@ -122,7 +122,9 @@ ynh_add_config --template="log.yaml" --destination="/etc/matrix-$app/log.yaml"
 
 ynh_script_progression --message="Configuring permissions..." --weight=1
 ynh_permission_url --permission=server_api --clear_urls
-ynh_permission_url --permission=server_api --url=$domain/_matrix --additional_urls=$server_name/.well-known/matrix \
+ynh_permission_url --permission=server_api --url=$domain/_matrix --additional_urls=$server_name/.well-known/matrix
+ynh_permission_url --permission=admin_api --clear_urls
+ynh_permission_url --permission=admin_api --url=$domain/_synapse
 
 #=================================================
 # RELOAD SERVICES
