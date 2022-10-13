@@ -272,9 +272,11 @@ if [ $is_free_registration -eq 0 ]
 then
     allowed_access=False
     sso_enabled=True
+    password_config_enabled=False
 else
     allowed_access=True
     sso_enabled=False
+    password_config_enabled=True
 fi
 
 ynh_add_config --template="homeserver.yaml" --destination="/etc/matrix-$app/homeserver.yaml"
