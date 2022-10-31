@@ -146,7 +146,7 @@ ynh_install_app_dependencies $dependances
 ynh_script_progression --message="Configuring system user..." --weight=3
 
 ynh_system_user_create --username=$synapse_user --home_dir=$final_path
-yunohost user create $synapse_user_app -f Synapse -l Application -d $domain -p "$synapse_user_app_pwd"
+yunohost user create $synapse_user_app -F Synapse Application -d $domain -p "$synapse_user_app_pwd"
 adduser $synapse_user ssl-cert
 adduser turnserver ssl-cert
 

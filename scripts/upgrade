@@ -141,7 +141,7 @@ fi
 if [ -z $synapse_user_app_pwd ]; then
     synapse_user_app_pwd="$(ynh_string_random --length=30)"
     ynh_app_setting_set --app=$app --key=synapse_user_app_pwd --value=$synapse_user_app_pwd
-    yunohost user create $synapse_user_app -f Synapse -l Application -d $domain -p "$synapse_user_app_pwd"
+    yunohost user create $synapse_user_app -F Synapse Application -d $domain -p "$synapse_user_app_pwd"
 fi
 
 #=================================================
