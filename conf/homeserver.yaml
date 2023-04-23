@@ -1285,6 +1285,8 @@ disable_msisdn_registration: __DISABLE_MSISDN_REGISTRATION__
 #
 #allowed_local_3pids:
 #  - medium: email
+#    pattern: '^[^@]+@matrix\.org$'
+#  - medium: email
 #    pattern: '^[^@]+@vector\.im$'
 #  - medium: msisdn
 #    pattern: '\+44'
@@ -1392,8 +1394,8 @@ account_threepid_delegates:
 # If the room already exists, make certain it is a publicly joinable
 # room. The join rule of the room must be set to 'public'.
 #
-auto_join_rooms:
-  - "__AUTO_JOIN_ROOMS__"
+#auto_join_rooms:
+#  - "__AUTO_JOIN_ROOMS__"
 
 # Where auto_join_rooms are specified, setting this flag ensures that the
 # the rooms exist by creating them when the first user on the

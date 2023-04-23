@@ -24,31 +24,6 @@ services = ["matrix-__APP__"]
         bind = "password_config>enabled:/etc/matrix-__APP__/homeserver.yaml"
         visible = "! enable_registration"
 
-        [main.welcome.registrations_require_3pid]
-        ask = "Registration requires all following 3PID personal identifier."
-        type = "select"
-        choices = ["false","email", "msisdn", "email&msisdn"]
-        help = "Defaults to: 'email'. Phone number: 'msisdn'"
-        visible = "enable_registration"
-
-        [main.welcome.allowed_local_3pids_email]
-        ask = "Register only with given email formats."
-        type = "tags"
-        help = "'^[^@]+@matrix\.org$'"
-        visible = 'enable_registration && (registrations_require_3pid == "email" || registrations_require_3pid == "email&msisdn")'
-
-        [main.welcome.allowed_local_3pids_msisdn]
-        ask = "Register only with given phone number formats."
-        type = "tags"
-        help = "'\+33'"
-        visible = 'enable_registration && (registrations_require_3pid == "email&msisdn" || registrations_require_3pid == "msisdn")'
-
-        [main.welcome.auto_join_rooms]
-        ask = "Auto Join new Users in following Rooms:"
-        type = "tags"
-        help = "Users who register on this homeserver will automatically be joined to these rooms. If the room already exists, the join rule must be set to 'public'. See also next setting."
-        bind = ":/etc/matrix-__APP__/homeserver.yaml"
-
         [main.welcome.autocreate_auto_join_rooms]
         ask = "Auto-Create room for Auto Join if not existing?"
         type = "boolean"
