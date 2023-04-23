@@ -183,6 +183,7 @@ services = ["matrix-__APP__"]
         no = false
         help = "Defaults to 'true'."
         bind = ":/etc/matrix-__APP__/homeserver.yaml"
+        visible = "allow_guest_access"
 
     [advanced.privacy]
     name = "Data Privacy"
