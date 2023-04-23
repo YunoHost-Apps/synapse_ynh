@@ -19,7 +19,7 @@ get__max_upload_size() {
 
 set__max_upload_size() { 
     ynh_write_var_in_file --file=/etc/matrix-$app/homeserver.yaml --key=max_upload_size --value="${max_upload_size}" 
-    sed -i -r "s|client_max_body_size\s+[[:digit:]]+M;|client_max_body_size ${max_upload_size}M;|g" "/etc/nginx/conf.d/$domain.d/$app.conf 
+    sed -i -r "s|client_max_body_size\s+[[:digit:]]+M;|client_max_body_size ${max_upload_size}M;|g" "/etc/nginx/conf.d/$domain.d/$app.conf"
     ynh_add_nginx_conf
 }
 

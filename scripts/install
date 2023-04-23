@@ -118,10 +118,7 @@ if yunohost --output-as plain app list | grep -q "^$element_instance$"; then
     element_domain=$(ynh_app_setting_get --app $element_instance --key domain)
     element_path=$(ynh_app_setting_get --app $element_instance --key path)
     element_ynh_url="https://""$element_domain""$element_path"
-    #if [ -z "$element_domain" ]; then
-    #    element_ynh_url="https://matrix.to/"
 fi
-
 web_client_location=$element_ynh_url
 client_base_url=$element_ynh_url
 invite_client_location=$element_ynh_url

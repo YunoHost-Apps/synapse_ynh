@@ -229,24 +229,27 @@ fi
 # SET STANDARD SETTINGS FROM DEFAULT CONFIG
 
 # Get app name of first Element Instance
+element_ynh_url="https://matrix.to/"
+element_domain=""
+element_path=""
+web_client_location=$element_ynh_url
+client_base_url=$element_ynh_url
+invite_client_location=$element_ynh_url
+element_instance="element"
 if [ -z "$web_client_location" ]
 then
-  element_ynh_url="https://matrix.to/"
-  element_instance="element"
   if yunohost --output-as plain app list | grep -q "^$element_instance"'$'; then
     element_domain=$(ynh_app_setting_get --app $element_instance --key domain)
     element_path=$(ynh_app_setting_get --app $element_instance --key path)
-  #if [ -z "$element_domain" ]; then
-  #else
     element_ynh_url="https://""$element_domain""$element_path"
   fi
   web_client_location=$element_ynh_url
   client_base_url=$element_ynh_url
   invite_client_location=$element_ynh_url
+  ynh_app_setting_set --app=$app --key=web_client_location --value=$web_client_location
+  ynh_app_setting_set --app=$app --key=client_base_url --value=$client_base_url
+  ynh_app_setting_set --app=$app --key=invite_client_location --value=$invite_client_location
 fi
-ynh_app_setting_set --app=$app --key=web_client_location --value=$web_client_location
-ynh_app_setting_set --app=$app --key=client_base_url --value=$client_base_url
-ynh_app_setting_set --app=$app --key=invite_client_location --value=$invite_client_location
 
 if [ -z "$server_statistics" ]
 then
@@ -255,12 +258,12 @@ then
 fi
 if [ -z "$allow_public_rooms_without_auth" ]
 then
-  allow_public_rooms_without_auth=allow_public_rooms
+  allow_public_rooms_without_auth=$allow_public_rooms
   ynh_app_setting_set --app=$app --key=allow_public_rooms_without_auth --value=$allow_public_rooms_without_auth
 fi
 if [ -z "$allow_public_rooms_over_federation" ]
 then
-  allow_public_rooms_over_federation=allow_public_rooms
+  allow_public_rooms_over_federation=$allow_public_rooms
   ynh_app_setting_set --app=$app --key=allow_public_rooms_over_federation --value=$allow_public_rooms_over_federation
 fi
 if [ -z "$max_upload_size" ]
