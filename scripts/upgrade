@@ -358,12 +358,12 @@ public_ip6="$(curl -s ipv6.yunohost.org)" || true
 turn_external_ip=""
 if [ -n "$public_ip4" ] && ynh_validate_ip4 --ip_address="$public_ip4"
 then
-    turn_external_ip+="external-ip="$public_ip4%"\n"
+    turn_external_ip+="external-ip=$public_ip4"$'\n'
 fi
 
 if [ -n "$public_ip6" ] && ynh_validate_ip6 --ip_address="$public_ip6"
 then
-    turn_external_ip+="external-ip="$public_ip6%"\n"
+    turn_external_ip+="external-ip=$public_ip6"$'\n'
 fi
 
 ynh_add_config --template="turnserver.conf" --destination="/etc/matrix-$app/coturn.conf"
