@@ -65,6 +65,7 @@ install_sources() {
 
 get_domain_list() {
     yunohost --output-as plain domain list | grep -E "^#" -v | sort | uniq | while read domain; do
-        echo -n "      - https://$domain\n"
+        domain_list="      - https://$domain"$'\n'
+        echo -n "$domain_list"
     done
 }

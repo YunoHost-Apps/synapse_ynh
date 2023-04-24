@@ -27,8 +27,7 @@ is_free_registration=$(ynh_app_setting_get --app $app --key is_free_registration
 jitsi_server=$(ynh_app_setting_get --app=$app --key=jitsi_server)
 e2e_enabled_by_default=$(ynh_app_setting_get --app=$app --key=e2e_enabled_by_default)
 synapse_user_app_pwd=$(ynh_app_setting_get --app=$app --key=synapse_user_app_pwd)
-domain_whitelist_client_=$(get_domain_list)
-domain_whitelist_client=${domain_whitelist_client_%"\n"}
+domain_whitelist_client=$(get_domain_list)
 main_domain=$(yunohost domain list --output-as json | jq -r .main)
 
 #=================================================

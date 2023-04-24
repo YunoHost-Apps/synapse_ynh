@@ -36,8 +36,7 @@ report_stats="false"
 allow_public_rooms="false"
 e2e_enabled_by_default="true"
 default_domain_value="Same than the domain"
-domain_whitelist_client_=$(get_domain_list)
-domain_whitelist_client=${domain_whitelist_client_%"\n"}
+domain_whitelist_client=$(get_domain_list)
 
 #=================================================
 # RETRIEVE ARGUMENTS FROM THE MANIFEST
