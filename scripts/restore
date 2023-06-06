@@ -67,22 +67,6 @@ ynh_systemd_action --action=restart --service_name=fail2ban
 #=================================================
 # RESTORE THE POSTGRESQL DATABASE
 #=================================================
-# ynh_script_progression --message="Restoring the PostgreSQL database..." --weight=13
-
-# #REMOVEME? ynh_psql_test_if_first_run
-# ynh_psql_create_user $synapse_db_user $synapse_db_pwd
-# ynh_psql_execute_as_root \
-# --sql="CREATE DATABASE $synapse_db_name
-#  ENCODING 'UTF8'
-#  LC_COLLATE='C'
-#  LC_CTYPE='C'
-#  template=template0
-#  OWNER $synapse_db_user;"
-# ynh_psql_execute_file_as_root --file="${YNH_CWD}/dump.sql" --database="$synapse_db_name"
-
-#=================================================
-# RESTORE THE POSTGRESQL DATABASE
-#=================================================
 ynh_script_progression --message="Restoring the PostgreSQL database..." --weight=1
 
 ynh_psql_connect_as --user=$db_user --password=$db_pwd --database=$db_name < ./db.sql
