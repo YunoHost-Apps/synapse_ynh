@@ -94,6 +94,7 @@ ynh_script_progression --message="Configuring system user..." --weight=3
 #else
 #    yunohost user create $app -f Synapse -l Application -d $domain -p "$synapse_user_app_pwd"
 #fi
+ynh_system_user_create --username=$synapse_user
 
 adduser $synapse_user ssl-cert
 adduser turnserver ssl-cert
