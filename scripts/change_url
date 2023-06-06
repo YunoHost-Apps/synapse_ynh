@@ -7,47 +7,19 @@
 # IMPORT GENERIC HELPERS
 source /usr/share/yunohost/helpers
 
-# Exit if an error occurs during the execution of the script
-#REMOVEME? ynh_abort_if_errors
-
 # Import common cmd
 source ./experimental_helper.sh
 source ./_common.sh
-
-#REMOVEME? ynh_script_progression --message="Loading installation settings..."
 
 # RETRIEVE ARGUMENTS
 #REMOVEME? old_domain=$YNH_APP_OLD_DOMAIN
 domain=$YNH_APP_NEW_DOMAIN
 path=$(ynh_normalize_url_path --path $YNH_APP_NEW_PATH)
-#REMOVEME? app=$YNH_APP_INSTANCE_NAME
 
-#REMOVEME? server_name=$(ynh_app_setting_get --app=$app --key=server_name)
-#REMOVEME? #REMOVEME? install_dir=$(ynh_app_setting_get --app=$app --key=install_dir)
-#REMOVEME? synapse_old_version=$(ynh_app_setting_get --app=$app --key=synapse_version)
-#REMOVEME? jitsi_server=$(ynh_app_setting_get --app=$app --key=jitsi_server)
-#REMOVEME? is_free_registration=$(ynh_app_setting_get --app=$app --key=is_free_registration)
-#REMOVEME? port=$(ynh_app_setting_get --app=$app --key=synapse_port)
-#REMOVEME? synapse_tls_port=$(ynh_app_setting_get --app=$app --key=synapse_tls_port)
-#REMOVEME? turnserver_tls_port=$(ynh_app_setting_get --app=$app --key=turnserver_tls_port)
-#REMOVEME? turnserver_alt_tls_port=$(ynh_app_setting_get --app=$app --key=turnserver_alt_tls_port)
-#REMOVEME? cli_port=$(ynh_app_setting_get --app=$app --key=cli_port)
-#REMOVEME? report_stats=$(ynh_app_setting_get --app=$app --key=report_stats)
-#REMOVEME? allow_public_rooms=$(ynh_app_setting_get --app=$app --key=allow_public_rooms)
-#REMOVEME? e2e_enabled_by_default=$(ynh_app_setting_get --app=$app --key=e2e_enabled_by_default)
-#REMOVEME? synapse_db_pwd=$(ynh_app_setting_get --app=$app --key=synapse_db_pwd)
-#REMOVEME? turnserver_pwd=$(ynh_app_setting_get --app=$app --key=turnserver_pwd)
-#REMOVEME? registration_shared_secret=$(ynh_app_setting_get --app=$app --key=registration_shared_secret)
-#REMOVEME? form_secret=$(ynh_app_setting_get --app=$app --key=form_secret)
-#REMOVEME? macaroon_secret_key=$(ynh_app_setting_get --app=$app --key=macaroon_secret_key)
-#REMOVEME? synapse_user_app_pwd=$(ynh_app_setting_get --app=$app --key=synapse_user_app_pwd)
 main_domain=$(yunohost domain list --output-as json | jq -r .main)
 
 synapse_user="matrix-$app"
 synapse_user_app="$app"
-synapse_db_name="matrix_$app"
-synapse_db_user="matrix_$app"
-synapse_db_name="matrix_$app"
 upstream_version=$(ynh_app_upstream_version)
 domain_whitelist_client_=$(get_domain_list)
 domain_whitelist_client=${domain_whitelist_client_%"\n"}
@@ -67,25 +39,14 @@ ynh_systemd_action --service_name=matrix-$app.service --action=stop
 #=================================================
 # NGINX CONFIGURATION
 #=================================================
-
 ynh_script_progression --message="Updating NGINX configuration..."
 
 ynh_change_url_nginx_config
 
-# MODIFY URL IN NGINX CONF
-#REMOVEME? nginx_conf_path=/etc/nginx/conf.d/$old_domain.d/$app.conf
-
-#REMOVEME? # Change the domain for nginx
-# Delete file checksum for the old conf file location
-#REMOVEME? ynh_delete_file_checksum --file "$nginx_conf_path"
-#REMOVEME? mv $nginx_conf_path /etc/nginx/conf.d/$domain.d/$app.conf
-# Store file checksum for the new config file location
-#REMOVEME? ynh_store_file_checksum --file "/etc/nginx/conf.d/$domain.d/$app.conf"
-
 # Create .well-known redirection for access by federation
 if yunohost --output-as plain domain list | grep -q "^$server_name$"
 then
-#REMOVEME?     ynh_add_config --template="server_name.conf" --destination="/etc/nginx/conf.d/${server_name}.d/${app}_server_name.conf"
+    ynh_add_config --template="server_name.conf" --destination="/etc/nginx/conf.d/${server_name}.d/${app}_server_name.conf"
 fi
 
 #=================================================
@@ -130,9 +91,13 @@ chmod u=rwX,g=rX,o= -R /etc/matrix-$app
 #=================================================
 # RELOAD SERVICES
 #=================================================
-ynh_script_progression --message="Restarting Synapse services..." --weight=5
+ynh_script_progression --message="Starting a systemd service..." --weight=5
 
 ynh_systemd_action --service_name=coturn-$app.service --action=restart
-ynh_systemd_action --service_name=matrix-$app --action=restart --line_match="Synapse now listening on TCP port $synapse_tls_port" --log_path="/var/log/matrix-$app/homeserver.log" --timeout=300
+ynh_systemd_action --service_name=matrix-$app --action=restart --line_match="Synapse now listening on TCP port $port_synapse_tls" --log_path="/var/log/matrix-$app/homeserver.log" --timeout=300
+
+#=================================================
+# END OF SCRIPT
+#=================================================
 
 ynh_script_progression --message="Change of URL completed for $app" --last

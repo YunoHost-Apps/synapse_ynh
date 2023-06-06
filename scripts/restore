@@ -16,18 +16,6 @@ source /usr/share/yunohost/helpers
 #=================================================
 ynh_script_progression --message="Loading settings..."
 
-#REMOVEME? app=$YNH_APP_INSTANCE_NAME
-
-#REMOVEME? domain=$(ynh_app_setting_get --app=$app --key=domain)
-#REMOVEME? server_name=$(ynh_app_setting_get --app=$app --key=server_name)
-#REMOVEME? path=$(ynh_app_setting_get --app=$app --key=path)
-#REMOVEME? #REMOVEME? install_dir=$(ynh_app_setting_get --app=$app --key=install_dir)
-#REMOVEME? synapse_tls_port=$(ynh_app_setting_get --app=$app --key=synapse_tls_port)
-#REMOVEME? turnserver_tls_port=$(ynh_app_setting_get --app=$app --key=turnserver_tls_port)
-#REMOVEME? turnserver_alt_tls_port=$(ynh_app_setting_get --app=$app --key=turnserver_alt_tls_port)
-#REMOVEME? phpversion=$(ynh_app_setting_get --app=$app --key=phpversion)
-#REMOVEME? synapse_db_pwd=$(ynh_app_setting_get --app=$app --key=synapse_db_pwd)
-#REMOVEME? synapse_user_app_pwd=$(ynh_app_setting_get --app=$app --key=synapse_user_app_pwd)
 main_domain=$(yunohost domain list --output-as json | jq -r .main)
 
 #=================================================
@@ -36,20 +24,17 @@ main_domain=$(yunohost domain list --output-as json | jq -r .main)
 
 synapse_user="matrix-$app"
 synapse_user_app="$app"
-synapse_db_name="matrix_$app"
-synapse_db_user="matrix_$app"
-synapse_db_name="matrix_$app"
 upstream_version=$(ynh_app_upstream_version)
 final_www_path="/var/www/$app"
-data_path="/home/yunohost.app/matrix-$app"
 
 #=================================================
 # RECREATE THE DEDICATED USER
 #=================================================
-#REMOVEME? ynh_script_progression --message="Recreating the dedicated system user..." --weight=3
+ynh_script_progression --message="Recreating the dedicated system user..." --weight=3
 
 # Create the dedicated user (if not existing)
-#REMOVEME? ynh_system_user_create --username=$synapse_user --home_dir=$install_dir
+ynh_system_user_create --username=$synapse_user --home_dir=$install_dir
+
 # The format to create an user account varies depending on the version of YunoHost currently installed.
 ynh_current_version=$(dpkg-query --showformat='${Version}' --show yunohost)
 if $(dpkg --compare-versions "$ynh_current_version" ge "11.1"); then
@@ -63,7 +48,6 @@ adduser turnserver ssl-cert
 #=================================================
 # RESTORE ALL CONFIG AND DATA
 #=================================================
-
 ynh_script_progression --message="Restoring directory and configuration..." --weight=10
 ynh_restore
 mkdir -p /etc/matrix-$app/app-service
@@ -116,8 +100,8 @@ systemctl enable coturn-$app.service --quiet
 # ADVERTISE SERVICE IN ADMIN PANEL
 #=================================================
 
-yunohost service add matrix-$app --log "/var/log/matrix-$app/homeserver.log" --needs_exposed_ports $synapse_tls_port
-yunohost service add coturn-$app --needs_exposed_ports $turnserver_tls_port
+yunohost service add matrix-$app --log "/var/log/matrix-$app/homeserver.log" --needs_exposed_ports $port_synapse_tls
+yunohost service add coturn-$app --needs_exposed_ports $port_turnserver_tls
 
 #=================================================
 # CREATE A DH FILE
@@ -182,7 +166,7 @@ ynh_script_progression --message="Configuring file permission..."
 chown $synapse_user:root -R $install_dir
 chmod 770 $install_dir/Coturn_config_rotate.sh
 chmod 700 $install_dir/update_synapse_for_appservice.sh
-chown $synapse_user:root -R $data_path
+chown $synapse_user:root -R $data_dir
 chown $synapse_user:root -R /var/log/matrix-$app
 chown $synapse_user:root -R /etc/matrix-$app
 chmod u=rwX,g=rX,o= -R /etc/matrix-$app

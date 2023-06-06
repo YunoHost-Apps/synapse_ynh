@@ -44,23 +44,11 @@ then
 fi
 
 #=================================================
-# BACKUP BEFORE UPGRADE THEN ACTIVE TRAP
+# STOP SYSTEMD SERVICE
 #=================================================
-#REMOVEME? ynh_script_progression --message="Backing up the app before upgrading (may take a while)..." --weight=30
+ynh_script_progression --message="Stopping a systemd service..." --weight=1
 
-#REMOVEME? # We stop the service before to set ynh_clean_setup
-ynh_systemd_action --service_name=matrix-$app.service --action=stop
-
-# Backup the current version of the app
-#REMOVEME? if [ "0$(ynh_app_setting_get --app=$app --key=disable_backup_before_upgrade)" -ne 1 ]
-then
-#REMOVEME?     ynh_backup_before_upgrade
-#REMOVEME?     ynh_clean_setup () {
-        # Clean installation remainings that are not handled by the remove script.
-        ynh_clean_check_starting
-#REMOVEME?         ynh_restore_upgradebackup
-    }
-fi
+ynh_systemd_action --service_name=matrix-$app.service --action="stop" #--log_path="/var/log/$app/$app.log"
 
 #=================================================
 # STANDARD UPGRADE STEPS
@@ -82,7 +70,7 @@ fi
 # Define $server_name if not already defined
 if [ -z $server_name ]; then
    server_name=$domain
-#REMOVEME?    ynh_app_setting_set --app=$app --key=server_name --value=$domain
+    ynh_app_setting_set --app=$app --key=server_name --value=$domain
 fi
 
 # Define $jitsi_server if not already defined
@@ -99,7 +87,7 @@ fi
 
 if [ -z $report_stats ]; then
     report_stats="false"
-#REMOVEME?     ynh_app_setting_set --app=$app --key=report_stats --value=$report_stats
+    ynh_app_setting_set --app=$app --key=report_stats --value=$report_stats
 fi
 
 if [ -z $allow_public_rooms ]; then
@@ -108,7 +96,7 @@ if [ -z $allow_public_rooms ]; then
 fi
 
 if [ -z $is_free_registration ]; then
-#REMOVEME?     is_free_registration=$(ynh_app_setting_get --app=$app --key=is_""public)
+    is_free_registration=$(ynh_app_setting_get --app=$app --key=is_""public)
     ynh_app_setting_set --app=$app --key=is_free_registration --value=$is_free_registration
 fi
 
@@ -129,27 +117,18 @@ fi
 #=================================================
 
 if [ -e "/var/lib/matrix-$app" ]; then
-    ynh_script_progression --message="Moving data directory to $data_path..." --weight=1
-    if [ -e "$data_path" ]; then
-        old_data_dir_path="$data_path$(date '+%Y%m%d.%H%M%S')"
+    ynh_script_progression --message="Moving data directory to $data_data..." --weight=1
+    if [ -e "$data_dir" ]; then
+        old_data_dir_path="$data_data$(date '+%Y%m%d.%H%M%S')"
         ynh_print_warn "A data directory already exist. Data was renamed to $old_data_dir_path"
-        mv "$data_path" "$old_data_dir_path"
+        mv "$data_dir" "$old_data_dir_path"
     fi
-    mv "/var/lib/matrix-$app" "$data_path"
+    mv "/var/lib/matrix-$app" "$data_dir"
 fi
 if ! grep -q "$install_dir" /etc/passwd; then
     # matrix-synapse:x:994:994::/var/lib/matrix-synapse:/usr/sbin/nologin
     sed --in-place -r "s@matrix-$app\:x\:([[:digit:]]+\:[[:digit:]]+)\:\:/.*/matrix-$app\:/usr/sbin/nologin@matrix-$app\:x\:\1\:\:$install_dir\:/usr/sbin/nologin@g" /etc/passwd
 fi
-
-#=================================================
-# INSTALL DEPENDENCIES
-#=================================================
-#REMOVEME? ynh_script_progression --message="Upgrading dependencies..." --weight=6
-
-# WARNING : theses command are used in INSTALL, UPGRADE, RESTORE
-# For any update do it in all files
-#REMOVEME? ynh_exec_warn_less ynh_install_app_dependencies $dependances
 
 #=================================================
 # DOWNLOAD, CHECK AND UNPACK SOURCE
@@ -247,15 +226,6 @@ then
     # Disable default config for turnserver and create a new service
     systemctl stop coturn.service
 
-    # Set a port for each service in turnserver
-#REMOVEME?     turnserver_alt_tls_port=$(ynh_find_port --port=$((turnserver_tls_port+1)))
-#REMOVEME?     cli_port=$(ynh_find_port --port=5766)
-
-#REMOVEME?     ynh_app_setting_set --app=$app --key=turnserver_alt_tls_port --value=$turnserver_alt_tls_port
-#REMOVEME?     ynh_app_setting_set --app=$app --key=cli_port --value=$cli_port
-
-    yunohost firewall allow Both $turnserver_alt_tls_port > /dev/null 2>&1
-
     #=================================================
     # MAKE A CLEAN LOGROTATE CONFIG
     #=================================================
@@ -299,9 +269,6 @@ fi
 # NGINX CONFIGURATION
 #=================================================
 ynh_script_progression --message="Upgrading NGINX web server configuration..." --weight=2
-
-# Create a dedicated php-fpm config
-ynh_script_progression --message="Configuring application..."
 
 ynh_add_fpm_config --usage=low --footprint=low
 
@@ -393,47 +360,6 @@ ynh_script_progression --message="Reconfiguring Fail2Ban..." --weight=8
 ynh_add_fail2ban_config --use_template
 
 #=================================================
-# GENERIC FINALIZATION
-#=================================================
-# SETUP PERMISSIONS
-#=================================================
-#REMOVEME? ynh_script_progression --message="Configuring permissions..." --weight=1
-#REMOVEME? ynh_legacy_permissions_delete_all
-
-ynh_permission_url --permission=main --url=$domain/_matrix/cas_server.php/login --auth_header=true
-#REMOVEME? ynh_permission_update --permission=main --show_tile=false --protected=true
-
-#REMOVEME? if ! ynh_permission_exists --permission=server_api; then
-#REMOVEME?     ynh_permission_create --permission=server_api --url=$domain/_matrix \
-                          --label="Server access for client apps." --show_tile=false --allowed=visitors \
-                          --auth_header=false --protected=true
-    python3 remove_sso_conf_persistent.py $domain $server_name \
-        || ynh_print_warn --message="Your file /etc/ssowat/""conf.json.persistent doesn't respect the json syntax. The config file wasn't cleaned. Please clean it manually."
-else
-    ynh_permission_url --permission=server_api --url=$domain/_matrix --remove_url=$server_name/.well-known/matrix \
-                       --auth_header=false
-#REMOVEME?     ynh_permission_update --permission=server_api --label="Server access for client apps." --show_tile=false \
-                          --protected=true
-fi
-
-#REMOVEME? if yunohost --output-as plain domain list | grep -q "^$server_name"'$' && ! ynh_permission_exists --permission=server_client_infos; then
-#REMOVEME?     ynh_permission_create --permission=server_client_infos --url=$server_name/.well-known/matrix \
-                          --label="Server info for clients. (well-known)" --show_tile=false --allowed=visitors \
-                          --auth_header=false --protected=true
-elif yunohost --output-as plain domain list | grep -q "^$server_name"'$'; then
-    ynh_permission_url --permission=server_client_infos --url=$server_name/.well-known/matrix \
-                       --auth_header=false
-#REMOVEME?     ynh_permission_update --permission=server_client_infos --label="Server info for clients. (well-known)" --show_tile=false \
-                          --protected=true
-fi
-
-#REMOVEME? if ! ynh_permission_exists --permission=admin_api; then
-#REMOVEME?     ynh_permission_create --permission=admin_api --url=$domain/_synapse \
-                          --label="Server administration API." --show_tile=false \
-                          --auth_header=false --allowed=visitors
-fi
-
-#=================================================
 # SECURE FILES AND DIRECTORIES
 #=================================================
 
@@ -442,7 +368,7 @@ fi
 chown $synapse_user:root -R $install_dir
 chmod 770 $install_dir/Coturn_config_rotate.sh
 chmod 700 $install_dir/update_synapse_for_appservice.sh
-chown $synapse_user:root -R $data_path
+chown $synapse_user:root -R $data_dir
 chown $synapse_user:root -R /var/log/matrix-$app
 chown $synapse_user:root -R /etc/matrix-$app
 chmod u=rwX,g=rX,o= -R /etc/matrix-$app
