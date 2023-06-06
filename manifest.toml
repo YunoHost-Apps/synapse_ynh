@@ -80,9 +80,9 @@ ram.runtime = "50M"
     [resources.data_dir]
     
     [resources.permissions]
-    main.url = "__DOMAIN__/_matrix/cas_server.php/login"
-    main.show_tile=false
-    main.auth_header = true
+    #main.url = "__DOMAIN__/_matrix/cas_server.php/login"
+    #main.show_tile=false
+    #main.auth_header = true
     server_api.url = "__DOMAIN__/_matrix"
     server_api.allowed = "visitors"
     server_api.show_tile = false
