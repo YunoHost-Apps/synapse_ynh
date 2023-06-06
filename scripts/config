@@ -8,9 +8,6 @@
 
 source /usr/share/yunohost/helpers
 
-# Stop script if errors
-ynh_abort_if_errors
-
 # Import common fonctions
 source ./experimental_helper.sh
 source ./_common.sh

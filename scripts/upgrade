@@ -10,9 +10,6 @@ source _common.sh
 source experimental_helper.sh
 source /usr/share/yunohost/helpers
 
-# Exit if an error occurs during the execution of the script
-#REMOVEME? ynh_abort_if_errors
-
 #=================================================
 # LOAD SETTINGS
 #=================================================
