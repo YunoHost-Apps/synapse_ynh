@@ -15,7 +15,6 @@ source /usr/share/yunohost/helpers
 #=================================================
 
 synapse_user="matrix-$app"
-synapse_user_app="$app"
 upstream_version=$(ynh_app_upstream_version)
 final_www_path="/var/www/$app"
 
