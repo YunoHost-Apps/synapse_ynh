@@ -22,10 +22,7 @@ main_domain=$(yunohost domain list --output-as json | jq -r .main)
 # SET ALL CONSTANT
 #=================================================
 
-synapse_user="matrix-$app"
-synapse_user_app="$app"
 upstream_version=$(ynh_app_upstream_version)
-final_www_path="/var/www/$app"
 
 #=================================================
 # RECREATE THE DEDICATED USER
@@ -37,11 +34,14 @@ ynh_system_user_create --username=$synapse_user --home_dir=$install_dir
 
 # The format to create an user account varies depending on the version of YunoHost currently installed.
 ynh_current_version=$(dpkg-query --showformat='${Version}' --show yunohost)
-if $(dpkg --compare-versions "$ynh_current_version" ge "11.1"); then
-    yunohost user create $synapse_user_app -F "Synapse Application" -d $domain -p "$synapse_user_app_pwd"
-else
-    yunohost user create $synapse_user_app -f Synapse -l Application -d $domain -p "$synapse_user_app_pwd"
-fi
+#if $(dpkg --compare-versions "$ynh_current_version" ge "11.1"); then
+#    yunohost user create $app -F "Synapse Application" -d $domain -p "$synapse_user_app_pwd"
+#else
+#    yunohost user create $app -f Synapse -l Application -d $domain -p "$synapse_user_app_pwd"
+#fi
+
+ynh_system_user_create --username=$synapse_user
+
 adduser $synapse_user ssl-cert
 adduser turnserver ssl-cert
 

@@ -14,9 +14,7 @@ source /usr/share/yunohost/helpers
 # SET CONSTANTS
 #=================================================
 
-synapse_user="matrix-$app"
 upstream_version=$(ynh_app_upstream_version)
-final_www_path="/var/www/$app"
 
 #=================================================
 # REMOVE SYSTEM CONFIGURATIONS

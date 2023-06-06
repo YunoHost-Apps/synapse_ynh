@@ -23,10 +23,8 @@ main_domain=$(yunohost domain list --output-as json | jq -r .main)
 # SET ALL CONSTANT
 #=================================================
 
-synapse_user="matrix-$app"
 upstream_version=$(ynh_app_upstream_version)
 upgrade_type=$(ynh_check_app_version_changed)
-final_www_path="/var/www/$app"
 
 #=================================================
 # ENSURE DOWNWARD COMPATIBILITY

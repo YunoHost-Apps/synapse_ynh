@@ -61,6 +61,9 @@ ynh_app_setting_set --app=$app --key=allow_public_rooms --value=$allow_public_ro
 ynh_app_setting_set --app=$app --key=e2e_enabled_by_default --value=$e2e_enabled_by_default
 ynh_app_setting_set --app=$app --key=synapse_user_app_pwd --value=$synapse_user_app_pwd
 
+ynh_app_setting_set --app=$app --key=synapse_user --value=$synapse_user
+ynh_app_setting_set --app=$app --key=final_www_path --value=$final_www_path
+
 #=================================================
 # CREATE A DH FILE
 #=================================================
@@ -154,11 +157,9 @@ ynh_app_setting_set --app=$app --key=macaroon_secret_key --value="$macaroon_secr
 ynh_script_progression --message="Configuring a systemd service..." --weight=2
 
 # Create systemd service for Synapse and Turnserver
-#cp ../conf/default_matrix-synapse /etc/default/matrix-$app
 ynh_add_config --template="../conf/default_matrix-synapse" --destination="/etc/default/matrix-$app"
 ynh_add_systemd_config --service=matrix-$app --template=matrix-synapse.service
 
-#cp ../conf/default_coturn /etc/default/coturn-$app
 ynh_add_config --template="../conf/default_coturn" --destination="/etc/default/coturn-$app"
 ynh_add_systemd_config --service=coturn-$app --template=coturn-synapse.service
 
@@ -175,8 +176,8 @@ then
     ynh_add_config --template="server_name.conf" --destination="/etc/nginx/conf.d/${server_name}.d/${app}_server_name.conf"
 fi
 
-# Create a dedicated nginx config
-ynh_add_nginx_config #app
+# Create a dedicated NGINX config
+ynh_add_nginx_config
 
 #=================================================
 # SET SYNAPSE CONFIG
@@ -304,9 +305,6 @@ ynh_systemd_action --service_name=matrix-$app --action=restart --line_match="Syn
 # SETUP FAIL2BAN
 #=================================================
 ynh_script_progression --message="Configuring Fail2Ban..." --weight=10
-
-# WARNING : theses command are used in INSTALL, UPGRADE
-# For any update do it in all files
 
 ynh_add_fail2ban_config --use_template
 
