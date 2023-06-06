@@ -15,7 +15,6 @@ source /usr/share/yunohost/helpers
 #=================================================
 
 synapse_user="matrix-$app"
-synapse_user_app="$app"
 synapse_user_app_pwd="$(ynh_string_random --length=30)"
 upstream_version=$(ynh_app_upstream_version)
 report_stats="false"
@@ -168,10 +167,12 @@ ynh_app_setting_set --app=$app --key=macaroon_secret_key --value="$macaroon_secr
 ynh_script_progression --message="Configuring a systemd service..." --weight=2
 
 # Create systemd service for Synapse and Turnserver
-cp ../conf/default_matrix-synapse /etc/default/matrix-$app
+#cp ../conf/default_matrix-synapse /etc/default/matrix-$app
+ynh_add_config --template="../conf/default_matrix-synapse" --destination="/etc/default/matrix-$app"
 ynh_add_systemd_config --service=matrix-$app --template=matrix-synapse.service
 
-cp ../conf/default_coturn /etc/default/coturn-$app
+#cp ../conf/default_coturn /etc/default/coturn-$app
+ynh_add_config --template="../conf/default_coturn" --destination="/etc/default/coturn-$app"
 ynh_add_systemd_config --service=coturn-$app --template=coturn-synapse.service
 
 #=================================================
