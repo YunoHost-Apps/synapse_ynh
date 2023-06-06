@@ -15,7 +15,7 @@ source /usr/share/yunohost/helpers
 #=================================================
 
 synapse_user="matrix-$app"
-synapse_user_app_pwd="$(ynh_string_random --length=30)"
+synapse_user_app_pwd="$(ynh_string_random --length=15)"
 upstream_version=$(ynh_app_upstream_version)
 report_stats="false"
 allow_public_rooms="false"
