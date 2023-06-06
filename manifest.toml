@@ -74,7 +74,7 @@ ram.runtime = "50M"
     turnserver_alt_tls.exposed = "Both"
     cli.default = 5766
 
-    #[resources.system_user]
+    [resources.system_user]
 
     [resources.install_dir]
     dir = "/opt/yunohost/matrix-__APP__"

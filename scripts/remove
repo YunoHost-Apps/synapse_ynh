@@ -66,7 +66,6 @@ ynh_secure_remove --file=/etc/nginx/conf.d/${server_name}.d/${app}_server_name.c
 
 # Delete a system user
 ynh_system_user_delete --username=$synapse_user
-yunohost user delete $synapse_user_app
 
 #=================================================
 # END OF SCRIPT

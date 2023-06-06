@@ -2246,7 +2246,7 @@ password_providers:
           uid: "uid"
           mail: "mail"
           name: "givenName"
-       bind_dn: "uid=__SYNAPSE_USER_APP__,ou=users,dc=yunohost,dc=org"
+       bind_dn: "uid=__APP__,ou=users,dc=yunohost,dc=org"
        bind_password: __SYNAPSE_USER_APP_PWD__
        filter: "(&(objectClass=posixAccount)(permission=cn=__APP__.main,ou=permission,dc=yunohost,dc=org))"
 
@@ -2269,7 +2269,7 @@ email:
   # Username/password for authentication to the SMTP server. By default, no
   # authentication is attempted.
   #
-  smtp_user: __SYNAPSE_USER_APP__
+  smtp_user: __APP__
   smtp_pass: __SYNAPSE_USER_APP_PWD__
 
   # Uncomment the following to require TLS transport security for SMTP.
@@ -2297,12 +2297,12 @@ email:
   # Note that the placeholder must be written '%(app)s', including the
   # trailing 's'.
   #
-  notif_from: "Your Friendly %(app)s Home Server <__SYNAPSE_USER_APP__@__DOMAIN__>"
+  notif_from: "Your Friendly %(app)s Home Server <__APP__@__DOMAIN__>"
 
   # app_name defines the default value for '%(app)s' in notif_from and email
   # subjects. It defaults to 'Matrix'.
   #
-  app_name: Yunohost Matrix-Synapse
+  app_name: YunoHost Matrix-Synapse
 
   # Uncomment the following to enable sending emails for messages that the user
   # has missed. Disabled by default.
