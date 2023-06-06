@@ -53,7 +53,9 @@ ram.runtime = "50M"
     default = "jitsi.riot.im"
 
 [resources]
+
     [resources.sources]
+
         [resources.sources.armv7_bookworm]
         url = "https://github.com/YunoHost-Apps/synapse_python_build/releases/download/v1.84.1/matrix-synapse_1.84.1-bookworm-bin1_armv7l.tar.gz"
         sha256 = "fd516b379687540aa74c828a8d93cb05e59a04c03508258cfb6b331cfb80ea18"
@@ -62,7 +64,7 @@ ram.runtime = "50M"
         url = "https://github.com/YunoHost-Apps/synapse_python_build/releases/download/v1.84.1/matrix-synapse_1.84.1-bullseye-bin1_armv7l.tar.gz"
         sha256 = "70ea244b3527ccaaba5384106078c60ef1482b104924311af02406bd52eebf3c"
 
-    [resources.system_user]
+    [resources.ports]
     main.default = 8008
     synapse_tls.default = 8448
     synapse_tls.exposed = "TCP"
