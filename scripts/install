@@ -29,9 +29,7 @@ domain_whitelist_client=${domain_whitelist_client_%"\n"}
 #=================================================
 
 path="/_matrix"
-
 final_www_path="/var/www/$app"
-
 main_domain=$(yunohost domain list --output-as json | jq -r .main)
 
 if [[ "$server_name" == "$default_domain_value" ]]; then
@@ -45,11 +43,11 @@ ynh_script_progression --message="Validating installation parameters..." --weigh
 
 test ! -e "/etc/nginx/conf.d/$domain.d/synapse*.conf" || ynh_die --message="$domain is not available as domain, please use an other domain."
 
-if [ -e "$data_dir" ]; then
-    old_data_dir_path="$data_dir$(date '+%Y%m%d.%H%M%S')"
-    ynh_print_warn "A data directory already exist. Data was renamed to $old_data_dir_path"
-    mv "$data_dir" "$old_data_dir_path"
-fi
+#if [ -e "$data_dir" ]; then
+#    old_data_dir_path="$data_dir$(date '+%Y%m%d.%H%M%S')"
+#    ynh_print_warn "A data directory already exist. Data was renamed to $old_data_dir_path"
+#    mv "$data_dir" "$old_data_dir_path"
+#fi
 
 #=================================================
 # STORE SETTINGS FROM MANIFEST
@@ -94,6 +92,7 @@ ynh_script_progression --message="Configuring system user..." --weight=3
 #else
 #    yunohost user create $app -f Synapse -l Application -d $domain -p "$synapse_user_app_pwd"
 #fi
+
 ynh_system_user_create --username=$synapse_user
 
 adduser $synapse_user ssl-cert
