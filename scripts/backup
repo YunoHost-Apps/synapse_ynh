@@ -15,19 +15,19 @@ source /usr/share/yunohost/helpers
 #=================================================
 
 # Exit if an error occurs during the execution of the script
-ynh_abort_if_errors
+#REMOVEME? ynh_abort_if_errors
 
 #=================================================
 # LOAD SETTINGS
 #=================================================
-ynh_print_info --message="Loading installation settings..."
+#REMOVEME? ynh_print_info --message="Loading installation settings..."
 
-app=$YNH_APP_INSTANCE_NAME
+#REMOVEME? app=$YNH_APP_INSTANCE_NAME
 
-domain=$(ynh_app_setting_get --app=$app --key=domain)
-server_name=$(ynh_app_setting_get --app=$app --key=server_name)
-final_path=$(ynh_app_setting_get --app=$app --key=final_path)
-phpversion=$(ynh_app_setting_get --app=$app --key=phpversion)
+#REMOVEME? domain=$(ynh_app_setting_get --app=$app --key=domain)
+#REMOVEME? server_name=$(ynh_app_setting_get --app=$app --key=server_name)
+#REMOVEME? #REMOVEME? install_dir=$(ynh_app_setting_get --app=$app --key=install_dir)
+#REMOVEME? phpversion=$(ynh_app_setting_get --app=$app --key=phpversion)
 
 if [[ ! "$(systemctl status matrix-$app.service)" =~ "Active: inactive (dead)" ]]; then
     ynh_print_warn --message="It's hightly recommended to make your backup when the service is stopped. Please stop $app service with this command before to run the backup 'systemctl stop matrix-$app.service'"
@@ -56,7 +56,7 @@ ynh_print_info --message="Declaring files to be backed up..."
 # BACKUP THE APP MAIN DIR
 #=================================================
 
-ynh_backup --src_path="$final_path"
+ynh_backup --src_path="$install_dir"
 ynh_backup --src_path="$final_www_path"
 
 #=================================================

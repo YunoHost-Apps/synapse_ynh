@@ -1,7 +1,0 @@
-SOURCE_URL=https://github.com/YunoHost-Apps/synapse_python_build/releases/download/v1.84.1/matrix-synapse_1.84.1-bullseye-bin1_armv7l.tar.gz
-SOURCE_SUM=70ea244b3527ccaaba5384106078c60ef1482b104924311af02406bd52eebf3c
-# (Optional) Program to check the integrity (sha256sum, md5sum...)
-# default: sha256
-SOURCE_SUM_PRG=sha256sum
-SOURCE_FORMAT=tar.gz
-SOURCE_IN_SUBDIR=true

@@ -8,39 +8,39 @@
 source /usr/share/yunohost/helpers
 
 # Exit if an error occurs during the execution of the script
-ynh_abort_if_errors
+#REMOVEME? ynh_abort_if_errors
 
 # Import common cmd
 source ./experimental_helper.sh
 source ./_common.sh
 
-ynh_script_progression --message="Loading installation settings..."
+#REMOVEME? ynh_script_progression --message="Loading installation settings..."
 
 # RETRIEVE ARGUMENTS
-old_domain=$YNH_APP_OLD_DOMAIN
+#REMOVEME? old_domain=$YNH_APP_OLD_DOMAIN
 domain=$YNH_APP_NEW_DOMAIN
-path_url=$(ynh_normalize_url_path --path_url $YNH_APP_NEW_PATH)
-app=$YNH_APP_INSTANCE_NAME
+path=$(ynh_normalize_url_path --path $YNH_APP_NEW_PATH)
+#REMOVEME? app=$YNH_APP_INSTANCE_NAME
 
-server_name=$(ynh_app_setting_get --app=$app --key=server_name)
-final_path=$(ynh_app_setting_get --app=$app --key=final_path)
-synapse_old_version=$(ynh_app_setting_get --app=$app --key=synapse_version)
-jitsi_server=$(ynh_app_setting_get --app=$app --key=jitsi_server)
-is_free_registration=$(ynh_app_setting_get --app=$app --key=is_free_registration)
-port=$(ynh_app_setting_get --app=$app --key=synapse_port)
-synapse_tls_port=$(ynh_app_setting_get --app=$app --key=synapse_tls_port)
-turnserver_tls_port=$(ynh_app_setting_get --app=$app --key=turnserver_tls_port)
-turnserver_alt_tls_port=$(ynh_app_setting_get --app=$app --key=turnserver_alt_tls_port)
-cli_port=$(ynh_app_setting_get --app=$app --key=cli_port)
-report_stats=$(ynh_app_setting_get --app=$app --key=report_stats)
-allow_public_rooms=$(ynh_app_setting_get --app=$app --key=allow_public_rooms)
-e2e_enabled_by_default=$(ynh_app_setting_get --app=$app --key=e2e_enabled_by_default)
-synapse_db_pwd=$(ynh_app_setting_get --app=$app --key=synapse_db_pwd)
-turnserver_pwd=$(ynh_app_setting_get --app=$app --key=turnserver_pwd)
-registration_shared_secret=$(ynh_app_setting_get --app=$app --key=registration_shared_secret)
-form_secret=$(ynh_app_setting_get --app=$app --key=form_secret)
-macaroon_secret_key=$(ynh_app_setting_get --app=$app --key=macaroon_secret_key)
-synapse_user_app_pwd=$(ynh_app_setting_get --app=$app --key=synapse_user_app_pwd)
+#REMOVEME? server_name=$(ynh_app_setting_get --app=$app --key=server_name)
+#REMOVEME? #REMOVEME? install_dir=$(ynh_app_setting_get --app=$app --key=install_dir)
+#REMOVEME? synapse_old_version=$(ynh_app_setting_get --app=$app --key=synapse_version)
+#REMOVEME? jitsi_server=$(ynh_app_setting_get --app=$app --key=jitsi_server)
+#REMOVEME? is_free_registration=$(ynh_app_setting_get --app=$app --key=is_free_registration)
+#REMOVEME? port=$(ynh_app_setting_get --app=$app --key=synapse_port)
+#REMOVEME? synapse_tls_port=$(ynh_app_setting_get --app=$app --key=synapse_tls_port)
+#REMOVEME? turnserver_tls_port=$(ynh_app_setting_get --app=$app --key=turnserver_tls_port)
+#REMOVEME? turnserver_alt_tls_port=$(ynh_app_setting_get --app=$app --key=turnserver_alt_tls_port)
+#REMOVEME? cli_port=$(ynh_app_setting_get --app=$app --key=cli_port)
+#REMOVEME? report_stats=$(ynh_app_setting_get --app=$app --key=report_stats)
+#REMOVEME? allow_public_rooms=$(ynh_app_setting_get --app=$app --key=allow_public_rooms)
+#REMOVEME? e2e_enabled_by_default=$(ynh_app_setting_get --app=$app --key=e2e_enabled_by_default)
+#REMOVEME? synapse_db_pwd=$(ynh_app_setting_get --app=$app --key=synapse_db_pwd)
+#REMOVEME? turnserver_pwd=$(ynh_app_setting_get --app=$app --key=turnserver_pwd)
+#REMOVEME? registration_shared_secret=$(ynh_app_setting_get --app=$app --key=registration_shared_secret)
+#REMOVEME? form_secret=$(ynh_app_setting_get --app=$app --key=form_secret)
+#REMOVEME? macaroon_secret_key=$(ynh_app_setting_get --app=$app --key=macaroon_secret_key)
+#REMOVEME? synapse_user_app_pwd=$(ynh_app_setting_get --app=$app --key=synapse_user_app_pwd)
 main_domain=$(yunohost domain list --output-as json | jq -r .main)
 
 synapse_user="matrix-$app"
@@ -54,12 +54,12 @@ domain_whitelist_client=${domain_whitelist_client_%"\n"}
 
 # Check if the new path stay /_matrix if not exit
 
-if [[ $path_url != "/_matrix" ]]
+if [[ $path != "/_matrix" ]]
 then
     ynh_die --message "You can't use an other path than '/_matrix'. You can only change the domain."
 fi
 
-# We stop the service before to set ynh_clean_setup
+#REMOVEME? # We stop the service before to set ynh_clean_setup
 ynh_systemd_action --service_name=matrix-$app.service --action=stop
 
 #=================================================
@@ -70,20 +70,22 @@ ynh_systemd_action --service_name=matrix-$app.service --action=stop
 
 ynh_script_progression --message="Updating NGINX configuration..."
 
-# MODIFY URL IN NGINX CONF
-nginx_conf_path=/etc/nginx/conf.d/$old_domain.d/$app.conf
+ynh_change_url_nginx_config
 
-# Change the domain for nginx
+# MODIFY URL IN NGINX CONF
+#REMOVEME? nginx_conf_path=/etc/nginx/conf.d/$old_domain.d/$app.conf
+
+#REMOVEME? # Change the domain for nginx
 # Delete file checksum for the old conf file location
-ynh_delete_file_checksum --file "$nginx_conf_path"
-mv $nginx_conf_path /etc/nginx/conf.d/$domain.d/$app.conf
+#REMOVEME? ynh_delete_file_checksum --file "$nginx_conf_path"
+#REMOVEME? mv $nginx_conf_path /etc/nginx/conf.d/$domain.d/$app.conf
 # Store file checksum for the new config file location
-ynh_store_file_checksum --file "/etc/nginx/conf.d/$domain.d/$app.conf"
+#REMOVEME? ynh_store_file_checksum --file "/etc/nginx/conf.d/$domain.d/$app.conf"
 
 # Create .well-known redirection for access by federation
 if yunohost --output-as plain domain list | grep -q "^$server_name$"
 then
-    ynh_add_config --template="server_name.conf" --destination="/etc/nginx/conf.d/${server_name}.d/${app}_server_name.conf"
+#REMOVEME?     ynh_add_config --template="server_name.conf" --destination="/etc/nginx/conf.d/${server_name}.d/${app}_server_name.conf"
 fi
 
 #=================================================

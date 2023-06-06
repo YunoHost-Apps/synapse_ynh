@@ -14,12 +14,12 @@ source /usr/share/yunohost/helpers
 # MANAGE SCRIPT FAILURE
 #=================================================
 
-ynh_clean_setup () {
+#REMOVEME? ynh_clean_setup () {
 # Clean installation remainings that are not handled by the remove script.
 	ynh_clean_check_starting
 }
 # Exit if an error occurs during the execution of the script
-ynh_abort_if_errors
+#REMOVEME? ynh_abort_if_errors
 
 #=================================================
 # SET CONSTANTS
@@ -43,12 +43,12 @@ domain_whitelist_client=${domain_whitelist_client_%"\n"}
 # RETRIEVE ARGUMENTS FROM THE MANIFEST
 #=================================================
 
-domain=$YNH_APP_ARG_DOMAIN
-server_name=$YNH_APP_ARG_SERVER_NAME
-is_free_registration=$YNH_APP_ARG_IS_FREE_REGISTRATION
-jitsi_server=$YNH_APP_ARG_JITSI_SERVER
-path_url="/_matrix"
-final_path="/opt/yunohost/matrix-$app"
+#REMOVEME? domain=$YNH_APP_ARG_DOMAIN
+#REMOVEME? server_name=$YNH_APP_ARG_SERVER_NAME
+#REMOVEME? is_free_registration=$YNH_APP_ARG_IS_FREE_REGISTRATION
+#REMOVEME? jitsi_server=$YNH_APP_ARG_JITSI_SERVER
+path="/_matrix"
+#REMOVEME? install_dir="/opt/yunohost/matrix-$app"
 final_www_path="/var/www/$app"
 data_path="/home/yunohost.app/matrix-$app"
 main_domain=$(yunohost domain list --output-as json | jq -r .main)
@@ -60,11 +60,11 @@ fi
 #=================================================
 # CHECK IF THE APP CAN BE INSTALLED WITH THESE ARGS
 #=================================================
-ynh_script_progression --message="Validating installation parameters..." --weight=2
+#REMOVEME? ynh_script_progression --message="Validating installation parameters..." --weight=2
 test ! -e "/etc/nginx/conf.d/$domain.d/synapse*.conf" || ynh_die --message="$domain is not available as domain, please use an other domain."
 
 # Check Final Path availability
-test ! -e "$final_path" || ynh_die --message="This path already contains a folder"
+#REMOVEME? test ! -e "$install_dir" || ynh_die --message="This path already contains a folder"
 
 if [ -e "$data_path" ]; then
     old_data_dir_path="$data_path$(date '+%Y%m%d.%H%M%S')"
@@ -75,17 +75,17 @@ fi
 #=================================================
 # STORE SETTINGS FROM MANIFEST
 #=================================================
-ynh_script_progression --message="Storing installation settings..." --weight=1
+#REMOVEME? ynh_script_progression --message="Storing installation settings..." --weight=1
 
-ynh_app_setting_set --app=$app --key=domain --value=$domain
-ynh_app_setting_set --app=$app --key=path --value=$path_url
+#REMOVEME? ynh_app_setting_set --app=$app --key=domain --value=$domain
+#REMOVEME? ynh_app_setting_set --app=$app --key=path --value=$path
 ynh_app_setting_set --app=$app --key=no_sso --value true
 ynh_app_setting_set --app=$app --key=server_name --value=$server_name
 ynh_app_setting_set --app=$app --key=jitsi_server --value=$jitsi_server
-ynh_app_setting_set --app=$app --key=final_path --value=$final_path
+#REMOVEME? ynh_app_setting_set --app=$app --key=install_dir --value=$install_dir
 ynh_app_setting_set --app=$app --key=synapse_version --value=$upstream_version
 ynh_app_setting_set --app=$app --key=is_free_registration --value=$is_free_registration
-ynh_app_setting_set --app=$app --key=report_stats --value=$report_stats
+#REMOVEME? ynh_app_setting_set --app=$app --key=report_stats --value=$report_stats
 ynh_app_setting_set --app=$app --key=allow_public_rooms --value=$allow_public_rooms
 ynh_app_setting_set --app=$app --key=e2e_enabled_by_default --value=$e2e_enabled_by_default
 ynh_app_setting_set --app=$app --key=synapse_user_app_pwd --value=$synapse_user_app_pwd
@@ -98,11 +98,11 @@ ynh_app_setting_set --app=$app --key=synapse_user_app_pwd --value=$synapse_user_
 ynh_script_progression --message="Configuring firewall..." --weight=19
 
 # Find a free port
-synapse_tls_port=$(ynh_find_port --port=8448)
-port=$(ynh_find_port --port=8008)
-turnserver_tls_port=$(ynh_find_port --port=5349)
-turnserver_alt_tls_port=$(ynh_find_port --port=$((turnserver_tls_port+1)))
-cli_port=$(ynh_find_port --port=5766)
+#REMOVEME? synapse_tls_port=$(ynh_find_port --port=8448)
+#REMOVEME? port=$(ynh_find_port --port=8008)
+#REMOVEME? turnserver_tls_port=$(ynh_find_port --port=5349)
+#REMOVEME? turnserver_alt_tls_port=$(ynh_find_port --port=$((turnserver_tls_port+1)))
+#REMOVEME? cli_port=$(ynh_find_port --port=5766)
 
 # Open this port
 ynh_exec_warn_less yunohost firewall allow TCP $synapse_tls_port
@@ -110,11 +110,11 @@ ynh_exec_warn_less yunohost firewall allow Both $turnserver_tls_port
 ynh_exec_warn_less yunohost firewall allow Both $turnserver_alt_tls_port
 
 # Store opened ports
-ynh_app_setting_set --app=$app --key=synapse_port --value=$port
-ynh_app_setting_set --app=$app --key=synapse_tls_port --value=$synapse_tls_port
-ynh_app_setting_set --app=$app --key=turnserver_tls_port --value=$turnserver_tls_port
-ynh_app_setting_set --app=$app --key=turnserver_alt_tls_port --value=$turnserver_alt_tls_port
-ynh_app_setting_set --app=$app --key=cli_port --value=$cli_port
+#REMOVEME? ynh_app_setting_set --app=$app --key=synapse_port --value=$port
+#REMOVEME? ynh_app_setting_set --app=$app --key=synapse_tls_port --value=$synapse_tls_port
+#REMOVEME? ynh_app_setting_set --app=$app --key=turnserver_tls_port --value=$turnserver_tls_port
+#REMOVEME? ynh_app_setting_set --app=$app --key=turnserver_alt_tls_port --value=$turnserver_alt_tls_port
+#REMOVEME? ynh_app_setting_set --app=$app --key=cli_port --value=$cli_port
 
 #=================================================
 # CREATE A DH FILE
@@ -135,18 +135,18 @@ fi
 #=================================================
 # INSTALL DEPENDENCIES
 #=================================================
-ynh_script_progression --message="Installing dependencies..." --weight=80
+#REMOVEME? ynh_script_progression --message="Installing dependencies..." --weight=80
 
 # WARNING : theses command are used in INSTALL, UPGRADE, RESTORE
 # For any update do it in all files
-ynh_exec_warn_less ynh_install_app_dependencies $dependances
+#REMOVEME? ynh_exec_warn_less ynh_install_app_dependencies $dependances
 
 #=================================================
 # CREATE DEDICATED USER
 #=================================================
-ynh_script_progression --message="Configuring system user..." --weight=3
+#REMOVEME? ynh_script_progression --message="Configuring system user..." --weight=3
 
-ynh_system_user_create --username=$synapse_user --home_dir=$final_path
+#REMOVEME? ynh_system_user_create --username=$synapse_user --home_dir=$install_dir
 # The format to create an user account varies depending on the version of YunoHost currently installed.
 ynh_current_version=$(dpkg-query --showformat='${Version}' --show yunohost)
 if $(dpkg --compare-versions "$ynh_current_version" ge "11.1"); then
@@ -160,13 +160,13 @@ adduser turnserver ssl-cert
 #=================================================
 # CREATE A POSTGRESQL DATABASE
 #=================================================
-ynh_script_progression --message="Creating a PostgreSQL database..." --weight=4
+#REMOVEME? ynh_script_progression --message="Creating a PostgreSQL database..." --weight=4
 
 synapse_db_pwd=$(ynh_string_random --length=30)
-ynh_app_setting_set --app=$app --key=synapse_db_pwd --value=$synapse_db_pwd
+#REMOVEME? ynh_app_setting_set --app=$app --key=synapse_db_pwd --value=$synapse_db_pwd
 
 # Create postgresql database
-ynh_psql_test_if_first_run
+#REMOVEME? ynh_psql_test_if_first_run
 ynh_psql_create_user $synapse_db_user $synapse_db_pwd
 ynh_psql_execute_as_root \
 --sql="CREATE DATABASE $synapse_db_name ENCODING 'UTF8' LC_COLLATE='C' LC_CTYPE='C' template=template0 OWNER $synapse_db_user;"
@@ -208,13 +208,13 @@ ynh_script_progression --message="Creating Synapse config..." --weight=3
 
 # Go in virtualenvironnement
 set +u;
-source $final_path/bin/activate
+source $install_dir/bin/activate
 set -u;
 
 # Generate config
 python -m synapse.app.homeserver --keys-directory /etc/matrix-$app/ --generate-config --server-name $server_name --report-stats=no -c homeserver.yml
 
-# This function was defined when we called "source $final_path/bin/activate". With this function we undo what "$final_path/bin/activate" does
+# This function was defined when we called "source $install_dir/bin/activate". With this function we undo what "$install_dir/bin/activate" does
 set +u;
 deactivate
 set -u;
@@ -327,27 +327,27 @@ ynh_use_logrotate --logfile "/var/log/matrix-$app"
 # WARNING : theses command are used in INSTALL, UPGRADE
 # For any update do it in all files
 
-ynh_add_config --template="../sources/Coturn_config_rotate.sh" --destination="$final_path/Coturn_config_rotate.sh"
-ynh_add_config --template="../sources/update_synapse_for_appservice.sh" --destination="$final_path/update_synapse_for_appservice.sh"
+ynh_add_config --template="../sources/Coturn_config_rotate.sh" --destination="$install_dir/Coturn_config_rotate.sh"
+ynh_add_config --template="../sources/update_synapse_for_appservice.sh" --destination="$install_dir/update_synapse_for_appservice.sh"
 
 #=================================================
 # GENERIC FINALIZATION
 #=================================================
 # SETUP PERMISSIONS
 #=================================================
-ynh_script_progression --message="Configuring permissions..." --weight=1
+#REMOVEME? ynh_script_progression --message="Configuring permissions..." --weight=1
 
 ynh_permission_url --permission=main --url=$domain/_matrix/cas_server.php/login --auth_header=true
-ynh_permission_update --permission=main --show_tile=false --protected=true
+#REMOVEME? ynh_permission_update --permission=main --show_tile=false --protected=true
 
-ynh_permission_create --permission=server_api --url=$domain/_matrix \
+#REMOVEME? ynh_permission_create --permission=server_api --url=$domain/_matrix \
                       --label="Server access for client apps." --show_tile=false --allowed=visitors \
                       --auth_header=false --protected=true
-ynh_permission_create --permission=admin_api --url=$domain/_synapse \
+#REMOVEME? ynh_permission_create --permission=admin_api --url=$domain/_synapse \
                       --label="Server administration API." --show_tile=false \
                       --auth_header=false --allowed=visitors
 if yunohost --output-as plain domain list | grep -q "^$server_name$"; then
-    ynh_permission_create --permission=server_client_infos --url=$server_name/.well-known/matrix \
+#REMOVEME?     ynh_permission_create --permission=server_client_infos --url=$server_name/.well-known/matrix \
                           --label="Server info for clients. (well-known)" --show_tile=false --allowed=visitors \
                           --auth_header=false --protected=true
 fi
@@ -367,9 +367,9 @@ ynh_replace_string __DOMAIN__ $domain ../hooks/post_cert_update
 
 # WARNING : theses command are used in INSTALL, UPGRADE, RESTORE
 # For any update do it in all files
-chown $synapse_user:root -R $final_path
-chmod 770 $final_path/Coturn_config_rotate.sh
-chmod 700 $final_path/update_synapse_for_appservice.sh
+chown $synapse_user:root -R $install_dir
+chmod 770 $install_dir/Coturn_config_rotate.sh
+chmod 700 $install_dir/update_synapse_for_appservice.sh
 chown $synapse_user:root -R $data_path
 chown $synapse_user:root -R /var/log/matrix-$app
 chown $synapse_user:root -R /etc/matrix-$app

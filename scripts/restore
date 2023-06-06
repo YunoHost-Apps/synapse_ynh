@@ -15,30 +15,30 @@ source /usr/share/yunohost/helpers
 # MANAGE SCRIPT FAILURE
 #=================================================
 
-ynh_clean_setup () {
+#REMOVEME? ynh_clean_setup () {
 # Clean installation remainings that are not handled by the remove script.
 	ynh_clean_check_starting
 }
 # Exit if an error occurs during the execution of the script
-ynh_abort_if_errors
+#REMOVEME? ynh_abort_if_errors
 
 #=================================================
 # LOAD SETTINGS
 #=================================================
 ynh_script_progression --message="Loading settings..."
 
-app=$YNH_APP_INSTANCE_NAME
+#REMOVEME? app=$YNH_APP_INSTANCE_NAME
 
-domain=$(ynh_app_setting_get --app=$app --key=domain)
-server_name=$(ynh_app_setting_get --app=$app --key=server_name)
-path_url=$(ynh_app_setting_get --app=$app --key=path)
-final_path=$(ynh_app_setting_get --app=$app --key=final_path)
-synapse_tls_port=$(ynh_app_setting_get --app=$app --key=synapse_tls_port)
-turnserver_tls_port=$(ynh_app_setting_get --app=$app --key=turnserver_tls_port)
-turnserver_alt_tls_port=$(ynh_app_setting_get --app=$app --key=turnserver_alt_tls_port)
-phpversion=$(ynh_app_setting_get --app=$app --key=phpversion)
-synapse_db_pwd=$(ynh_app_setting_get --app=$app --key=synapse_db_pwd)
-synapse_user_app_pwd=$(ynh_app_setting_get --app=$app --key=synapse_user_app_pwd)
+#REMOVEME? domain=$(ynh_app_setting_get --app=$app --key=domain)
+#REMOVEME? server_name=$(ynh_app_setting_get --app=$app --key=server_name)
+#REMOVEME? path=$(ynh_app_setting_get --app=$app --key=path)
+#REMOVEME? #REMOVEME? install_dir=$(ynh_app_setting_get --app=$app --key=install_dir)
+#REMOVEME? synapse_tls_port=$(ynh_app_setting_get --app=$app --key=synapse_tls_port)
+#REMOVEME? turnserver_tls_port=$(ynh_app_setting_get --app=$app --key=turnserver_tls_port)
+#REMOVEME? turnserver_alt_tls_port=$(ynh_app_setting_get --app=$app --key=turnserver_alt_tls_port)
+#REMOVEME? phpversion=$(ynh_app_setting_get --app=$app --key=phpversion)
+#REMOVEME? synapse_db_pwd=$(ynh_app_setting_get --app=$app --key=synapse_db_pwd)
+#REMOVEME? synapse_user_app_pwd=$(ynh_app_setting_get --app=$app --key=synapse_user_app_pwd)
 main_domain=$(yunohost domain list --output-as json | jq -r .main)
 
 #=================================================
@@ -57,29 +57,29 @@ data_path="/home/yunohost.app/matrix-$app"
 #=================================================
 # CHECK IF THE APP CAN BE RESTORED
 #=================================================
-ynh_script_progression --message="Validating restoration parameters..." --weight=2
+#REMOVEME? ynh_script_progression --message="Validating restoration parameters..." --weight=2
 
-test ! -d $final_path \
-	|| ynh_die --message="There is already a directory: $final_path "
+#REMOVEME? test ! -d $install_dir \
+	|| ynh_die --message="There is already a directory: $install_dir "
 
 #=================================================
 # STANDARD RESTORATION STEPS
 #=================================================
 # REINSTALL DEPENDENCIES
 #=================================================
-ynh_script_progression --message="Reinstalling dependencies..." --weight=70
+#REMOVEME? ynh_script_progression --message="Reinstalling dependencies..." --weight=70
 
 # WARNING : theses command are used in INSTALL, UPGRADE, RESTORE
 # For any update do it in all files
-ynh_exec_warn_less ynh_install_app_dependencies $dependances
+#REMOVEME? ynh_exec_warn_less ynh_install_app_dependencies $dependances
 
 #=================================================
 # RECREATE THE DEDICATED USER
 #=================================================
-ynh_script_progression --message="Recreating the dedicated system user..." --weight=3
+#REMOVEME? ynh_script_progression --message="Recreating the dedicated system user..." --weight=3
 
 # Create the dedicated user (if not existing)
-ynh_system_user_create --username=$synapse_user --home_dir=$final_path
+#REMOVEME? ynh_system_user_create --username=$synapse_user --home_dir=$install_dir
 # The format to create an user account varies depending on the version of YunoHost currently installed.
 ynh_current_version=$(dpkg-query --showformat='${Version}' --show yunohost)
 if $(dpkg --compare-versions "$ynh_current_version" ge "11.1"); then
@@ -113,9 +113,9 @@ ynh_systemd_action --action=restart --service_name=fail2ban
 #=================================================
 # RESTORE THE POSTGRESQL DATABASE
 #=================================================
-ynh_script_progression --message="Restoring the PostgreSQL database..." --weight=13
+#REMOVEME? ynh_script_progression --message="Restoring the PostgreSQL database..." --weight=13
 
-ynh_psql_test_if_first_run
+#REMOVEME? ynh_psql_test_if_first_run
 ynh_psql_create_user $synapse_db_user $synapse_db_pwd
 ynh_psql_execute_as_root \
 --sql="CREATE DATABASE $synapse_db_name
@@ -166,10 +166,10 @@ ynh_script_progression --message="Reconfiguring Coturn..." --weight=23
 # To be sure that at the restoration the IP address in coturn config is the same as the real address we remake the coturn config
 
 # Retrieve specific settings
-turnserver_tls_port=$(ynh_app_setting_get --app=$app --key=turnserver_tls_port)
-turnserver_alt_tls_port=$(ynh_app_setting_get --app=$app --key=turnserver_alt_tls_port)
-cli_port=$(ynh_app_setting_get --app=$app --key=cli_port)
-turnserver_pwd=$(ynh_app_setting_get --app=$app --key=turnserver_pwd)
+#REMOVEME? turnserver_tls_port=$(ynh_app_setting_get --app=$app --key=turnserver_tls_port)
+#REMOVEME? turnserver_alt_tls_port=$(ynh_app_setting_get --app=$app --key=turnserver_alt_tls_port)
+#REMOVEME? cli_port=$(ynh_app_setting_get --app=$app --key=cli_port)
+#REMOVEME? turnserver_pwd=$(ynh_app_setting_get --app=$app --key=turnserver_pwd)
 
 # WARNING : these commands are used in INSTALL, UPGRADE
 # For any update do it in all files
@@ -217,9 +217,9 @@ ynh_use_logrotate --logfile /var/log/matrix-$app
 # WARNING : theses command are used in INSTALL, UPGRADE, RESTORE (3 times)
 # For any update do it in all files
 ynh_script_progression --message="Configuring file permission..."
-chown $synapse_user:root -R $final_path
-chmod 770 $final_path/Coturn_config_rotate.sh
-chmod 700 $final_path/update_synapse_for_appservice.sh
+chown $synapse_user:root -R $install_dir
+chmod 770 $install_dir/Coturn_config_rotate.sh
+chmod 700 $install_dir/update_synapse_for_appservice.sh
 chown $synapse_user:root -R $data_path
 chown $synapse_user:root -R /var/log/matrix-$app
 chown $synapse_user:root -R /etc/matrix-$app

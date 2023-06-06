@@ -1,0 +1,72 @@
+packaging_format = 2
+
+id = "synapse"
+name = "Synapse"
+description.en = "Instant messaging server which uses Matrix"
+description.fr = "Serveur de messagerie instantané basé sur Matrix"
+
+version = "1.84.1~ynh2"
+
+maintainers = ["Josué Tille"]
+
+[upstream]
+license = "Apache-2.0"
+website = "https://matrix.org/"
+code = "https://github.com/matrix-org/synapse"
+cpe = "???" # FIXME: optional but recommended if relevant, this is meant to contain the Common Platform Enumeration, which is sort of a standard id for applications defined by the NIST. In particular, Yunohost may use this is in the future to easily track CVE (=security reports) related to apps. The CPE may be obtained by searching here: https://nvd.nist.gov/products/cpe/search. For example, for Nextcloud, the CPE is 'cpe:2.3:a:nextcloud:nextcloud' (no need to include the version number)
+fund = "???" # FIXME: optional but recommended (or remove if irrelevant / not applicable). This is meant to be an URL where people can financially support this app, especially when its development is based on volunteers and/or financed by its community. YunoHost may later advertise it in the webadmin.
+
+[integration]
+yunohost = ">= 11.0.11"
+architectures = "all" # FIXME: can be replaced by a list of supported archs using the dpkg --print-architecture nomenclature (amd64/i386/armhf/arm64), for example: ["amd64", "i386"]
+multi_instance = true
+ldap = "?" # FIXME: replace with true, false, or "not_relevant". Not to confuse with the "sso" key : the "ldap" key corresponds to wether or not a user *can* login on the app using its YunoHost credentials.
+sso = "?" # FIXME: replace with true, false, or "not_relevant". Not to confuse with the "ldap" key : the "sso" key corresponds to wether or not a user is *automatically logged-in* on the app when logged-in on the YunoHost portal.
+disk = "50M" # FIXME: replace with an **estimate** minimum disk requirement. e.g. 20M, 400M, 1G, ...
+ram.build = "50M" # FIXME: replace with an **estimate** minimum ram requirement. e.g. 50M, 400M, 1G, ...
+ram.runtime = "50M" # FIXME: replace with an **estimate** minimum ram requirement. e.g. 50M, 400M, 1G, ...
+
+[install]
+    [install.domain]
+    # this is a generic question - ask strings are automatically handled by Yunohost's core
+    type = "domain"
+    full_domain = true
+
+    [install.server_name]
+    ask.en = "If your Synapse domain is a subdomain, you can choose a name for your Synapse server to have your Matrix user-ids looking like @user:domain.org instead of @user:synapse.domain.org"
+    ask.fr = "Si votre domaine pour Synapse est un sous-domaine, vous pouvez choisir un nom pour votre serveur Synapse afin que vos identifiants Matrix soient @utilisateur:domain.org plutôt que @utilisateur:synapse.domain.org"
+    type = "string"
+    example = "domain.org"
+    default = "Same than the domain"
+
+    [install.is_free_registration]
+    ask.en = "Is it a server with free registration?"
+    ask.fr = "Est-ce un serveur avec création de compte libre ?"
+    help.en = "A public server means that anybody will be able to register on this server."
+    help.fr = "Un serveur public signifie que n'importe qui pourra s'enregistrer sur ce serveur."
+    type = "boolean"
+    default = false
+
+    [install.jitsi_server]
+    ask.en = "Jitsi server address for conferencing?"
+    ask.fr = "Adresse du serveur Jitsi pour les conférences ?"
+    type = "string"
+    example = "domain.org"
+    default = "jitsi.riot.im"
+
+[resources]
+    [resources.sources]
+        [resources.sources.armv7_bookworm]
+        url = "https://github.com/YunoHost-Apps/synapse_python_build/releases/download/v1.84.1/matrix-synapse_1.84.1-bookworm-bin1_armv7l.tar.gz"
+        sha256 = "fd516b379687540aa74c828a8d93cb05e59a04c03508258cfb6b331cfb80ea18"
+
+        [resources.sources.armv7_bullseye]
+        url = "https://github.com/YunoHost-Apps/synapse_python_build/releases/download/v1.84.1/matrix-synapse_1.84.1-bullseye-bin1_armv7l.tar.gz"
+        sha256 = "70ea244b3527ccaaba5384106078c60ef1482b104924311af02406bd52eebf3c"
+
+
+    [resources.system_user]
+
+    [resources.install_dir]
+
+    [resources.permissions]

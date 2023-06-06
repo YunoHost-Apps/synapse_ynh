@@ -13,16 +13,16 @@ source /usr/share/yunohost/helpers
 #=================================================
 # LOAD SETTINGS
 #=================================================
-ynh_script_progression --message="Loading installation settings..." --weight=3
+#REMOVEME? ynh_script_progression --message="Loading installation settings..." --weight=3
 
-app=$YNH_APP_INSTANCE_NAME
+#REMOVEME? app=$YNH_APP_INSTANCE_NAME
 
-domain=$(ynh_app_setting_get --app=$app --key=domain)
-server_name=$(ynh_app_setting_get --app=$app --key=server_name)
-final_path=$(ynh_app_setting_get --app=$app --key=final_path)
-synapse_tls_port=$(ynh_app_setting_get --app=$app --key=synapse_tls_port)
-turnserver_tls_port=$(ynh_app_setting_get --app=$app --key=turnserver_tls_port)
-turnserver_alt_tls_port=$(ynh_app_setting_get --app=$app --key=turnserver_alt_tls_port)
+#REMOVEME? domain=$(ynh_app_setting_get --app=$app --key=domain)
+#REMOVEME? server_name=$(ynh_app_setting_get --app=$app --key=server_name)
+#REMOVEME? #REMOVEME? install_dir=$(ynh_app_setting_get --app=$app --key=install_dir)
+#REMOVEME? synapse_tls_port=$(ynh_app_setting_get --app=$app --key=synapse_tls_port)
+#REMOVEME? turnserver_tls_port=$(ynh_app_setting_get --app=$app --key=turnserver_tls_port)
+#REMOVEME? turnserver_alt_tls_port=$(ynh_app_setting_get --app=$app --key=turnserver_alt_tls_port)
 
 #=================================================
 # SET CONSTANTS
@@ -64,25 +64,25 @@ ynh_remove_systemd_config --service=coturn-$app
 #=================================================
 # REMOVE THE POSTGRESQL DATABASE
 #=================================================
-ynh_script_progression --message="Removing the PostgreSQL database" --weight=2
+#REMOVEME? ynh_script_progression --message="Removing the PostgreSQL database" --weight=2
 
 # Remove a database if it exists, along with the associated user
-ynh_psql_remove_db --db_user=$synapse_db_name --db_name=$synapse_db_user
+#REMOVEME? ynh_psql_remove_db --db_user=$synapse_db_name --db_name=$synapse_db_user
 
 #=================================================
 # REMOVE DEPENDENCIES
 #=================================================
-ynh_script_progression --message="Removing dependencies" --weight=15
+#REMOVEME? ynh_script_progression --message="Removing dependencies" --weight=15
 
 # Remove metapackage and its dependencies
-ynh_remove_app_dependencies
+#REMOVEME? ynh_remove_app_dependencies
 
 #=================================================
 # REMOVE APP MAIN DIR
 #=================================================
-ynh_script_progression --message="Removing app main directory" --weight=2
+#REMOVEME? ynh_script_progression --message="Removing app main directory" --weight=2
 
-ynh_secure_remove --file=$final_path
+#REMOVEME? ynh_secure_remove --file=$install_dir
 ynh_secure_remove --file=$final_www_path
 ynh_secure_remove --file=/var/log/matrix-$app
 ynh_secure_remove --file=/etc/matrix-$app
@@ -139,10 +139,10 @@ ynh_remove_fail2ban_config
 #=================================================
 # REMOVE DEDICATED USER
 #=================================================
-ynh_script_progression --message="Removing the dedicated system user" --weight=1
+#REMOVEME? ynh_script_progression --message="Removing the dedicated system user" --weight=1
 
 # Delete a system user
-ynh_system_user_delete --username=$synapse_user
+#REMOVEME? ynh_system_user_delete --username=$synapse_user
 yunohost user delete $synapse_user_app
 
 #=================================================
