@@ -16,41 +16,46 @@ source /usr/share/yunohost/helpers
 
 synapse_user="matrix-$app"
 synapse_user_app="$app"
-#synapse_db_name="matrix_$app"
-#synapse_db_user="matrix_$app"
-#synapse_db_name="matrix_$app"
 upstream_version=$(ynh_app_upstream_version)
 final_www_path="/var/www/$app"
 
 #=================================================
-# STANDARD REMOVE
+# REMOVE SYSTEM CONFIGURATIONS
 #=================================================
-# REMOVE SERVICE FROM ADMIN PANEL
+# REMOVE SYSTEMD SERVICE 
 #=================================================
+ynh_script_progression --message="Removing system configurations related to $app..." --weight=1
 
-# Remove a service from the admin panel, added by `yunohost service add`
-if yunohost service status matrix-$app >/dev/null 2>&1
+# Remove the service from the list of services known by YunoHost (added from `yunohost service add`)
+if ynh_exec_warn_less yunohost service status matrix-$app >/dev/null
 then
-	yunohost service remove matrix-$app
+    ynh_script_progression --message="Removing matrix-$app service integration..." --weight=1
+    yunohost service remove matrix-$app
 fi
 
-if yunohost service status coturn-$app >/dev/null 2>&1
+# Remove the service from the list of services known by YunoHost (added from `yunohost service add`)
+if ynh_exec_warn_less yunohost service status coturn-$app >/dev/null
 then
-	yunohost service remove coturn-$app
+    ynh_script_progression --message="Removing coturn-$app service integration..." --weight=1
+    yunohost service remove coturn-$app
 fi
-
-#=================================================
-# STOP AND REMOVE SERVICE
-#=================================================
-ynh_script_progression --message="Stopping and removing the systemd service" --weight=2
 
 ynh_remove_systemd_config --service=matrix-$app
 ynh_remove_systemd_config --service=coturn-$app
 
-#=================================================
-# REMOVE APP MAIN DIR
-#=================================================
-ynh_script_progression --message="Removing app main directory" --weight=2
+# Remove the dedicated NGINX config
+ynh_remove_nginx_config
+
+# Remove the dedicated PHP-FPM config
+ynh_remove_fpm_config
+
+# Remove the app-specific logrotate config
+ynh_remove_logrotate
+
+# Remove the dedicated fail2ban config
+ynh_remove_fail2ban_config
+
+# Remove other various files specific to the app...
 
 ynh_secure_remove --file=$final_www_path
 ynh_secure_remove --file=/var/log/matrix-$app
@@ -59,40 +64,6 @@ ynh_secure_remove --file=/etc/default/matrix-$app
 ynh_secure_remove --file=/etc/default/coturn-$app
 ynh_secure_remove --file=/etc/nginx/conf.d/${server_name}.d/${app}_server_name.conf
 
-#=================================================
-# REMOVE NGINX CONFIGURATION
-#=================================================
-ynh_script_progression --message="Removing NGINX web server configuration" --weight=2
-
-# Remove the dedicated nginx config
-ynh_remove_nginx_config
-
-# Remove the dedicated php-fpm config
-ynh_remove_fpm_config
-
-#=================================================
-# REMOVE LOGROTATE CONFIGURATION
-#=================================================
-ynh_script_progression --message="Removing logrotate configuration" --weight=1
-
-# Remove the app-specific logrotate config
-ynh_remove_logrotate
-
-#=================================================
-# REMOVE FAIL2BAN CONFIGURATION
-#=================================================
-ynh_script_progression --message="Removing Fail2Ban configuration..." --weight=8
-
-# Remove the dedicated fail2ban config
-ynh_remove_fail2ban_config
-
-#=================================================
-# GENERIC FINALIZATION
-#=================================================
-# REMOVE DEDICATED USER
-#=================================================
-ynh_script_progression --message="Removing the dedicated system user" --weight=1
-
 # Delete a system user
 ynh_system_user_delete --username=$synapse_user
 yunohost user delete $synapse_user_app
@@ -100,7 +71,5 @@ yunohost user delete $synapse_user_app
 #=================================================
 # END OF SCRIPT
 #=================================================
-ynh_print_info --message="Due of the backup core only feature the data directory in '/home/yunohost.app/matrix-$app' was not removed. It need to be removed manually to purge app user data."
 
 ynh_script_progression --message="Removal of $app completed" --last
-sleep 1

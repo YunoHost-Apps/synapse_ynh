@@ -6,12 +6,13 @@ test_format = 1.0
     # Default args to use for install
     # -------------------------------
 
-    args.is_free_registration=1
-    args.server_name="domain.tld"
+    args.is_free_registration = 1
+    args.server_name = "domain.tld"
+    args.jitsi_server = "jitsi.riot.im"
 
     # -------------------------------
     # Commits to test upgrade from
     # -------------------------------
 
-    test_upgrade_from.00a1a6e7.name = "Upgrade from 5.4"
-    test_upgrade_from.00a1a6e7.args.foo = "bar"
+    #test_upgrade_from.00a1a6e7.name = "Upgrade from 5.4"
+

@@ -17,9 +17,6 @@ source /usr/share/yunohost/helpers
 synapse_user="matrix-$app"
 synapse_user_app="$app"
 synapse_user_app_pwd="$(ynh_string_random --length=30)"
-#synapse_db_name="matrix_$app"
-#synapse_db_user="matrix_$app"
-#synapse_db_name="matrix_$app"
 upstream_version=$(ynh_app_upstream_version)
 report_stats="false"
 allow_public_rooms="false"
@@ -32,14 +29,10 @@ domain_whitelist_client=${domain_whitelist_client_%"\n"}
 # RETRIEVE ARGUMENTS FROM THE MANIFEST
 #=================================================
 
-
-#REMOVEME? server_name=$YNH_APP_ARG_SERVER_NAME
-#REMOVEME? is_free_registration=$YNH_APP_ARG_IS_FREE_REGISTRATION
-#REMOVEME? jitsi_server=$YNH_APP_ARG_JITSI_SERVER
 path="/_matrix"
-#REMOVEME? install_dir="/opt/yunohost/matrix-$app"
+
 final_www_path="/var/www/$app"
-data_path="/home/yunohost.app/matrix-$app"
+
 main_domain=$(yunohost domain list --output-as json | jq -r .main)
 
 if [[ "$server_name" == "$default_domain_value" ]]; then
@@ -53,23 +46,23 @@ ynh_script_progression --message="Validating installation parameters..." --weigh
 
 test ! -e "/etc/nginx/conf.d/$domain.d/synapse*.conf" || ynh_die --message="$domain is not available as domain, please use an other domain."
 
-if [ -e "$data_path" ]; then
-    old_data_dir_path="$data_path$(date '+%Y%m%d.%H%M%S')"
+if [ -e "$data_dir" ]; then
+    old_data_dir_path="$data_dir$(date '+%Y%m%d.%H%M%S')"
     ynh_print_warn "A data directory already exist. Data was renamed to $old_data_dir_path"
-    mv "$data_path" "$old_data_dir_path"
+    mv "$data_dir" "$old_data_dir_path"
 fi
 
 #=================================================
 # STORE SETTINGS FROM MANIFEST
 #=================================================
-#REMOVEME? ynh_script_progression --message="Storing installation settings..." --weight=1
+ynh_script_progression --message="Storing installation settings..." --weight=1
 
 ynh_app_setting_set --app=$app --key=no_sso --value true
-ynh_app_setting_set --app=$app --key=server_name --value=$server_name
-ynh_app_setting_set --app=$app --key=jitsi_server --value=$jitsi_server
+#ynh_app_setting_set --app=$app --key=server_name --value=$server_name
+#ynh_app_setting_set --app=$app --key=jitsi_server --value=$jitsi_server
 ynh_app_setting_set --app=$app --key=synapse_version --value=$upstream_version
-ynh_app_setting_set --app=$app --key=is_free_registration --value=$is_free_registration
-#REMOVEME? ynh_app_setting_set --app=$app --key=report_stats --value=$report_stats
+#ynh_app_setting_set --app=$app --key=is_free_registration --value=$is_free_registration
+ynh_app_setting_set --app=$app --key=report_stats --value=$report_stats
 ynh_app_setting_set --app=$app --key=allow_public_rooms --value=$allow_public_rooms
 ynh_app_setting_set --app=$app --key=e2e_enabled_by_default --value=$e2e_enabled_by_default
 ynh_app_setting_set --app=$app --key=synapse_user_app_pwd --value=$synapse_user_app_pwd
@@ -112,7 +105,7 @@ adduser turnserver ssl-cert
 ynh_script_progression --message="Creating a PostgreSQL database..." --weight=4
 
 ynh_psql_execute_as_root \
---sql="CREATE DATABASE $synapse_db_name ENCODING 'UTF8' LC_COLLATE='C' LC_CTYPE='C' template=template0 OWNER $synapse_db_user;"
+--sql="CREATE DATABASE $db_name ENCODING 'UTF8' LC_COLLATE='C' LC_CTYPE='C' template=template0 OWNER $db_user;"
 
 #=================================================
 # DOWNLOAD, CHECK AND UNPACK SOURCE
@@ -123,7 +116,6 @@ ynh_script_progression --message="Setting up source files..." --weight=50
 
 # WARNING : theses command are used in INSTALL, UPGRADE
 # For any update do it in all files
-mkdir -p $data_path
 mkdir -p /var/log/matrix-$app
 mkdir -p /etc/matrix-$app/conf.d
 mkdir -p /etc/matrix-$app/app-service
@@ -146,7 +138,6 @@ chown $synapse_user:root -R $final_www_path
 #=================================================
 # CREATE SYNAPSE CONFIG
 #=================================================
-
 ynh_script_progression --message="Creating Synapse config..." --weight=3
 
 # Go in virtualenvironnement
@@ -167,7 +158,7 @@ registration_shared_secret=$(egrep "^registration_shared_secret:" homeserver.yml
 form_secret=$(egrep "^form_secret:" homeserver.yml | cut -d'"' -f2)
 macaroon_secret_key=$(egrep "^macaroon_secret_key:" homeserver.yml | cut -d'"' -f2)
 
-# store in yunohost settings
+# store in YunoHost settings
 ynh_app_setting_set --app=$app --key=registration_shared_secret --value="$registration_shared_secret"
 ynh_app_setting_set --app=$app --key=form_secret --value="$form_secret"
 ynh_app_setting_set --app=$app --key=macaroon_secret_key --value="$macaroon_secret_key"
@@ -177,7 +168,7 @@ ynh_app_setting_set --app=$app --key=macaroon_secret_key --value="$macaroon_secr
 #=================================================
 ynh_script_progression --message="Configuring a systemd service..." --weight=2
 
-# Create systemd service for synapse and turnserver
+# Create systemd service for Synapse and Turnserver
 cp ../conf/default_matrix-synapse /etc/default/matrix-$app
 ynh_add_systemd_config --service=matrix-$app --template=matrix-synapse.service
 
@@ -188,9 +179,6 @@ ynh_add_systemd_config --service=coturn-$app --template=coturn-synapse.service
 # NGINX CONFIGURATION
 #=================================================
 ynh_script_progression --message="Configuring NGINX web server..." --weight=2
-
-# Create a dedicated php-fpm config
-ynh_script_progression --message="Configuring application..."
 
 ynh_add_fpm_config --usage=low --footprint=low
 
@@ -305,7 +293,7 @@ ynh_replace_string __DOMAIN__ $domain ../hooks/post_cert_update
 chown $synapse_user:root -R $install_dir
 chmod 770 $install_dir/Coturn_config_rotate.sh
 chmod 700 $install_dir/update_synapse_for_appservice.sh
-chown $synapse_user:root -R $data_path
+chown $synapse_user:root -R $data_dir
 chown $synapse_user:root -R /var/log/matrix-$app
 chown $synapse_user:root -R /etc/matrix-$app
 chmod u=rwX,g=rX,o= -R /etc/matrix-$app
@@ -317,8 +305,8 @@ setfacl -R -m user:turnserver:rwX  /var/log/matrix-$app
 # ADVERTISE SERVICE IN ADMIN PANEL
 #=================================================
 
-yunohost service add matrix-$app --log "/var/log/matrix-$app/homeserver.log" --needs_exposed_ports $synapse_tls_port
-yunohost service add coturn-$app --needs_exposed_ports $turnserver_tls_port
+yunohost service add matrix-$app --log "/var/log/matrix-$app/homeserver.log" --needs_exposed_ports $port_synapse_tls
+yunohost service add coturn-$app --needs_exposed_ports $port_turnserver_tls
 
 #=================================================
 # RELOAD SERVICES
@@ -326,7 +314,7 @@ yunohost service add coturn-$app --needs_exposed_ports $turnserver_tls_port
 ynh_script_progression --message="Restarting Synapse services..." --weight=11
 
 ynh_systemd_action --service_name=coturn-$app.service --action=restart
-ynh_systemd_action --service_name=matrix-$app --action=restart --line_match="Synapse now listening on TCP port $synapse_tls_port" --log_path="/var/log/matrix-$app/homeserver.log" --timeout=300
+ynh_systemd_action --service_name=matrix-$app --action=restart --line_match="Synapse now listening on TCP port $port_synapse_tls" --log_path="/var/log/matrix-$app/homeserver.log" --timeout=300
 
 #=================================================
 # SETUP FAIL2BAN
