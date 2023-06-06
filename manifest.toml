@@ -80,6 +80,7 @@ ram.runtime = "50M"
     dir = "/opt/yunohost/matrix-__APP__"
 
     [resources.data_dir]
+    subdirs = ["media", "media_storage"]
     
     [resources.permissions]
     main.url = "/"

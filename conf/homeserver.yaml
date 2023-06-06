@@ -956,7 +956,7 @@ log_config: "/etc/matrix-__APP__/log.yaml"
 
 # Directory where uploaded images and attachments are stored.
 #
-media_store_path: "/home/yunohost.app/matrix-__APP__/media"
+media_store_path: "__DATA_DIR__/media"
 
 # Media storage providers allow media to be stored in different
 # locations.
@@ -970,7 +970,7 @@ media_storage_providers:
    # Whether to wait for successful storage for local uploads
    store_synchronous: false
    config:
-      directory: "/home/yunohost.app/matrix-__APP__/media_storage"
+      directory: "__DATA_DIR__/media_storage"
 
 # The largest allowed upload size in bytes
 #
