@@ -15,7 +15,7 @@ source /usr/share/yunohost/helpers
 #=================================================
 
 synapse_user="matrix-$app"
-synapse_user_app_pwd="$(ynh_string_random --length=15)"
+synapse_user_app_pwd="$(ynh_string_random --length=30)"
 upstream_version=$(ynh_app_upstream_version)
 report_stats="false"
 allow_public_rooms="false"
@@ -88,12 +88,13 @@ fi
 ynh_script_progression --message="Configuring system user..." --weight=3
 
 # The format to create an user account varies depending on the version of YunoHost currently installed.
-ynh_current_version=$(dpkg-query --showformat='${Version}' --show yunohost)
-if $(dpkg --compare-versions "$ynh_current_version" ge "11.1"); then
-    yunohost user create $app -F "Synapse Application" -d $domain -p "$synapse_user_app_pwd"
-else
-    yunohost user create $app -f Synapse -l Application -d $domain -p "$synapse_user_app_pwd"
-fi
+#ynh_current_version=$(dpkg-query --showformat='${Version}' --show yunohost)
+#if $(dpkg --compare-versions "$ynh_current_version" ge "11.1"); then
+#    yunohost user create $app -F "Synapse Application" -d $domain -p "$synapse_user_app_pwd"
+#else
+#    yunohost user create $app -f Synapse -l Application -d $domain -p "$synapse_user_app_pwd"
+#fi
+
 adduser $synapse_user ssl-cert
 adduser turnserver ssl-cert
 
