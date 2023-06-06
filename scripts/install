@@ -126,17 +126,17 @@ chown $synapse_user:root -R $final_www_path
 ynh_script_progression --message="Creating Synapse config..." --weight=3
 
 # Go in virtualenvironnement
-#set +u;
+set +u;
 source $install_dir/bin/activate
-#set -u;
+set -u;
 
 # Generate config
 python -m synapse.app.homeserver --keys-directory /etc/matrix-$app/ --generate-config --server-name $server_name --report-stats=no -c homeserver.yml
 
 # This function was defined when we called "source $install_dir/bin/activate". With this function we undo what "$install_dir/bin/activate" does
-#set +u;
+set +u;
 deactivate
-#set -u;
+set -u;
 
 # Get random values from config
 registration_shared_secret=$(egrep "^registration_shared_secret:" homeserver.yml | cut -d'"' -f2)
