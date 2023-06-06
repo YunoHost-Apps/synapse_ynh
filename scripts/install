@@ -304,9 +304,9 @@ ynh_systemd_action --service_name=matrix-$app --action=restart --line_match="Syn
 #=================================================
 # SETUP FAIL2BAN
 #=================================================
-ynh_script_progression --message="Configuring Fail2Ban..." --weight=10
+#ynh_script_progression --message="Configuring Fail2Ban..." --weight=10
 
-ynh_add_fail2ban_config --use_template
+#ynh_add_fail2ban_config --use_template
 
 #=================================================
 # END OF SCRIPT
