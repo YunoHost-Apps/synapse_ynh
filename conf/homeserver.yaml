@@ -285,7 +285,7 @@ listeners:
   # will also need to give Synapse a TLS key and certificate: see the TLS section
   # below.)
   #
-  - port: __SYNAPSE_TLS_PORT__
+  - port: __PORT_SYNAPSE_TLS__
     type: http
     tls: true
     resources:
@@ -801,9 +801,9 @@ database:
  name: psycopg2
  #txn_limit: 10000
  args:
-   user: __SYNAPSE_DB_USER__
-   password: __SYNAPSE_DB_PWD__
-   database: __SYNAPSE_DB_NAME__
+   user: __DB_USER__
+   password: __DB_PWD__
+   database: __DB_NAME__
    host: localhost
    port: 5432
    cp_min: 5
@@ -1178,7 +1178,7 @@ oembed:
 
 # The public URIs of the TURN server to give to clients
 #
-turn_uris: [ "turn:__DOMAIN__:__TURNSERVER_TLS_PORT__?transport=udp", "turn:__DOMAIN__:__TURNSERVER_TLS_PORT__?transport=tcp" ]
+turn_uris: [ "turn:__DOMAIN__:__PORT_TURNSERVER_TLS__?transport=udp", "turn:__DOMAIN__:__PORT_TURNSERVER_TLS__?transport=tcp" ]
 
 # The shared secret used to compute passwords for the TURN server
 #

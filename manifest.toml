@@ -13,22 +13,20 @@ maintainers = ["Josué Tille"]
 license = "Apache-2.0"
 website = "https://matrix.org/"
 code = "https://github.com/matrix-org/synapse"
-cpe = "???" # FIXME: optional but recommended if relevant, this is meant to contain the Common Platform Enumeration, which is sort of a standard id for applications defined by the NIST. In particular, Yunohost may use this is in the future to easily track CVE (=security reports) related to apps. The CPE may be obtained by searching here: https://nvd.nist.gov/products/cpe/search. For example, for Nextcloud, the CPE is 'cpe:2.3:a:nextcloud:nextcloud' (no need to include the version number)
-fund = "???" # FIXME: optional but recommended (or remove if irrelevant / not applicable). This is meant to be an URL where people can financially support this app, especially when its development is based on volunteers and/or financed by its community. YunoHost may later advertise it in the webadmin.
+cpe = "cpe:2.3:a:matrix:synapse"
 
 [integration]
-yunohost = ">= 11.0.11"
-architectures = "all" # FIXME: can be replaced by a list of supported archs using the dpkg --print-architecture nomenclature (amd64/i386/armhf/arm64), for example: ["amd64", "i386"]
+yunohost = ">= 11.1.19"
+architectures = "all"
 multi_instance = true
-ldap = "?" # FIXME: replace with true, false, or "not_relevant". Not to confuse with the "sso" key : the "ldap" key corresponds to wether or not a user *can* login on the app using its YunoHost credentials.
-sso = "?" # FIXME: replace with true, false, or "not_relevant". Not to confuse with the "ldap" key : the "sso" key corresponds to wether or not a user is *automatically logged-in* on the app when logged-in on the YunoHost portal.
-disk = "50M" # FIXME: replace with an **estimate** minimum disk requirement. e.g. 20M, 400M, 1G, ...
-ram.build = "50M" # FIXME: replace with an **estimate** minimum ram requirement. e.g. 50M, 400M, 1G, ...
-ram.runtime = "50M" # FIXME: replace with an **estimate** minimum ram requirement. e.g. 50M, 400M, 1G, ...
+ldap = "not_relevant"
+sso = "not_relevant"
+disk = "50M"
+ram.build = "50M"
+ram.runtime = "50M"
 
 [install]
     [install.domain]
-    # this is a generic question - ask strings are automatically handled by Yunohost's core
     type = "domain"
     full_domain = true
 
@@ -64,9 +62,37 @@ ram.runtime = "50M" # FIXME: replace with an **estimate** minimum ram requiremen
         url = "https://github.com/YunoHost-Apps/synapse_python_build/releases/download/v1.84.1/matrix-synapse_1.84.1-bullseye-bin1_armv7l.tar.gz"
         sha256 = "70ea244b3527ccaaba5384106078c60ef1482b104924311af02406bd52eebf3c"
 
+    [resources.system_user]
+    main.default = 8008
+    synapse_tls.default = 8448
+    synapse_tls.exposed = "TCP"
+    turnserver_tls.default = 5349
+    turnserver_tls.exposed = "Both"
+    turnserver_alt_tls.default = 5350
+    turnserver_alt_tls.exposed = "Both"
+    cli.default = 5766
 
     [resources.system_user]
 
     [resources.install_dir]
+    dir = "/opt/yunohost/matrix-__APP__"
 
     [resources.permissions]
+    main.url = "__DOMAIN__/_matrix/cas_server.php/login"
+    main.show_tile=false
+    main.auth_header = true
+    server_api.url = "__DOMAIN__/_matrix"
+    server_api.allowed = "visitors"
+    server_api.show_tile = false
+    server_api.auth_header = false
+    server_api.protected = true
+    admin_api.url = "__DOMAIN__/_synapse"
+    admin_api.allowed = "visitors"
+    admin_api.show_tile = false
+    admin_api.auth_header = false
+
+    [resources.apt]
+    packages = "coturn build-essential python3-dev libffi-dev python3-pip python3-setuptools sqlite3 libssl-dev python3-venv libxml2-dev libxslt1-dev python3-lxml zlib1g-dev libjpeg-dev libpq-dev postgresql acl"
+
+    [resources.database]
+    type = "postgresql"

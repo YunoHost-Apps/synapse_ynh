@@ -12,17 +12,6 @@ source ../settings/scripts/experimental_helper.sh
 source /usr/share/yunohost/helpers
 
 #=================================================
-# MANAGE SCRIPT FAILURE
-#=================================================
-
-#REMOVEME? ynh_clean_setup () {
-# Clean installation remainings that are not handled by the remove script.
-	ynh_clean_check_starting
-}
-# Exit if an error occurs during the execution of the script
-#REMOVEME? ynh_abort_if_errors
-
-#=================================================
 # LOAD SETTINGS
 #=================================================
 ynh_script_progression --message="Loading settings..."
@@ -53,25 +42,6 @@ synapse_db_name="matrix_$app"
 upstream_version=$(ynh_app_upstream_version)
 final_www_path="/var/www/$app"
 data_path="/home/yunohost.app/matrix-$app"
-
-#=================================================
-# CHECK IF THE APP CAN BE RESTORED
-#=================================================
-#REMOVEME? ynh_script_progression --message="Validating restoration parameters..." --weight=2
-
-#REMOVEME? test ! -d $install_dir \
-	|| ynh_die --message="There is already a directory: $install_dir "
-
-#=================================================
-# STANDARD RESTORATION STEPS
-#=================================================
-# REINSTALL DEPENDENCIES
-#=================================================
-#REMOVEME? ynh_script_progression --message="Reinstalling dependencies..." --weight=70
-
-# WARNING : theses command are used in INSTALL, UPGRADE, RESTORE
-# For any update do it in all files
-#REMOVEME? ynh_exec_warn_less ynh_install_app_dependencies $dependances
 
 #=================================================
 # RECREATE THE DEDICATED USER
@@ -106,25 +76,32 @@ install_sources
 #=================================================
 # RESTORE FAIL2BAN CONFIGURATION
 #=================================================
-
 ynh_script_progression --message="Reload Fail2Ban..." --weight=6
+
 ynh_systemd_action --action=restart --service_name=fail2ban
 
 #=================================================
 # RESTORE THE POSTGRESQL DATABASE
 #=================================================
-#REMOVEME? ynh_script_progression --message="Restoring the PostgreSQL database..." --weight=13
+# ynh_script_progression --message="Restoring the PostgreSQL database..." --weight=13
 
-#REMOVEME? ynh_psql_test_if_first_run
-ynh_psql_create_user $synapse_db_user $synapse_db_pwd
-ynh_psql_execute_as_root \
---sql="CREATE DATABASE $synapse_db_name
- ENCODING 'UTF8'
- LC_COLLATE='C'
- LC_CTYPE='C'
- template=template0
- OWNER $synapse_db_user;"
-ynh_psql_execute_file_as_root --file="${YNH_CWD}/dump.sql" --database="$synapse_db_name"
+# #REMOVEME? ynh_psql_test_if_first_run
+# ynh_psql_create_user $synapse_db_user $synapse_db_pwd
+# ynh_psql_execute_as_root \
+# --sql="CREATE DATABASE $synapse_db_name
+#  ENCODING 'UTF8'
+#  LC_COLLATE='C'
+#  LC_CTYPE='C'
+#  template=template0
+#  OWNER $synapse_db_user;"
+# ynh_psql_execute_file_as_root --file="${YNH_CWD}/dump.sql" --database="$synapse_db_name"
+
+#=================================================
+# RESTORE THE POSTGRESQL DATABASE
+#=================================================
+ynh_script_progression --message="Restoring the PostgreSQL database..." --weight=1
+
+ynh_psql_connect_as --user=$db_user --password=$db_pwd --database=$db_name < ./db.sql
 
 #=================================================
 # RESTORE SYSTEMD
@@ -165,12 +142,6 @@ ynh_script_progression --message="Reconfiguring Coturn..." --weight=23
 
 # To be sure that at the restoration the IP address in coturn config is the same as the real address we remake the coturn config
 
-# Retrieve specific settings
-#REMOVEME? turnserver_tls_port=$(ynh_app_setting_get --app=$app --key=turnserver_tls_port)
-#REMOVEME? turnserver_alt_tls_port=$(ynh_app_setting_get --app=$app --key=turnserver_alt_tls_port)
-#REMOVEME? cli_port=$(ynh_app_setting_get --app=$app --key=cli_port)
-#REMOVEME? turnserver_pwd=$(ynh_app_setting_get --app=$app --key=turnserver_pwd)
-
 # WARNING : these commands are used in INSTALL, UPGRADE
 # For any update do it in all files
 
@@ -191,15 +162,6 @@ then
 fi
 
 ynh_add_config --template="turnserver.conf" --destination="/etc/matrix-$app/coturn.conf"
-
-#=================================================
-# OPEN THE PORT
-#=================================================
-
-# Ouvre le port dans le firewall
-ynh_exec_warn_less yunohost firewall allow TCP $synapse_tls_port
-ynh_exec_warn_less yunohost firewall allow Both $turnserver_tls_port
-ynh_exec_warn_less yunohost firewall allow Both $turnserver_alt_tls_port
 
 #=================================================
 # SETUP LOGROTATE
@@ -236,35 +198,18 @@ chown $synapse_user:root -R $final_www_path
 ynh_script_progression --message="Restarting Synapse services..." --weight=7
 
 ynh_systemd_action --service_name=coturn-$app.service --action=restart
-ynh_systemd_action --service_name=matrix-$app --action=restart --line_match="Synapse now listening on TCP port $synapse_tls_port" --log_path="/var/log/matrix-$app/homeserver.log" --timeout=300
-
-#=================================================
-# SEND A README FOR THE ADMIN
-#=================================================
-
-# WARNING : theses command are used in INSTALL, RESTORE
-# For any update do it in all files
-
-echo "To federate this app you need to add this line in your DNS configuration:
-
-_matrix._tcp.$domain. 3600    IN      SRV     10 0 $synapse_tls_port $domain.
-
-You also need to open the TCP port $synapse_tls_port on your ISP box if it's not automatically done.
-
-Your synapse server also implements a turnserver (for VoIP), to have this fully functional please read the 'Turnserver' section in the README available here: https://github.com/YunoHost-Apps/synapse_ynh .
-
-If you're facing an issue or want to improve this app, please open a new issue in this project: https://github.com/YunoHost-Apps/synapse_ynh" > mail_to_send
-
-ynh_send_readme_to_admin --app_message="mail_to_send" --type="restore"
+ynh_systemd_action --service_name=matrix-$app --action=restart --line_match="Synapse now listening on TCP port $port_synapse_tls" --log_path="/var/log/matrix-$app/homeserver.log" --timeout=300
 
 #=================================================
 # GENERIC FINALIZATION
 #=================================================
-# RELOAD NGINX
+# RELOAD NGINX AND PHP-FPM OR THE APP SERVICE
 #=================================================
-ynh_script_progression --message="Reloading NGINX web server..."
+ynh_script_progression --message="Reloading NGINX web server and $app's service..." --weight=1
 
+# Typically you only have either $app or php-fpm but not both at the same time...
 ynh_systemd_action --service_name=php$phpversion-fpm --action=reload
+
 ynh_systemd_action --service_name=nginx --action=reload
 
 #=================================================

@@ -329,7 +329,8 @@ ynh_script_progression --message="Upgrading NGINX web server configuration..." -
 
 # Create a dedicated php-fpm config
 ynh_script_progression --message="Configuring application..."
-ynh_add_fpm_config
+
+ynh_add_fpm_config --usage=low --footprint=low
 
 # Create .well-known redirection for access by federation
 if yunohost --output-as plain domain list | grep -q "^$server_name$"

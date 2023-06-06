@@ -37,7 +37,7 @@ deactivate () {
 # unset irrelevant variables
 deactivate nondestructive
 
-VIRTUAL_ENV="__FINAL_PATH__"
+VIRTUAL_ENV="__INSTALL_DIR__"
 export VIRTUAL_ENV
 
 _OLD_VIRTUAL_PATH="$PATH"

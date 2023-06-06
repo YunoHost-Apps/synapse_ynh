@@ -11,28 +11,14 @@ source experimental_helper.sh
 source /usr/share/yunohost/helpers
 
 #=================================================
-# LOAD SETTINGS
-#=================================================
-#REMOVEME? ynh_script_progression --message="Loading installation settings..." --weight=3
-
-#REMOVEME? app=$YNH_APP_INSTANCE_NAME
-
-#REMOVEME? domain=$(ynh_app_setting_get --app=$app --key=domain)
-#REMOVEME? server_name=$(ynh_app_setting_get --app=$app --key=server_name)
-#REMOVEME? #REMOVEME? install_dir=$(ynh_app_setting_get --app=$app --key=install_dir)
-#REMOVEME? synapse_tls_port=$(ynh_app_setting_get --app=$app --key=synapse_tls_port)
-#REMOVEME? turnserver_tls_port=$(ynh_app_setting_get --app=$app --key=turnserver_tls_port)
-#REMOVEME? turnserver_alt_tls_port=$(ynh_app_setting_get --app=$app --key=turnserver_alt_tls_port)
-
-#=================================================
 # SET CONSTANTS
 #=================================================
 
 synapse_user="matrix-$app"
 synapse_user_app="$app"
-synapse_db_name="matrix_$app"
-synapse_db_user="matrix_$app"
-synapse_db_name="matrix_$app"
+#synapse_db_name="matrix_$app"
+#synapse_db_user="matrix_$app"
+#synapse_db_name="matrix_$app"
 upstream_version=$(ynh_app_upstream_version)
 final_www_path="/var/www/$app"
 
@@ -62,27 +48,10 @@ ynh_remove_systemd_config --service=matrix-$app
 ynh_remove_systemd_config --service=coturn-$app
 
 #=================================================
-# REMOVE THE POSTGRESQL DATABASE
-#=================================================
-#REMOVEME? ynh_script_progression --message="Removing the PostgreSQL database" --weight=2
-
-# Remove a database if it exists, along with the associated user
-#REMOVEME? ynh_psql_remove_db --db_user=$synapse_db_name --db_name=$synapse_db_user
-
-#=================================================
-# REMOVE DEPENDENCIES
-#=================================================
-#REMOVEME? ynh_script_progression --message="Removing dependencies" --weight=15
-
-# Remove metapackage and its dependencies
-#REMOVEME? ynh_remove_app_dependencies
-
-#=================================================
 # REMOVE APP MAIN DIR
 #=================================================
-#REMOVEME? ynh_script_progression --message="Removing app main directory" --weight=2
+ynh_script_progression --message="Removing app main directory" --weight=2
 
-#REMOVEME? ynh_secure_remove --file=$install_dir
 ynh_secure_remove --file=$final_www_path
 ynh_secure_remove --file=/var/log/matrix-$app
 ynh_secure_remove --file=/etc/matrix-$app
@@ -110,23 +79,6 @@ ynh_script_progression --message="Removing logrotate configuration" --weight=1
 ynh_remove_logrotate
 
 #=================================================
-# CLOSE A PORT
-#=================================================
-
-closeport() {
-    local port=$1
-    if yunohost firewall list | grep -q "\- $port$"
-    then
-            ynh_script_progression --message="Closing port $port"
-            ynh_exec_warn_less yunohost firewall disallow Both $port
-    fi
-}
-
-closeport $synapse_tls_port
-closeport $turnserver_tls_port
-closeport $turnserver_alt_tls_port
-
-#=================================================
 # REMOVE FAIL2BAN CONFIGURATION
 #=================================================
 ynh_script_progression --message="Removing Fail2Ban configuration..." --weight=8
@@ -139,10 +91,10 @@ ynh_remove_fail2ban_config
 #=================================================
 # REMOVE DEDICATED USER
 #=================================================
-#REMOVEME? ynh_script_progression --message="Removing the dedicated system user" --weight=1
+ynh_script_progression --message="Removing the dedicated system user" --weight=1
 
 # Delete a system user
-#REMOVEME? ynh_system_user_delete --username=$synapse_user
+ynh_system_user_delete --username=$synapse_user
 yunohost user delete $synapse_user_app
 
 #=================================================

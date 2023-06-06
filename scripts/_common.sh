@@ -1,18 +1,16 @@
-dependances="coturn build-essential python3-dev libffi-dev python3-pip python3-setuptools sqlite3 libssl-dev python3-venv libxml2-dev libxslt1-dev python3-lxml zlib1g-dev libjpeg-dev libpq-dev postgresql acl"
 python_version="$(python3 -V | cut -d' ' -f2 | cut -d. -f1-2)"
-#REMOVEME? app=$YNH_APP_INSTANCE_NAME
 
 install_sources() {
     # Install/upgrade synapse in virtualenv
 
     # Clean venv is it was on python2.7 or python3 with old version in case major upgrade of debian
     if [ ! -e $install_dir/bin/python3 ] || [ ! -e $install_dir/lib/python$python_version ]; then
-#REMOVEME?         ynh_secure_remove --file=$install_dir/bin
-#REMOVEME?         ynh_secure_remove --file=$install_dir/lib
-#REMOVEME?         ynh_secure_remove --file=$install_dir/lib64
-#REMOVEME?         ynh_secure_remove --file=$install_dir/include
-#REMOVEME?         ynh_secure_remove --file=$install_dir/share
-#REMOVEME?         ynh_secure_remove --file=$install_dir/pyvenv.cfg
+        ynh_secure_remove --file=$install_dir/bin
+        ynh_secure_remove --file=$install_dir/lib
+        ynh_secure_remove --file=$install_dir/lib64
+        ynh_secure_remove --file=$install_dir/include
+        ynh_secure_remove --file=$install_dir/share
+        ynh_secure_remove --file=$install_dir/pyvenv.cfg
     fi
 
     mkdir -p $install_dir
@@ -21,10 +19,10 @@ install_sources() {
     if [ -n "$(uname -m | grep arm)" ]
     then
         # Clean old file, sometimes it could make some big issues if we don't do this!!
-#REMOVEME?         ynh_secure_remove --file=$install_dir/bin
-#REMOVEME?         ynh_secure_remove --file=$install_dir/lib
-#REMOVEME?         ynh_secure_remove --file=$install_dir/include
-#REMOVEME?         ynh_secure_remove --file=$install_dir/share
+        ynh_secure_remove --file=$install_dir/bin
+        ynh_secure_remove --file=$install_dir/lib
+        ynh_secure_remove --file=$install_dir/include
+        ynh_secure_remove --file=$install_dir/share
 
         ynh_setup_source --dest_dir=$install_dir/ --source_id="armv7_$(lsb_release --codename --short)"
 
@@ -37,7 +35,7 @@ install_sources() {
     else
 
         # Install virtualenv if it don't exist
-#REMOVEME?         test -e $install_dir/bin/python3 || python3 -m venv $install_dir
+        test -e $install_dir/bin/python3 || python3 -m venv $install_dir
 
         # Install synapse in virtualenv
 
