@@ -55,10 +55,7 @@ test ! -e "/etc/nginx/conf.d/$domain.d/synapse*.conf" || ynh_die --message="$dom
 ynh_script_progression --message="Storing installation settings..." --weight=1
 
 ynh_app_setting_set --app=$app --key=no_sso --value true
-#ynh_app_setting_set --app=$app --key=server_name --value=$server_name
-#ynh_app_setting_set --app=$app --key=jitsi_server --value=$jitsi_server
 ynh_app_setting_set --app=$app --key=synapse_version --value=$upstream_version
-#ynh_app_setting_set --app=$app --key=is_free_registration --value=$is_free_registration
 ynh_app_setting_set --app=$app --key=report_stats --value=$report_stats
 ynh_app_setting_set --app=$app --key=allow_public_rooms --value=$allow_public_rooms
 ynh_app_setting_set --app=$app --key=e2e_enabled_by_default --value=$e2e_enabled_by_default
@@ -68,9 +65,6 @@ ynh_app_setting_set --app=$app --key=synapse_user_app_pwd --value=$synapse_user_
 # CREATE A DH FILE
 #=================================================
 ynh_script_progression --message="Creating a dh file..." --weight=3
-
-# WARNING : theses command are used in INSTALL, UPGRADE, RESTORE
-# For any update do it in all files
 
 # Make dh cert for synapse if it doesn't exist
 if [ ! -e /etc/ssl/private/dh2048.pem ]
@@ -118,11 +112,11 @@ install_sources
 #=================================================
 # CREATE SMALL CAS SERVER
 #=================================================
-# WARNING : theses command are used in INSTALL, UPGRADE
-# For any update do it in all files
 
 mkdir -p $final_www_path
-cp ../sources/cas_server.php $final_www_path/
+#cp ../sources/cas_server.php $final_www_path/
+ynh_add_config --template="../sources/cas_server.php" --destination="$final_www_path/cas_server.php"
+
 chmod u=rwX,g=rX,o= -R $final_www_path
 chown $synapse_user:root -R $final_www_path
 
@@ -132,17 +126,17 @@ chown $synapse_user:root -R $final_www_path
 ynh_script_progression --message="Creating Synapse config..." --weight=3
 
 # Go in virtualenvironnement
-set +u;
+#set +u;
 source $install_dir/bin/activate
-set -u;
+#set -u;
 
 # Generate config
 python -m synapse.app.homeserver --keys-directory /etc/matrix-$app/ --generate-config --server-name $server_name --report-stats=no -c homeserver.yml
 
 # This function was defined when we called "source $install_dir/bin/activate". With this function we undo what "$install_dir/bin/activate" does
-set +u;
+#set +u;
 deactivate
-set -u;
+#set -u;
 
 # Get random values from config
 registration_shared_secret=$(egrep "^registration_shared_secret:" homeserver.yml | cut -d'"' -f2)
@@ -216,9 +210,6 @@ ynh_add_config --template="log.yaml" --destination="/etc/matrix-$app/log.yaml"
 # SET COTURN CONFIG
 #=================================================
 ynh_script_progression --message="Configuring Coturn..." --weight=1
-
-# WARNING : theses command are used in INSTALL, UPGRADE
-# For any update do it in all files
 
 # Get public IP and set as external IP for coturn
 # note : '|| true' is used to ignore the errors if we can't get the public ipv4 or ipv6
