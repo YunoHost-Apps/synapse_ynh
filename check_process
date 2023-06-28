@@ -12,7 +12,7 @@
         setup_private=0
         setup_public=1
         upgrade=1
-        upgrade=1   from_commit=1531881768445ca4bce4a84b1634baa4dddfe8fa
+        upgrade=1   from_commit=0a485e0d6bcd14392b9203b3b27e7e1a7ba21d19
         upgrade=1   from_commit=6af39e6e086e70e2063eb8f63c48a1e4a597300d
         backup_restore=1
         multi_instance=0
@@ -22,7 +22,7 @@
 ;;; Levels
     Level 5=auto
 ;;; Upgrade options
-    ; commit=1531881768445ca4bce4a84b1634baa4dddfe8fa
-        name=Upgrade to 1.76.0, remove buster, add bookworm PR 364
+    ; commit=0a485e0d6bcd14392b9203b3b27e7e1a7ba21d19
+        name=Before permission implementation (branch old_version_for_CI_4)
     ; commit=6af39e6e086e70e2063eb8f63c48a1e4a597300d
         name=Before app user creation
