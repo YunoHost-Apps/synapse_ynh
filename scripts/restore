@@ -106,8 +106,8 @@ install_sources
 #=================================================
 # RESTORE FAIL2BAN CONFIGURATION
 #=================================================
-
 ynh_script_progression --message="Reload Fail2Ban..." --weight=6
+
 ynh_systemd_action --action=restart --service_name=fail2ban
 
 #=================================================

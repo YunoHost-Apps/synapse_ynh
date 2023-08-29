@@ -6,7 +6,11 @@ service_config_file=/etc/matrix-$app/conf.d/app_service.yaml
 # Backup the previous config file
 cp $service_config_file /tmp/app_service_backup.yaml
 
-echo "app_service_config_files:" > $service_config_file
+if [ -n "$(ls /etc/matrix-$app/app-service/)" ]; then
+    echo "app_service_config_files:" > $service_config_file
+else
+    echo "" > $service_config_file
+fi
 for f in $(ls /etc/matrix-$app/app-service/); do
     echo "  - /etc/matrix-$app/app-service/$f" >> $service_config_file
 done

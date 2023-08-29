@@ -328,7 +328,8 @@ ynh_script_progression --message="Upgrading NGINX web server configuration..." -
 
 # Create a dedicated php-fpm config
 ynh_script_progression --message="Configuring application..."
-ynh_add_fpm_config
+
+ynh_add_fpm_config --usage=low --footprint=low
 
 # Create .well-known redirection for access by federation
 if yunohost --output-as plain domain list | grep -q "^$server_name$"
@@ -379,7 +380,14 @@ ynh_add_config --template="../sources/update_synapse_for_appservice.sh" --destin
 
 # Ensure app-service folder has exists and the config file exit (Migration)
 mkdir -p /etc/matrix-$app/app-service
-test -e /etc/matrix-$app/conf.d/app_service.yaml || echo "app_service_config_files:" > /etc/matrix-$app/conf.d/app_service.yaml
+if [ -e /etc/matrix-$app/conf.d/app_service.yaml ]; then
+    # ensure that the file is empty if no app service are installed (fix issue #385)
+    if [ ! "$(ls -A /etc/matrix-$app/app-service)" ]; then
+        echo "" > /etc/matrix-$app/conf.d/app_service.yaml
+    fi
+else
+    touch /etc/matrix-$app/conf.d/app_service.yaml
+fi
 
 #=================================================
 # ADVERTISE SERVICE IN ADMIN PANEL
