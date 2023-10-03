@@ -48,7 +48,7 @@ install_sources() {
         set -$u_arg;
         if [ $(lsb_release --codename --short) == "bullseye" ]; then
             # Fix issue with setuptools https://github.com/pypa/setuptools/issues/3118
-            pip3 install --upgrade setuptools==60.8.2 wheel pip
+            pip3 install --upgrade setuptools==68.2.0 wheel pip
         else
             pip3 install --upgrade setuptools wheel pip
         fi
