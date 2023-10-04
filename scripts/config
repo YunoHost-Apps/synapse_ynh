@@ -163,6 +163,28 @@ set__auto_join_rooms() {
 	ynh_app_setting_set --app=$app --key=auto_join_rooms --value="${auto_join_rooms}"
 }
 
+get__e2e_enabled_by_default() {
+	e2e_enabled_by_default=$(ynh_app_setting_get --app $app --key e2e_enabled_by_default)
+	echo "${e2e_enabled_by_default}"
+}
+
+set__e2e_enabled_by_default_in_element() {
+	if [ "$e2e_enabled_by_default" = "invite" ] ; then
+   		e2e_enabled_by_default_in_element="true"
+	fi
+
+	if [ "$e2e_enabled_by_default" = "all" ] ; then
+   		e2e_enabled_by_default_in_element="true"
+	fi
+
+	if [ "$e2e_enabled_by_default" = "off" ] ; then
+   		e2e_enabled_by_default_in_element="false"
+	fi
+
+ 	ynh_app_setting_set --app=$app --key=e2e_enabled_by_default_in_element --value=$e2e_enabled_by_default_in_element
+        ynh_add_config --template="server_name.conf" --destination="/etc/nginx/conf.d/${server_name}.d/${app}_server_name.conf"
+}
+
 #=================================================
 # GENERIC FINALIZATION
 #=================================================
