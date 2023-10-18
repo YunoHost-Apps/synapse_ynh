@@ -85,6 +85,7 @@ ynh_app_setting_set --app=$app --key=final_path --value=$final_path
 ynh_app_setting_set --app=$app --key=synapse_version --value=$upstream_version
 ynh_app_setting_set --app=$app --key=report_stats --value=$report_stats
 ynh_app_setting_set --app=$app --key=e2e_enabled_by_default --value=$e2e_enabled_by_default
+ynh_app_setting_set --app=$app --key=e2e_enabled_by_default_in_element --value=$e2e_enabled_by_default_in_element
 ynh_app_setting_set --app=$app --key=synapse_user_app_pwd --value=$synapse_user_app_pwd
 
 if [ "$is_free_registration" -eq "0" ]
