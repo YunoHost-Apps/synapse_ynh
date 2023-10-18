@@ -171,18 +171,22 @@ get__e2e_enabled_by_default() {
 set__e2e_enabled_by_default_in_element() {
 	if [ "$e2e_enabled_by_default" = "invite" ] ; then
    		e2e_enabled_by_default_in_element="true"
+	 	ynh_app_setting_set --app=$app --key=e2e_enabled_by_default_in_element --value="${e2e_enabled_by_default_in_element}"
+		sed -i -r "s|"im\.vector\.riot\.e2ee": \{"default": [A-Za-z]+ \}|"im.vector.riot.e2ee": {"default": ${e2e_enabled_by_default_in_element} }|g" "/etc/nginx/conf.d/${server_name}.d/${app}_server_name.conf"
 	fi
 
 	if [ "$e2e_enabled_by_default" = "all" ] ; then
    		e2e_enabled_by_default_in_element="true"
+	 	ynh_app_setting_set --app=$app --key=e2e_enabled_by_default_in_element --value="${e2e_enabled_by_default_in_element}"
+		sed -i -r "s|"im\.vector\.riot\.e2ee": \{"default": [A-Za-z]+ \}|"im.vector.riot.e2ee": {"default": ${e2e_enabled_by_default_in_element} }|g" "/etc/nginx/conf.d/${server_name}.d/${app}_server_name.conf"
 	fi
 
 	if [ "$e2e_enabled_by_default" = "off" ] ; then
    		e2e_enabled_by_default_in_element="false"
+	 	ynh_app_setting_set --app=$app --key=e2e_enabled_by_default_in_element --value="${e2e_enabled_by_default_in_element}"
+		sed -i -r "s|"im\.vector\.riot\.e2ee": \{"default": [A-Za-z]+ \}|"im.vector.riot.e2ee": {"default": ${e2e_enabled_by_default_in_element} }|g" "/etc/nginx/conf.d/${server_name}.d/${app}_server_name.conf"
 	fi
 
- 	ynh_app_setting_set --app=$app --key=e2e_enabled_by_default_in_element --value="${e2e_enabled_by_default_in_element}"
-	sed -i -r "s|"im\.vector\.riot\.e2ee": \{"default": [A-Za-z]+ \}|"im.vector.riot.e2ee": {"default": ${e2e_enabled_by_default_in_element} }|g" "/etc/nginx/conf.d/${server_name}.d/${app}_server_name.conf"
 	yunohost service reload nginx
 }
 
