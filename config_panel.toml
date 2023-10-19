@@ -98,6 +98,15 @@ services = ["matrix-__APP__"]
         choices = ["all", "invite", "off"]
         help = "Note that encryption can always be turned on manually, even after creation."
         bind = "encryption_enabled_by_default_for_room_type:/etc/matrix-__APP__/homeserver.yaml"
+
+        [main.privacy.e2e_enabled_by_default_in_element]
+        ask = "End-to-End Encryption when new DM created with an other user who has encryption key"
+        type = "boolean"
+        yes = "true"
+        no = "false"
+        help = "Note that encryption can always be turned on manually, even after creation."
+        bind = ":/etc/matrix-__APP__/homeserver.yaml"
+        visible = 'e2e_enabled_by_default == "off"'
         
         [main.privacy.allow_public_rooms_over_federation]
         ask = "Access Public Rooms Directory over Federation?"
