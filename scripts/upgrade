@@ -34,7 +34,6 @@ turnserver_alt_tls_port=$(ynh_app_setting_get --app=$app --key=turnserver_alt_tl
 cli_port=$(ynh_app_setting_get --app=$app --key=cli_port)
 report_stats=$(ynh_app_setting_get --app=$app --key=report_stats)
 e2e_enabled_by_default=$(ynh_app_setting_get --app=$app --key=e2e_enabled_by_default)
-e2e_enabled_by_default_in_element=$(ynh_app_setting_get --app=$app --key=e2e_enabled_by_default_in_element)
 synapse_db_pwd=$(ynh_app_setting_get --app=$app --key=synapse_db_pwd)
 turnserver_pwd=$(ynh_app_setting_get --app=$app --key=turnserver_pwd)
 registration_shared_secret=$(ynh_app_setting_get --app=$app --key=registration_shared_secret)
@@ -178,12 +177,6 @@ fi
 if [ "$e2e_enabled_by_default" = "false" ]; then
    e2e_enabled_by_default="off"
    ynh_app_setting_set --app=$app --key=e2e_enabled_by_default --value=$e2e_enabled_by_default
-fi
-
-# Define $e2e_enabled_by_default_in_element if not already defined
-if [ -z $e2e_enabled_by_default_in_element ] ; then
-   e2e_enabled_by_default_in_element="true"
-   ynh_app_setting_set --app=$app --key=e2e_enabled_by_default_in_element --value=$e2e_enabled_by_default_in_element
 fi
 
 if [ "$e2e_enabled_by_default" = "all" ] || [ "$e2e_enabled_by_default" = "invite" ] ; then
