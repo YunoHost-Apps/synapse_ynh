@@ -234,7 +234,7 @@ if [ -e "/var/lib/matrix-$app" ]; then
 fi
 if ! grep -q "$final_path" /etc/passwd; then
     # matrix-synapse:x:994:994::/var/lib/matrix-synapse:/usr/sbin/nologin
-     sed --in-place -r "s@matrix-$app\:x\:([[:digit:]]+\:[[:digit:]]+)\:\:/.*/matrix-$app\:/usr/sbin/nologin@matrix-$app\:x\:\1\:\:$final_path\:/usr/sbin/nologin@g" /etc/passwd
+    sed --in-place -r "s@matrix-$app\:x\:([[:digit:]]+\:[[:digit:]]+)\:\:/.*/matrix-$app\:/usr/sbin/nologin@matrix-$app\:x\:\1\:\:$final_path\:/usr/sbin/nologin@g" /etc/passwd
 fi
 
 #=================================================
@@ -672,7 +672,7 @@ fi
 # SECURE FILES AND DIRECTORIES
 #=================================================
 
-# WARNING : theses command are u in INSTALL, UPGRADE, RESTORE
+# WARNING : theses command are used in INSTALL, UPGRADE, RESTORE
 # For any update do it in all files
 chown $synapse_user:root -R $final_path
 chmod 770 $final_path/Coturn_config_rotate.sh
