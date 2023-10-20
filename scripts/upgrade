@@ -234,7 +234,7 @@ if [ -e "/var/lib/matrix-$app" ]; then
 fi
 if ! grep -q "$final_path" /etc/passwd; then
     # matrix-synapse:x:994:994::/var/lib/matrix-synapse:/usr/sbin/nologin
-     --in-place -r "s@matrix-$app\:x\:([[:digit:]]+\:[[:digit:]]+)\:\:/.*/matrix-$app\:/usr/sbin/nologin@matrix-$app\:x\:\1\:\:$final_path\:/usr/sbin/nologin@g" /etc/passwd
+     sed --in-place -r "s@matrix-$app\:x\:([[:digit:]]+\:[[:digit:]]+)\:\:/.*/matrix-$app\:/usr/sbin/nologin@matrix-$app\:x\:\1\:\:$final_path\:/usr/sbin/nologin@g" /etc/passwd
 fi
 
 #=================================================
@@ -391,7 +391,7 @@ fi
 #=================================================
 ynh_script_progression --message="Upgrading dependencies..." --weight=6
 
-# WARNING : theses command are u in INSTALL, UPGRADE, RESTORE
+# WARNING : theses command are used in INSTALL, UPGRADE, RESTORE
 # For any update do it in all files
 ynh_exec_warn_less ynh_install_app_dependencies $dependances
 
@@ -408,7 +408,7 @@ fi
 #=================================================
 # CREATE SMALL CAS SERVER
 #=================================================
-# WARNING : theses command are u in INSTALL, UPGRADE
+# WARNING : theses command are used in INSTALL, UPGRADE
 # For any update do it in all files
 
 mkdir -p $final_www_path
@@ -451,7 +451,7 @@ fi
 #=================================================
 ynh_script_progression --message="Updating synapse config..." --weight=2
 
-# WARNING : theses command are u in INSTALL, UPGRADE, CONFIG, CHANGE-URL (4 times)
+# WARNING : theses command are used in INSTALL, UPGRADE, CONFIG, CHANGE-URL (4 times)
 # For any update do it in all files
 
 if [ -z $macaroon_secret_key ]; then
@@ -515,7 +515,7 @@ fi
 # MIGRATION 4 : CREATE A DH FILE
 #=================================================
 
-# WARNING : theses command are u in INSTALL, UPGRADE, RESTORE
+# WARNING : theses command are used in INSTALL, UPGRADE, RESTORE
 # For any update do it in all files
 
 # Make dh cert for synapse if it doesn't exist
@@ -556,11 +556,11 @@ ynh_add_nginx_config app
 #=================================================
 ynh_script_progression --message="Updating Coturn config..." --weight=1
 
-# WARNING : theses command are u in INSTALL, UPGRADE
+# WARNING : theses command are used in INSTALL, UPGRADE
 # For any update do it in all files
 
 # Get public IP and set as external IP for coturn
-# note : '|| true' is u to ignore the errors if we can't get the public ipv4 or ipv6
+# note : '|| true' is used to ignore the errors if we can't get the public ipv4 or ipv6
 public_ip4="$(curl -s ip.yunohost.org)" || true
 public_ip6="$(curl -s ipv6.yunohost.org)" || true
 
@@ -581,7 +581,7 @@ ynh_add_config --template="turnserver.conf" --destination="/etc/matrix-$app/cotu
 # ADD SCRIPT FOR COTURN CRON AND APP SERVICE
 #=================================================
 
-# WARNING : theses command are u in INSTALL, UPGRADE
+# WARNING : theses command are used in INSTALL, UPGRADE
 # For any update do it in all files
 
 ynh_add_config --template="../sources/Coturn_config_rotate.sh" --destination="$final_path/Coturn_config_rotate.sh"
@@ -602,8 +602,8 @@ fi
 # ADVERTISE SERVICE IN ADMIN PANEL
 #=================================================
 
-yunohost service add matrix-$app --log "/var/log/matrix-$app/homeserver.log" --needs_expo_ports $synapse_tls_port
-yunohost service add coturn-$app --needs_expo_ports $turnserver_tls_port
+yunohost service add matrix-$app --log "/var/log/matrix-$app/homeserver.log" --needs_exposed_ports $synapse_tls_port
+yunohost service add coturn-$app --needs_exposed_ports $turnserver_tls_port
 
 #=================================================
 # UPDATE SYSTEMD
@@ -622,7 +622,7 @@ ynh_add_systemd_config --service=coturn-$app --template=coturn-synapse.service
 #=================================================
 ynh_script_progression --message="Reconfiguring Fail2Ban..." --weight=8
 
-# WARNING : theses command are u in INSTALL, UPGRADE
+# WARNING : theses command are used in INSTALL, UPGRADE
 # For any update do it in all files
 
 ynh_add_fail2ban_config --use_template
@@ -689,7 +689,7 @@ setfacl -R -m user:turnserver:rwX  /var/log/matrix-$app
 # UPDATE HOOKS
 #=================================================
 
-# WARNING : theses command are u in INSTALL, UPGRADE
+# WARNING : theses command are used in INSTALL, UPGRADE
 # For any update do it in all files
 ynh_replace_string __APP__ $app ../hooks/post_cert_update
 ynh_replace_string __DOMAIN__ $domain ../hooks/post_cert_update
