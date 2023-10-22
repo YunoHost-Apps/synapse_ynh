@@ -21,7 +21,7 @@ Instant messaging server matrix network.
 Yunohost chatroom with matrix : [https://matrix.to/#/#yunohost:matrix.org](https://matrix.to/#/#yunohost:matrix.org)
 
 
-**Version incluse :** 1.92.3~ynh1
+**Version incluse :** 1.94.0~ynh1
 ## Avertissements / informations importantes
 
 ## Configuration
@@ -210,7 +210,6 @@ Before installing a second instance of the app it's really recommended to update
 
 * Site officiel de l’app : <https://matrix.org/>
 * Dépôt de code officiel de l’app : <https://github.com/matrix-org/synapse>
-* Documentation YunoHost pour cette app : <https://yunohost.org/app_synapse>
 * Signaler un bug : <https://github.com/YunoHost-Apps/synapse_ynh/issues>
 
 ## Informations pour les développeurs

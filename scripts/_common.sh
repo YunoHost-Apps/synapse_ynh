@@ -46,13 +46,8 @@ install_sources() {
         set +$u_arg;
         source $final_path/bin/activate
         set -$u_arg;
-        if [ $(lsb_release --codename --short) == "bullseye" ]; then
-            # Fix issue with setuptools https://github.com/pypa/setuptools/issues/3118
-            pip3 install --upgrade setuptools==60.8.2 wheel pip
-        else
-            pip3 install --upgrade setuptools wheel pip
-        fi
-
+        
+        pip3 install --upgrade setuptools wheel pip
         pip3 install --upgrade cffi ndg-httpsclient psycopg2 lxml jinja2
         pip3 install --upgrade -r $YNH_APP_BASEDIR/conf/requirement_$(lsb_release --codename --short).txt
 
