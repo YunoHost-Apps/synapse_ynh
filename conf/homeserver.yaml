@@ -2087,7 +2087,7 @@ sso:
     # By default, this list contains only the login fallback page.
     #
     client_whitelist:
-_DOMAIN_WHITELIST_CLIENT_
+__DOMAIN_WHITELIST_CLIENT__
 
     # Uncomment to keep a user's profile fields in sync with information from
     # the identity provider. Currently only syncing the displayname is
