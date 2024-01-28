@@ -12,7 +12,7 @@ maintainers = ["Josué Tille"]
 [upstream]
 license = "Apache-2.0"
 website = "https://matrix.org/"
-code = "https://github.com/matrix-org/synapse"
+code = "https://github.com/element-hq/synapse/"
 admindoc = "https://matrix-org.github.io/synapse/latest/welcome_and_overview.html"
 cpe = "cpe:2.3:a:matrix:synapse"
 fund = "https://matrix.org/support/#"
