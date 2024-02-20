@@ -147,7 +147,7 @@ Actually there are no functions in the client interface to set a user as admin. 
 
 The following command will grant admin privilege to the specified user:
 ```
-su --command="psql matrix_synapse" postgres <<< "UPDATE users SET admin = 1 WHERE name = '@user_to_be_admin:domain.tld'"
+sudo su --command="psql matrix_synapse" postgres <<< "UPDATE users SET admin = 1 WHERE name = '@user_to_be_admin:domain.tld'"
 ```
 
 ### Administration API
