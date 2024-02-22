@@ -126,7 +126,7 @@ ynh_script_progression --message="Creating a dh file..." --weight=3
 # Make dh cert for synapse if it doesn't exist
 if [ ! -e /etc/ssl/private/dh2048.pem ]
 then
-    ynh_exec_warn_less openssl dhparam -out /etc/ssl/private/dh2048.pem -outform PEM -2 2048 -dsaparam
+    ynh_exec_warn_less openssl dhparam -out /etc/ssl/private/dh2048.pem -outform PEM -2 2048
     chown root:ssl-cert /etc/ssl/private/dh2048.pem
     chmod 640 /etc/ssl/private/dh2048.pem
 fi
