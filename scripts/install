@@ -132,12 +132,13 @@ adduser $app ssl-cert
 adduser turnserver ssl-cert
 
 #=================================================
-# FIX DB CONFIG
+# FIX DB CONFIG AND CREATE SYLING PROXY DB
 #=================================================
 ynh_script_progression --message="Fixing database type..." --weight=1
 
 ynh_psql_execute_as_root \
     --sql="update pg_database set datcollate='C', datctype='C' where datname='$db_name';"
+ynh_''psql_setup_db --db_user=$db_user --db_pwd=$db_pwd --db_name=$db_name_slidingproxy
 
 #=================================================
 # DOWNLOAD, CHECK AND UNPACK SOURCE
@@ -179,11 +180,13 @@ $code_dir/bin/python -m synapse.app.homeserver --keys-directory /etc/matrix-$app
 registration_shared_secret=$(egrep "^registration_shared_secret:" homeserver.yml | cut -d'"' -f2)
 form_secret=$(egrep "^form_secret:" homeserver.yml | cut -d'"' -f2)
 macaroon_secret_key=$(egrep "^macaroon_secret_key:" homeserver.yml | cut -d'"' -f2)
+sync_proxy_secret=$(ynh_string_random -l 40)
 
 # store in yunohost settings
 ynh_app_setting_set --app=$app --key=registration_shared_secret --value="$registration_shared_secret"
 ynh_app_setting_set --app=$app --key=form_secret --value="$form_secret"
 ynh_app_setting_set --app=$app --key=macaroon_secret_key --value="$macaroon_secret_key"
+ynh_app_setting_set --app=$app --key=sync_proxy_secret --value="$sync_proxy_secret"
 
 #=================================================
 # SETUP SYSTEMD
@@ -195,6 +198,8 @@ ynh_add_systemd_config --service=$app --template=synapse.service
 
 cp ../conf/default_coturn /etc/default/coturn-$app
 ynh_add_systemd_config --service=$app-coturn --template=synapse-coturn.service
+
+ynh_add_systemd_config --service=$app-sliding-proxy --template=synapse-sliding-proxy.service
 
 #=================================================
 # NGINX CONFIGURATION
@@ -218,6 +223,7 @@ turnserver_pwd=$(ynh_string_random --length=30)
 ynh_app_setting_set --app=$app --key=turnserver_pwd --value=$turnserver_pwd
 
 configure_synapse
+ynh_add_config --template=sliding_proxy.conf --destination=/etc/matrix-$app/sliding_proxy.conf
 
 #=================================================
 # SET COTURN CONFIG
@@ -282,6 +288,7 @@ set_permissions data
 
 yunohost service add $app --log "/var/log/matrix-$app/homeserver.log" --needs_exposed_ports $port_synapse_tls --description 'Main matrix server service.'
 yunohost service add $app-coturn --needs_exposed_ports $port_turnserver_tls --description 'Turn server for matrix server. Used for audio and video call.'
+yunohost service add $app-sliding-proxy --description 'Matrix v2 service for clients.'
 
 #=================================================
 # RELOAD SERVICES
@@ -290,6 +297,7 @@ ynh_script_progression --message="Restarting Synapse services..." --weight=11
 
 ynh_systemd_action --service_name=$app-coturn.service --action=restart
 ynh_systemd_action --service_name=$app.service --action=restart --line_match="Synapse now listening on TCP port $port_synapse_tls" --log_path="/var/log/matrix-$app/homeserver.log" --timeout=300
+ynh_systemd_action --service_name=$app-sliding-proxy.service --action=restart
 
 #=================================================
 # SETUP FAIL2BAN

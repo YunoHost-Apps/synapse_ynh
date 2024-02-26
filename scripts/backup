@@ -73,6 +73,7 @@ ynh_backup --src_path="/etc/matrix-$app"
 ynh_backup --src_path="/etc/systemd/system/$app.service"
 ynh_backup --src_path="/etc/default/coturn-$app"
 ynh_backup --src_path="/etc/systemd/system/$app-coturn.service"
+ynh_backup --src_path=/etc/systemd/system/$app-sliding-proxy.service
 
 #=================================================
 # BACKUP SYNAPSE DATA

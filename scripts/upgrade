@@ -204,6 +204,11 @@ then
     enable_dtls_for_audio_video_turn_call="true"
     ynh_app_setting_set --app=$app --key=enable_dtls_for_audio_video_turn_call --value=$enable_dtls_for_audio_video_turn_call
 fi
+if [ -z "${sync_proxy_secret:-}" ]
+then
+    sync_proxy_secret=$(ynh_string_random -l 40)
+    ynh_app_setting_set --app=$app --key=sync_proxy_secret --value=$sync_proxy_secret
+fi
 
 #=================================================
 # MIGRATION 7 : STANDARDIZE SYSTEMD UNIT
@@ -382,6 +387,15 @@ then
 fi
 
 #=================================================
+# MIGRATION 13 : ADD SLIDING PROXY DB
+#=================================================
+ynh_script_progression --message="Updating db if needed..."
+
+if ! ynh_''psql_database_exists -d $db_name_slidingproxy; then
+    ynh_''psql_setup_db --db_user=$db_user --db_pwd=$db_pwd --db_name=$db_name_slidingproxy
+fi
+
+#=================================================
 # STANDARD UPGRADE STEPS
 #=================================================
 
@@ -391,6 +405,7 @@ fi
 ynh_script_progression --message="Updating synapse config..." --weight=2
 
 configure_synapse
+ynh_add_config --template=sliding_proxy.conf --destination=/etc/matrix-$app/sliding_proxy.conf
 
 #=================================================
 # CREATE SMALL CAS SERVER
@@ -453,6 +468,7 @@ fi
 
 yunohost service add $app --log "/var/log/matrix-$app/homeserver.log" --needs_exposed_ports $port_synapse_tls --description 'Main matrix server service.'
 yunohost service add $app-coturn --needs_exposed_ports $port_turnserver_tls --description 'Turn server for matrix server. Used for audio and video call.'
+yunohost service add $app-sliding-proxy --description 'Matrix v2 service for clients.'
 
 #=================================================
 # UPDATE SYSTEMD
@@ -464,6 +480,8 @@ ynh_add_systemd_config --service=$app --template=synapse.service
 
 cp ../conf/default_coturn /etc/default/coturn-$app
 ynh_add_systemd_config --service=$app-coturn --template=synapse-coturn.service
+
+ynh_add_systemd_config --service=$app-sliding-proxy --template=synapse-sliding-proxy.service
 
 #=================================================
 # UPGRADE FAIL2BAN
@@ -516,6 +534,7 @@ ynh_script_progression --message="Restarting Synapse services..." --weight=5
 
 ynh_systemd_action --service_name=$app-coturn.service --action=restart
 ynh_systemd_action --service_name=$app.service --action=restart --line_match="Synapse now listening on TCP port $port_synapse_tls" --log_path="/var/log/matrix-$app/homeserver.log" --timeout=300
+ynh_systemd_action --service_name=$app-sliding-proxy.service --action=restart
 
 #=================================================
 # END OF SCRIPT

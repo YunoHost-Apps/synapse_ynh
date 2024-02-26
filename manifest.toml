@@ -19,7 +19,7 @@ fund = "https://matrix.org/support/#"
 
 [integration]
 yunohost = ">= 11.2.10"
-architectures = "all"
+architectures = ["amd64", "arm64"]
 multi_instance = true
 ldap = true
 sso = "not_relevant"
@@ -71,6 +71,26 @@ ram.runtime = "200M"
     armhf.url = "https://github.com/YunoHost-Apps/synapse_python_build/releases/download/v1.102.0/matrix-synapse_1.102.0-bullseye-bin1_armv7l.tar.gz"
     armhf.sha256 = "4027b8e41950aeec151dfa19eda2402e7974de56d33abb9eee3879e211227eef"
 
+    [resources.sources.sliding_proxy]
+    prefetch = true
+    extract = false
+    rename = "sliding-proxy"
+
+    amd64.url = "https://github.com/matrix-org/sliding-sync/releases/download/v0.99.15/syncv3_linux_amd64"
+    amd64.sha256 = "f5a57a26a5a478470774d8f6387accf5ed7644c8258c8ff7570998b99f7afe01"
+    arm64.url = "https://github.com/matrix-org/sliding-sync/releases/download/v0.99.15/syncv3_linux_arm64"
+    arm64.sha256 = "24bd8c5ebf89806104465b8b218aba7e05b15c095d010aba2fb666172a106f75"
+
+    [resources.sources.sliding_proxy_rootfs]
+    prefetch = true
+    extract = true
+    in_subdir = false
+
+    amd64.url = "https://github.com/YunoHost-Apps/synapse_python_build/releases/download/sp-mfs-v1.0/min_rootfs_x86-64.tar.gz"
+    amd64.sha256 = "4626879513fedd8fca33eb98668a7d3967c6b04d2ea1eed86c5059ef394bc925"
+    arm64.url = "https://github.com/YunoHost-Apps/synapse_python_build/releases/download/sp-mfs-v1.0/min_rootfs_arm64.tar.gz"
+    arm64.sha256 = "3f71a0c1746d18cd5081fc68ba81d18d4dca717509b8de75ef1b23b99af325e0"
+
     [resources.system_user]
     allow_email = true
     home = "/opt/yunohost/matrix-__APP__"
@@ -92,6 +112,7 @@ ram.runtime = "200M"
     main.protected = true
 
     server_api.url = "/_matrix"
+    server_api.additional_urls = ["/client"]
     server_api.label = "Server access for client apps"
     server_api.allowed = "visitors"
     server_api.auth_header = false
@@ -109,6 +130,7 @@ ram.runtime = "200M"
     synapse_tls.default = 8448
     synapse_tls.exposed = "TCP"
     synapse.default = 8008
+    sliding_proxy.default = 8009
     turnserver_tls.default = 5349
     turnserver_tls.exposed = "Both"
     turnserver_alt_tls.default = 5350

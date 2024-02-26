@@ -68,6 +68,7 @@ ynh_script_progression --message="Enable systemd services" --weight=2
 # systemctl daemon-reload
 systemctl enable $app.service --quiet
 systemctl enable $app-coturn.service --quiet
+systemctl enable $app-sliding-proxy.service --quiet
 
 #=================================================
 # ADVERTISE SERVICE IN ADMIN PANEL
@@ -75,6 +76,7 @@ systemctl enable $app-coturn.service --quiet
 
 yunohost service add $app --log "/var/log/matrix-$app/homeserver.log" --needs_exposed_ports $port_synapse_tls --description 'Main matrix server service.'
 yunohost service add $app-coturn --needs_exposed_ports $port_turnserver_tls --description 'Turn server for matrix server. Used for audio and video call.'
+yunohost service add $app-sliding-proxy --description 'Matrix v2 service for clients.'
 
 #=================================================
 # CREATE A DH FILE
@@ -122,6 +124,7 @@ ynh_script_progression --message="Restarting Synapse services..." --weight=7
 
 ynh_systemd_action --service_name=$app-coturn.service --action=restart
 ynh_systemd_action --service_name=$app.service --action=restart --line_match="Synapse now listening on TCP port $port_synapse_tls" --log_path="/var/log/matrix-$app/homeserver.log" --timeout=300
+ynh_systemd_action --service_name=$app-sliding-proxy.service --action=restart
 
 #=================================================
 # GENERIC FINALIZATION

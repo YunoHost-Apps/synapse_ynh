@@ -1,6 +1,6 @@
 python_version="$(python3 -V | cut -d' ' -f2 | cut -d. -f1-2)"
 code_dir="/opt/yunohost/matrix-$app"
-
+db_name_slidingproxy=${db_name}_slidingproxy
 install_sources() {
     # Install/upgrade synapse in virtualenv
 
@@ -51,6 +51,13 @@ install_sources() {
         patch < $YNH_APP_BASEDIR/sources/ldap_auth_filter_anonymous_user.patch
         popd
     fi
+
+    # Setup chroot for sliding proxy
+    # Note that on debian bullseye we can't support run directly sliding proxy as it require new version of libc not available on debian bullseye
+    mkdir -p  $code_dir/sliding-chroot
+    ynh_setup_source -r --dest_dir=$code_dir/sliding-chroot/ --source_id=sliding_proxy_rootfs
+    mkdir -p  $code_dir/sliding-chroot/bin
+    ynh_setup_source --dest_dir=$code_dir/sliding-chroot/bin/ --source_id=sliding_proxy
 }
 
 configure_synapse() {
@@ -160,6 +167,7 @@ set_permissions() {
     chmod 770 $code_dir/Coturn_config_rotate.sh
     chmod 700 $code_dir/update_synapse_for_appservice.sh
     chmod 700 $code_dir/set_admin_user.sh
+    chmod 755 $code_dir/sliding-chroot/bin/sliding-proxy
 
     if [ "${1:-}" == data ]; then
         find $data_dir \(   \! -perm -o= \
