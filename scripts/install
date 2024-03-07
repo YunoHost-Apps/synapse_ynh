@@ -330,9 +330,9 @@ ynh_script_progression --message="Configuring NGINX web server..." --weight=2
 ynh_script_progression --message="Configuring application..."
 
 ynh_add_fpm_config --usage=low --footprint=low
-sed -i "s|user\s*=\s*$app|user = matrix-$app|g" /etc/php/7.*/fpm/pool.d/$app.conf
-sed -i "s|group\s*=\s*$app|group = matrix-$app|g" /etc/php/7.*/fpm/pool.d/$app.conf
-sed -i "s|chdir\s*=\s*/opt/yunohost/matrix-synapse.*|chdir = $final_www_path|g" /etc/php/7.*/fpm/pool.d/$app.conf
+sed -i "s|user\s*=\s*$app|user = matrix-$app|g" /etc/php/8.*/fpm/pool.d/$app.conf
+sed -i "s|group\s*=\s*$app|group = matrix-$app|g" /etc/php/8.*/fpm/pool.d/$app.conf
+sed -i "s|chdir\s*=\s*/opt/yunohost/matrix-synapse.*|chdir = $final_www_path|g" /etc/php/8.*/fpm/pool.d/$app.conf
 ynh_store_file_checksum --file=$(ls /etc/php/7.*/fpm/pool.d/$app.conf)
 
 # Create .well-known redirection for access by federation
