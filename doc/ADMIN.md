@@ -19,13 +19,13 @@ If your server name is identical to the domain on which synapse is installed, an
 
 If not, you can add the following line in the dns configuration but you normally don't need it as a `.well-known` file is edited during the install to declare your server name and port to the federation.
 
-```
+```text
 _matrix._tcp.<server_name.tld> <ttl> IN SRV 10 0 <port> <domain-or-subdomain-of-synapse.tld>
 ```
 
 for example
 
-```
+```text
 _matrix._tcp.example.com. 3600    IN      SRV     10 0 <synapse_port> synapse.example.com.
 ```
 
@@ -62,7 +62,7 @@ To prevent the situation when the server is behind a NAT, the public IP is writt
 
 If you have a dynamic IP address, you also might need to update this config automatically. To do that just edit a file named `/etc/cron.d/coturn_config_rotate` and add the following content (just adapt the `<synapse_instance_name>` which could be `synapse` or maybe `synapse__2`).
 
-```
+```text
 */15 * * * * root bash /opt/yunohost/matrix-<synapse_instance_name>/Coturn_config_rotate.sh;
 ```
 
@@ -82,13 +82,13 @@ exit 0
 
 Add this line in you sudo config file `/etc/sudoers`
 
-```
+```text
 openvpn    ALL=(ALL) NOPASSWD: /bin/systemctl restart synapse-coturn.service
 ```
 
 And add this line in your OpenVPN config file
 
-```
+```text
 ipchange /usr/local/bin/openvpn_up_script.sh
 ```
 
@@ -170,7 +170,7 @@ yunohost app setting synapse port_synapse
 
 Edit the file `/etc/nginx/conf.d/<previous-domain.tld>.d/synapse.conf` and add this text:
 
-```
+```text
 location /_matrix/ {
         proxy_pass http://localhost:<server_port_retrived_before>;
         proxy_set_header X-Forwarded-For $remote_addr;
