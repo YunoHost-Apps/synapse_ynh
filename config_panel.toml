@@ -110,6 +110,13 @@ services = ["__APP__"]
     [main.experience]
     name = "User Experience"
 
+        [main.experience.presence_tracking]
+        ask = "Enable Presence tracking feature"
+        type = "boolean"
+        yes = "true"
+        no = "false"
+        help = "Presence tracking allows users to see the state (e.g online/offline) of other local and remote users. Defaults to 'true'."
+
         [main.experience.web_client_location]
         ask = "Element instance your HomeServer should redirect to"
         type = "url"

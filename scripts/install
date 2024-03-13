@@ -25,6 +25,7 @@ ynh_script_progression --message="Storing installation settings..." --weight=1
 
 report_stats="false"
 e2e_enabled_by_default="off"
+presence_tracking=true
 allow_public_rooms_without_auth="false"
 allow_public_rooms_over_federation="false"
 max_upload_size="100M"
@@ -72,6 +73,7 @@ ynh_app_setting_set --app=$app --key=web_client_location --value=$web_client_loc
 ynh_app_setting_set --app=$app --key=client_base_url --value=$client_base_url
 ynh_app_setting_set --app=$app --key=invite_client_location --value=$invite_client_location
 ynh_app_setting_set --app=$app --key=allow_public_rooms_without_auth --value=$allow_public_rooms_without_auth
+ynh_app_setting_set --app=$app --key=presence_tracking --value=$presence_tracking
 ynh_app_setting_set --app=$app --key=allow_public_rooms_over_federation --value=$allow_public_rooms_over_federation
 ynh_app_setting_set --app=$app --key=max_upload_size --value=$max_upload_size
 ynh_app_setting_set --app=$app --key=disable_msisdn_registration --value=$disable_msisdn_registration

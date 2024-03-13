@@ -205,6 +205,12 @@ then
     ynh_app_setting_set --app=$app --key=enable_dtls_for_audio_video_turn_call --value=$enable_dtls_for_audio_video_turn_call
 fi
 
+if [ -z "${presence_tracking:-}" ]
+then
+    presence_tracking=true
+    ynh_app_setting_set --app=$app --key=presence_tracking --value=$presence_tracking
+fi
+
 #=================================================
 # MIGRATION 7 : STANDARDIZE SYSTEMD UNIT
 #=================================================
