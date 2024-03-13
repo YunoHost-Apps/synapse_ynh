@@ -97,7 +97,7 @@ presence:
   # Uncomment to disable presence tracking on this homeserver. This option
   # replaces the previous top-level 'use_presence' option.
   #
-  #enabled: false
+  enabled: __PRESENCE__
 
 # Whether to require authentication to retrieve profile data (avatars,
 # display names) of other users through the client API. Defaults to

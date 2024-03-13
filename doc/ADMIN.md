@@ -6,12 +6,12 @@ For all slow or arm architecture it's recommended to build the dh file before th
 You could build it by this cmd : `openssl dhparam -out /etc/ssl/private/dh2048.pem 2048 > /dev/null`
 After that you can install it without problem.
 
-The package uses a prebuilt python virtual environnement. The binary are taken from this repository: https://github.com/YunoHost-Apps/synapse_python_build
+The package uses a prebuilt python virtual environnement. The binary are taken from this repository: <https://github.com/YunoHost-Apps/synapse_python_build>
 The script to build the binary is also available.
 
 ## Web client
 
-If you want a web client you can also install Element with this package: https://github.com/YunoHost-Apps/element_ynh .
+If you want a web client you can also install Element with this package: <https://github.com/YunoHost-Apps/element_ynh> .
 
 ## Access by federation
 
@@ -19,30 +19,35 @@ If your server name is identical to the domain on which synapse is installed, an
 
 If not, you can add the following line in the dns configuration but you normally don't need it as a `.well-known` file is edited during the install to declare your server name and port to the federation.
 
-```
+```text
 _matrix._tcp.<server_name.tld> <ttl> IN SRV 10 0 <port> <domain-or-subdomain-of-synapse.tld>
 ```
+
 for example
-```
+
+```text
 _matrix._tcp.example.com. 3600    IN      SRV     10 0 <synapse_port> synapse.example.com.
 ```
+
 You need to replace `<synapse_port>` by the real port. This port can be obtained by the command: `yunohost app setting <synapse_instance_name> port_synapse_tls`
 
-For more details, see : https://github.com/element-hq/synapse/blob/master/docs/federate.md
+For more details, see : <https://github.com/element-hq/synapse/blob/master/docs/federate.md>
 
 If it is not automatically done, you need to open this in your ISP box.
 
-You also need a valid TLS certificate for the domain used by synapse. To do that you can refer to the documentation here : https://yunohost.org/#/certificate_en
+You also need a valid TLS certificate for the domain used by synapse. To do that you can refer to the documentation here : <https://yunohost.org/#/certificate_en>
 
-https://federationtester.matrix.org/ can be used to easily debug federation issues
+<https://federationtester.matrix.org/> can be used to easily debug federation issues
 
 ## Turnserver
 
 For Voip and video conferencing a turnserver is also installed (and configured). The turnserver listens on two UDP and TCP ports. You can get them with these commands:
+
 ```bash
 yunohost app setting synapse port_turnserver_tls
 yunohost app setting synapse port_turnserver_alt_tls
 ```
+
 The turnserver will also choose a port dynamically when a new call starts. The range is between 49153 - 49193.
 
 For some security reason the ports range (49153 - 49193) isn't automatically open by default. If you want to use the synapse server for voip or conferencing you will need to open this port range manually. To do this just run this command:
@@ -57,13 +62,14 @@ To prevent the situation when the server is behind a NAT, the public IP is writt
 
 If you have a dynamic IP address, you also might need to update this config automatically. To do that just edit a file named `/etc/cron.d/coturn_config_rotate` and add the following content (just adapt the `<synapse_instance_name>` which could be `synapse` or maybe `synapse__2`).
 
-```
+```text
 */15 * * * * root bash /opt/yunohost/matrix-<synapse_instance_name>/Coturn_config_rotate.sh;
 ```
 
 ## OpenVPN
 
 In case of you have an OpenVPN server you might want than `synapse-coturn` restart when the VPN restart. To do this create a file named `/usr/local/bin/openvpn_up_script.sh` with this content:
+
 ```bash
 #!/bin/bash
 
@@ -75,12 +81,14 @@ exit 0
 ```
 
 Add this line in you sudo config file `/etc/sudoers`
-```
+
+```text
 openvpn    ALL=(ALL) NOPASSWD: /bin/systemctl restart synapse-coturn.service
 ```
 
 And add this line in your OpenVPN config file
-```
+
+```text
 ipchange /usr/local/bin/openvpn_up_script.sh
 ```
 
@@ -94,7 +102,7 @@ access to Element (or other apps) due to sharing the same domain.
 
 We have put some coarse mitigations into place to try to protect against this
 situation, but it's still not a good practice to do it in the first place. See
-https://github.com/vector-im/element-web/issues/1977 for more details.
+<https://github.com/vector-im/element-web/issues/1977> for more details.
 
 ## Limitations
 
@@ -117,6 +125,7 @@ Before any manipulation it's recommended to do a backup by this following comman
 Actually there are no functions in the client interface to set a user as admin. So it's possible to enable it manually in the database.
 
 The following command will grant admin privilege to the specified user:
+
 ```bash
 /opt/yunohost/matrix-<synapse_instance_name>/set_admin_user.sh '@user_to_be_admin:domain.tld'
 ```
@@ -134,6 +143,7 @@ Synapse give the possibility to change the domain of the instance. Note that thi
 The advantage of this is that you can put the app on a specific domain without impacting the domain name of the accounts. For instance you can have the synapse app on `matrix.yolo.net` and the user account will be something like that `@michu:yolo.net`. Note that it's the main difference between the domain of the app (which is `matrix.yolo.net`) and the "server name" which is `yolo.net`.
 
 **Note that this change will have some important implications:**
+
 - **This will break the connection from all previous connected clients. So all client connected before this change won't be able to communicate with the server until users will do a logout and login (which can also be problematic for e2e keys).** [There are a workaround which are described below](#avoid-the-need-to-reconnect-all-client-after-change-url-operation).
 - In some case the client configuration will need to be updated. By example on element we can configure a default matrix server, this settings by example will need to be updated to the new domain to work correctly.
 - In case of the "server name" domain are not on the same server than the synapse domain, you will need to update the `.well-known` or your DNS.
@@ -153,12 +163,14 @@ The idea is to setup again a minimal configuration on the previous domain so the
 ##### Nginx config
 
 Retrive the server port with this command:
+
 ```bash
 yunohost app setting synapse port_synapse
 ```
 
 Edit the file `/etc/nginx/conf.d/<previous-domain.tld>.d/synapse.conf` and add this text:
-```
+
+```text
 location /_matrix/ {
         proxy_pass http://localhost:<server_port_retrived_before>;
         proxy_set_header X-Forwarded-For $remote_addr;
@@ -170,6 +182,7 @@ location /_matrix/ {
 ```
 
 Then reload nginx config:
+
 ```bash
 systemctl reload nginx.service
 ```
@@ -186,17 +199,20 @@ Now the configured client before the change-url should work again.
 This app use now the core-only feature of the backup. To keep the integrity of the data and to have a better guarantee of the restoration is recommended to proceed like this:
 
 - Stop synapse service with theses following command:
+
 ```bash
 systemctl stop synapse.service
 ```
 
 - Launch the backup of synapse with this following command:
+
 ```bash
 yunohost backup create --app synapse
 ```
 
 - Do a backup of your data with your specific strategy (could be with rsync, borg backup or just cp). The data is generally stored in `/home/yunohost.app/synapse`.
 - Restart the synapse service with these command:
+
 ```bash
 systemctl start synapse.service
 ```
@@ -206,3 +222,12 @@ systemctl start synapse.service
 Due of the backup core only feature the data directory in `/home/yunohost.app/synapse` **is not removed**.
 
 Use the `--purge` flag with the command, or remove it manually to purge app user data.
+
+## Slow server
+
+If your server is slow, you can do the following, according to [the official doc](https://matrix-org.github.io/synapse/latest/usage/administration/admin_faq.html#help-synapse-is-slow-and-eats-all-my-ramcpu):
+
+- increase the `SYNAPSE_CACHE_FACTOR` value in your `/etc/default/matrix-__APP__`, `2` is a good value
+  - note that the counterpart is more RAM usage
+- if synapse is heavy on CPU, you can try to disable presence tracking in your config, using the config panel, under "User Experience" category
+- note: this package already implemented the `libjemalloc` part, you con't need to touch that
