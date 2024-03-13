@@ -466,6 +466,12 @@ ynh_add_systemd_config --service=$app --template=synapse.service
 cp ../conf/default_coturn /etc/default/coturn-$app
 ynh_add_systemd_config --service=$app-coturn --template=synapse-coturn.service
 
+# if necessary, add libjemalloc.so to the matrix-synapse env file
+if ! grep -q "libjemalloc" "/etc/default/matrix-$app"; then
+    libjemalloc_path=$(whereis libjemalloc | cut -d ' ' -f 3)
+    echo "LD_PRELOAD=$libjemalloc_path" >> "/etc/default/matrix-$app"
+fi
+
 #=================================================
 # UPGRADE FAIL2BAN
 #=================================================

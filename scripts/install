@@ -196,6 +196,10 @@ ynh_add_systemd_config --service=$app --template=synapse.service
 cp ../conf/default_coturn /etc/default/coturn-$app
 ynh_add_systemd_config --service=$app-coturn --template=synapse-coturn.service
 
+# add libjemalloc.so to the matrix-synapse env file
+libjemalloc_path=$(whereis libjemalloc | cut -d ' ' -f 3)
+echo "LD_PRELOAD=$libjemalloc_path" >> "/etc/default/matrix-$app"
+
 #=================================================
 # NGINX CONFIGURATION
 #=================================================

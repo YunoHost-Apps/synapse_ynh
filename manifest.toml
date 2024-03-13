@@ -118,7 +118,8 @@ ram.runtime = "200M"
     [resources.apt]
     packages = ["coturn", "acl", "postgresql", "php-fpm",
                 "python3-dev", "python3-venv", "python3-pip", "python3-setuptools", "python3-lxml",
-                "build-essential", "libffi-dev", "libssl-dev", "libxml2-dev", "libxslt1-dev", "zlib1g-dev", "libjpeg-dev", "libpq-dev"]
+                "build-essential", "libffi-dev", "libssl-dev", "libxml2-dev", "libxslt1-dev",
+                "zlib1g-dev", "libjpeg-dev", "libpq-dev", "libjemalloc-dev"]
 
     [resources.database]
     type = "postgresql"
