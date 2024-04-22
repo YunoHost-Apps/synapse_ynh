@@ -18,8 +18,8 @@ for f in $(ls /etc/matrix-$app/app-service/); do
 done
 
 # Set permissions
-chown matrix-$app $service_config_file
-chown matrix-$app /etc/matrix-$app/app-service/*
+chown $app $service_config_file
+chown $app /etc/matrix-$app/app-service/*
 chmod 600 $service_config_file
 chmod 600 /etc/matrix-$app/app-service/*
 

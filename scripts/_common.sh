@@ -102,6 +102,11 @@ ensure_vars_set() {
         ynh_app_setting_set --app="$app" --key=e2e_enabled_by_default --value="$e2e_enabled_by_default"
     fi
 
+    if [ -z "${turnserver_pwd:-}" ]; then
+        turnserver_pwd=$(ynh_string_random --length=30)
+        ynh_app_setting_set --app="$app" --key=turnserver_pwd --value="$turnserver_pwd"
+    fi
+
     if [ -z "${web_client_location:-}" ]
     then
         web_client_location="https://matrix.to/"

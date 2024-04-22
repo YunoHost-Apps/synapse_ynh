@@ -156,9 +156,6 @@ configure_nginx
 #=================================================
 ynh_script_progression --message="Configuring Synapse..." --weight=2
 
-# Find password for turnserver and database
-turnserver_pwd=$(ynh_string_random --length=30)
-ynh_app_setting_set --app=$app --key=turnserver_pwd --value=$turnserver_pwd
 ynh_add_jinja_config --template="homeserver.yaml" --destination="/etc/matrix-$app/homeserver.yaml"
 ynh_add_config --template="log.yaml" --destination="/etc/matrix-$app/log.yaml"
 
