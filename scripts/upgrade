@@ -30,7 +30,7 @@ if [ -z "${domain:-}" ]; then
     ynh_app_setting_set --app=$app --key=path --value=$path
     ynh_app_setting_delete --app=$app --key=special_domain
     ynh_app_setting_delete --app=$app --key=special_path
-    ynh_app_setting_set --app=$app --key=no_sso --value true
+    ynh_app_setting_set --app=$app --key=no_sso --value=true
 fi
 
 ensure_vars_set
@@ -187,7 +187,7 @@ then
     # MAKE A CLEAN LOGROTATE CONFIG
     #=================================================
 
-    ynh_use_logrotate --logfile /var/log/matrix-$app --nonappend
+    ynh_use_logrotate --logfile=/var/log/matrix-$app --nonappend
 fi
 
 #=================================================

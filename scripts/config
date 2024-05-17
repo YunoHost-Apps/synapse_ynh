@@ -37,4 +37,4 @@ ynh_app_config_apply() {
 #=================================================
 # SELECT THE ACTION FOLLOWING THE GIVEN ARGUMENT
 #=================================================
-ynh_app_config_run $1
+ynh_app_config_run "$1"

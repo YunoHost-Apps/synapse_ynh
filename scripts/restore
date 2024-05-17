@@ -104,7 +104,7 @@ configure_coturn
 #=================================================
 ynh_script_progression --message="Configuring log rotation..."
 
-ynh_use_logrotate --logfile /var/log/matrix-$app
+ynh_use_logrotate --logfile=/var/log/matrix-$app
 
 #=================================================
 # GENERIC FINALIZATION

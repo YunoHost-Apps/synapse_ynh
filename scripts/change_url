@@ -10,7 +10,7 @@ source ./_common.sh
 source /usr/share/yunohost/helpers
 
 # We stop the service
-ynh_systemd_action --service_name=$app.service --action=stop
+ynh_systemd_action --service_name="$app".service --action=stop
 
 #=================================================
 # STANDARD MODIFICATIONS
@@ -43,8 +43,8 @@ set_permissions
 #=================================================
 ynh_script_progression --message="Restarting Synapse services..." --weight=5
 
-ynh_systemd_action --service_name=$app-coturn.service --action=restart
-ynh_systemd_action --service_name=$app.service --action=restart --line_match="Synapse now listening on TCP port $port_synapse_tls" --log_path="/var/log/matrix-$app/homeserver.log" --timeout=300
+ynh_systemd_action --service_name="$app"-coturn.service --action=restart
+ynh_systemd_action --service_name="$app".service --action=restart --line_match="Synapse now listening on TCP port $port_synapse_tls" --log_path="/var/log/matrix-$app/homeserver.log" --timeout=300
 
 if ! yunohost --output-as plain domain list | grep -q "^$server_name"'$'; then
     ynh_print_warn "Note yunohost won't be able to manage the required config for $server_name. So please add the needed DNS config as described on the documentation"

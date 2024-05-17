@@ -13,8 +13,8 @@ source /usr/share/yunohost/helpers
 #=================================================
 
 if [ "$server_name" == "Same than the domain" ]; then
-    server_name=$domain
-    ynh_app_setting_set --app=$app --key=server_name --value=$server_name
+    server_name="$domain"
+    ynh_app_setting_set --app="$app" --key=server_name --value="$server_name"
 fi
 
 #=================================================
@@ -43,10 +43,10 @@ ynh_app_setting_set --app="$app" --key=enable_registration --value="$enable_regi
 # Check datadir empty
 #=================================================
 
-if [ -n "$(ls -A $data_dir)" ]; then
+if [ -n "$(ls -A "$data_dir")" ]; then
     old_data_dir_path="${data_dir}_$(date '+%Y%m%d.%H%M%S')"
     ynh_print_warn "Data directory was not empty. Data was moved to $old_data_dir_path"
-    mkdir -p $old_data_dir_path
+    mkdir -p "$old_data_dir_path"
     mv -t "$old_data_dir_path" "$data_dir"/*
 fi
 
@@ -71,7 +71,7 @@ fi
 #=================================================
 ynh_script_progression --message='Configuring system groups'
 
-adduser $app ssl-cert
+adduser "$app" ssl-cert
 adduser turnserver ssl-cert
 
 #=================================================
@@ -91,10 +91,10 @@ ynh_script_progression --message="Setting up source files..." --weight=50
 
 # WARNING : theses command are used in INSTALL, UPGRADE
 # For any update do it in all files
-mkdir -p /var/log/matrix-$app
-mkdir -p /etc/matrix-$app/conf.d
-mkdir -p /etc/matrix-$app/app-service
-touch /etc/matrix-$app/conf.d/app_service.yaml
+mkdir -p /var/log/matrix-"$app"
+mkdir -p /etc/matrix-"$app"/conf.d
+mkdir -p /etc/matrix-"$app"/app-service
+touch /etc/matrix-"$app"/conf.d/app_service.yaml
 
 # Install synapse in virtualenv
 install_sources
@@ -105,9 +105,9 @@ install_sources
 # WARNING : theses command are used in INSTALL, UPGRADE
 # For any update do it in all files
 
-cp ../sources/cas_server.php $install_dir/
-chmod u=rwX,g=rX,o= -R $install_dir
-chown $app:$app -R $install_dir
+cp ../sources/cas_server.php "$install_dir"/
+chmod u=rwX,g=rX,o= -R "$install_dir"
+chown "$app:$app" -R "$install_dir"
 
 #=================================================
 # CREATE SYNAPSE CONFIG
@@ -116,17 +116,17 @@ chown $app:$app -R $install_dir
 ynh_script_progression --message="Creating Synapse config..." --weight=3
 
 # Generate config
-$code_dir/bin/python -m synapse.app.homeserver --keys-directory /etc/matrix-$app/ --generate-config --server-name $server_name --report-stats=no -c homeserver.yml
+$code_dir/bin/python -m synapse.app.homeserver --keys-directory /etc/matrix-"$app"/ --generate-config --server-name "$server_name" --report-stats=no -c homeserver.yml
 
 # Get random values from config
-registration_shared_secret=$(egrep "^registration_shared_secret:" homeserver.yml | cut -d'"' -f2)
-form_secret=$(egrep "^form_secret:" homeserver.yml | cut -d'"' -f2)
-macaroon_secret_key=$(egrep "^macaroon_secret_key:" homeserver.yml | cut -d'"' -f2)
+registration_shared_secret="$(grep -E "^registration_shared_secret:" homeserver.yml | cut -d'"' -f2)"
+form_secret="$(grep -E "^form_secret:" homeserver.yml | cut -d'"' -f2)"
+macaroon_secret_key="$(grep -E "^macaroon_secret_key:" homeserver.yml | cut -d'"' -f2)"
 
 # store in yunohost settings
-ynh_app_setting_set --app=$app --key=registration_shared_secret --value="$registration_shared_secret"
-ynh_app_setting_set --app=$app --key=form_secret --value="$form_secret"
-ynh_app_setting_set --app=$app --key=macaroon_secret_key --value="$macaroon_secret_key"
+ynh_app_setting_set --app="$app" --key=registration_shared_secret --value="$registration_shared_secret"
+ynh_app_setting_set --app="$app" --key=form_secret --value="$form_secret"
+ynh_app_setting_set --app="$app" --key=macaroon_secret_key --value="$macaroon_secret_key"
 
 #=================================================
 # SETUP SYSTEMD
@@ -134,10 +134,10 @@ ynh_app_setting_set --app=$app --key=macaroon_secret_key --value="$macaroon_secr
 ynh_script_progression --message="Configuring a systemd service..." --weight=2
 
 # Create systemd service for synapse and turnserver
-ynh_add_systemd_config --service=$app --template=synapse.service
+ynh_add_systemd_config --service="$app" --template=synapse.service
 
-cp ../conf/default_coturn /etc/matrix-$app/coturn_env
-ynh_add_systemd_config --service=$app-coturn --template=synapse-coturn.service
+cp ../conf/default_coturn /etc/matrix-"$app"/coturn_env
+ynh_add_systemd_config --service="$app"-coturn --template=synapse-coturn.service
 
 #=================================================
 # NGINX CONFIGURATION
@@ -171,7 +171,7 @@ configure_coturn
 #=================================================
 ynh_script_progression --message="Configuring log rotation..." --weight=2
 
-ynh_use_logrotate --logfile "/var/log/matrix-$app"
+ynh_use_logrotate --logfile="/var/log/matrix-$app"
 
 #=================================================
 # ADD SCRIPT FOR COTURN CRON AND APP SERVICE
@@ -182,7 +182,7 @@ ynh_use_logrotate --logfile "/var/log/matrix-$app"
 
 ynh_add_config --template="../sources/Coturn_config_rotate.sh" --destination="$code_dir/Coturn_config_rotate.sh"
 ynh_add_config --template="../sources/update_synapse_for_appservice.sh" --destination="$code_dir/update_synapse_for_appservice.sh"
-ynh_add_config --template=../sources/set_admin_user.sh --destination=$code_dir/set_admin_user.sh
+ynh_add_config --template=../sources/set_admin_user.sh --destination="$code_dir"/set_admin_user.sh
 
 #=================================================
 # GENERIC FINALIZATION
@@ -193,7 +193,7 @@ ynh_add_config --template=../sources/set_admin_user.sh --destination=$code_dir/s
 ynh_script_progression --message="Configuring permissions..." --weight=1
 
 if yunohost --output-as plain domain list | grep -q "^$server_name$"; then
-    ynh_""permission_create --permission=server_client_infos --url=$server_name/.well-known/matrix \
+    ynh_""permission_create --permission=server_client_infos --url="$server_name"/.well-known/matrix \
                           --label="Server info for clients. (well-known)" --show_tile=false --allowed=visitors \
                           --auth_header=false --protected=true
 else
@@ -206,8 +206,8 @@ fi
 
 # WARNING : theses command are used in INSTALL, UPGRADE
 # For any update do it in all files
-ynh_replace_string __APP__ $app ../hooks/post_cert_update
-ynh_replace_string __DOMAIN__ $domain ../hooks/post_cert_update
+ynh_replace_string __APP__ "$app" ../hooks/post_cert_update
+ynh_replace_string __DOMAIN__ "$domain" ../hooks/post_cert_update
 
 #=================================================
 # SECURE FILES AND DIRECTORIES
@@ -220,16 +220,16 @@ set_permissions data
 # ADVERTISE SERVICE IN ADMIN PANEL
 #=================================================
 
-yunohost service add $app --log "/var/log/matrix-$app/homeserver.log" --needs_exposed_ports $port_synapse_tls --description 'Main matrix server service.'
-yunohost service add $app-coturn --needs_exposed_ports $port_turnserver_tls --description 'Turn server for matrix server. Used for audio and video call.'
+yunohost service add "$app" --log "/var/log/matrix-$app/homeserver.log" --needs_exposed_ports "$port_synapse_tls" --description 'Main matrix server service.'
+yunohost service add "$app"-coturn --needs_exposed_ports "$port_turnserver_tls" --description 'Turn server for matrix server. Used for audio and video call.'
 
 #=================================================
 # RELOAD SERVICES
 #=================================================
 ynh_script_progression --message="Restarting Synapse services..." --weight=11
 
-ynh_systemd_action --service_name=$app-coturn.service --action=restart
-ynh_systemd_action --service_name=$app.service --action=restart --line_match="Synapse now listening on TCP port $port_synapse_tls" --log_path="/var/log/matrix-$app/homeserver.log" --timeout=300
+ynh_systemd_action --service_name="$app"-coturn.service --action=restart
+ynh_systemd_action --service_name="$app".service --action=restart --line_match="Synapse now listening on TCP port $port_synapse_tls" --log_path="/var/log/matrix-$app/homeserver.log" --timeout=300
 
 #=================================================
 # SETUP FAIL2BAN

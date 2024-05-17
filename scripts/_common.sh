@@ -6,51 +6,51 @@ install_sources() {
     # Install/upgrade synapse in virtualenv
 
     # Clean venv is it was on python2.7 or python3 with old version in case major upgrade of debian
-    if [ ! -e $code_dir/bin/python3 ] || [ ! -e $code_dir/lib/python$python_version ]; then
-        ynh_secure_remove --file=$code_dir/bin
-        ynh_secure_remove --file=$code_dir/lib
-        ynh_secure_remove --file=$code_dir/lib64
-        ynh_secure_remove --file=$code_dir/include
-        ynh_secure_remove --file=$code_dir/share
-        ynh_secure_remove --file=$code_dir/pyvenv.cfg
+    if [ ! -e "$code_dir"/bin/python3 ] || [ ! -e "$code_dir/lib/python$python_version" ]; then
+        ynh_secure_remove --file="$code_dir"/bin
+        ynh_secure_remove --file="$code_dir"/lib
+        ynh_secure_remove --file="$code_dir"/lib64
+        ynh_secure_remove --file="$code_dir"/include
+        ynh_secure_remove --file="$code_dir"/share
+        ynh_secure_remove --file="$code_dir"/pyvenv.cfg
     fi
 
-    mkdir -p $code_dir
-    chown $app:root -R $code_dir
+    mkdir -p "$code_dir"
+    chown "$app":root -R "$code_dir"
 
     if [ -n "$(uname -m | grep arm)" ]
     then
         # Clean old file, sometimes it could make some big issues if we don't do this!!
-        ynh_secure_remove --file=$code_dir/bin
-        ynh_secure_remove --file=$code_dir/lib
-        ynh_secure_remove --file=$code_dir/include
-        ynh_secure_remove --file=$code_dir/share
+        ynh_secure_remove --file="$code_dir"/bin
+        ynh_secure_remove --file="$code_dir"/lib
+        ynh_secure_remove --file="$code_dir"/include
+        ynh_secure_remove --file="$code_dir"/share
 
-        ynh_setup_source --dest_dir=$code_dir/ --source_id="synapse_prebuilt_armv7_$(lsb_release --codename --short)"
+        ynh_setup_source --dest_dir="$code_dir"/ --source_id="synapse_prebuilt_armv7_$(lsb_release --codename --short)"
 
         # Fix multi-instance support
-        for f in $(ls $code_dir/bin); do
+        for f in "$code_dir"/bin/*; do
             if ! [[ $f =~ "__" ]]; then
-                ynh_replace_special_string --match_string='#!/opt/yunohost/matrix-synapse' --replace_string='#!'$code_dir --target_file=$code_dir/bin/$f
+                ynh_replace_special_string --match_string='#!/opt/yunohost/matrix-synapse' --replace_string='#!'"$code_dir" --target_file="$f"
             fi
         done
     else
 
         # Install virtualenv if it don't exist
-        test -e $code_dir/bin/python3 || python3 -m venv $code_dir
+        test -e "$code_dir"/bin/python3 || python3 -m venv "$code_dir"
 
         # Install synapse in virtualenv
-        local pip3=$code_dir/bin/pip3
+        local pip3="$code_dir"/bin/pip3
 
         $pip3 install --upgrade setuptools wheel pip cffi
-        $pip3 install --upgrade -r $YNH_APP_BASEDIR/conf/requirement_$(lsb_release --codename --short).txt
+        $pip3 install --upgrade -r "$YNH_APP_BASEDIR/conf/requirement_$(lsb_release --codename --short).txt"
     fi
 
     # Apply patch for LDAP auth if needed
     # Note that we put patch into scripts dir because /source are not stored and can't be used on restore
-    if ! grep -F -q '# LDAP Filter anonymous user Applied' $code_dir/lib/python$python_version/site-packages/ldap_auth_provider.py; then
-        pushd $code_dir/lib/python$python_version/site-packages
-        patch < $YNH_APP_BASEDIR/scripts/patch/ldap_auth_filter_anonymous_user.patch
+    if ! grep -F -q '# LDAP Filter anonymous user Applied' "$code_dir/lib/python$python_version/site-packages/ldap_auth_provider.py"; then
+        pushd "$code_dir/lib/python$python_version/site-packages"
+        patch < "$YNH_APP_BASEDIR"/scripts/patch/ldap_auth_filter_anonymous_user.patch
         popd
     fi
 }
@@ -58,8 +58,10 @@ install_sources() {
 configure_coturn() {
     # Get public IP and set as external IP for coturn
     # note : '|| true' is used to ignore the errors if we can't get the public ipv4 or ipv6
-    local public_ip4="$(curl -s ip.yunohost.org)" || true
-    local public_ip6="$(curl -s ipv6.yunohost.org)" || true
+    local public_ip4
+    local public_ip6
+    public_ip4="$(curl -s ip.yunohost.org)" || true
+    public_ip6="$(curl -s ipv6.yunohost.org)" || true
 
     local turn_external_ip=""
     if [ -n "$public_ip4" ] && ynh_validate_ip4 --ip_address="$public_ip4"
@@ -80,7 +82,7 @@ configure_nginx() {
     if yunohost --output-as plain domain list | grep -q "^$server_name$"
     then
         local e2e_enabled_by_default_client_config
-        if [ $e2e_enabled_by_default == "off" ]; then
+        if [ "$e2e_enabled_by_default" == "off" ]; then
             e2e_enabled_by_default_client_config=false
         else
             e2e_enabled_by_default_client_config=true
@@ -113,8 +115,8 @@ ensure_vars_set() {
 
         element_instance=element
         if yunohost --output-as plain app list | grep -q "^$element_instance"'$'; then
-            element_domain=$(ynh_app_setting_get --app $element_instance --key domain)
-            element_path=$(ynh_app_setting_get --app $element_instance --key path)
+            element_domain=$(ynh_app_setting_get --app=$element_instance --key=domain)
+            element_path=$(ynh_app_setting_get --app=$element_instance --key=path)
             web_client_location="https://""$element_domain""$element_path"
         fi
         ynh_app_setting_set --app="$app" --key=web_client_location --value="$web_client_location"

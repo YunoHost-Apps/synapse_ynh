@@ -14,7 +14,7 @@ source /usr/share/yunohost/helpers
 # MANAGE SCRIPT FAILURE
 #=================================================
 
-if systemctl is-active $app.service --quiet; then
+if systemctl is-active "$app".service --quiet; then
     ynh_print_warn --message="It's hightly recommended to make your backup when the service is stopped. Please stop $app service with this command before to run the backup 'systemctl stop $app.service'"
 fi
 
@@ -37,7 +37,7 @@ ynh_backup --src_path="$install_dir"
 #=================================================
 
 # BACKUP THE PHP-FPM CONFIGURATION
-ynh_backup --src_path "/etc/php/$phpversion/fpm/pool.d/$app.conf"
+ynh_backup --src_path="/etc/php/$phpversion/fpm/pool.d/$app.conf"
 
 ynh_backup --src_path="/etc/nginx/conf.d/$domain.d/$app.conf"
 if yunohost --output-as plain domain list | grep -q "^$server_name$"
@@ -90,7 +90,7 @@ ynh_backup --src_path="/var/log/matrix-$app" --is_big=1
 #=================================================
 
 # Copy hook
-ynh_backup --src_path "/etc/yunohost/hooks.d/post_cert_update/50-$app"
+ynh_backup --src_path="/etc/yunohost/hooks.d/post_cert_update/50-$app"
 
 #=================================================
 # END OF SCRIPT

@@ -3,7 +3,7 @@
 请勿手动编辑。
 -->
 
-# YunoHost 的 Synapse
+# YunoHost 上的 Synapse
 
 [![集成程度](https://dash.yunohost.org/integration/synapse.svg)](https://dash.yunohost.org/appci/app/synapse) ![工作状态](https://ci-apps.yunohost.org/ci/badges/synapse.status.svg) ![维护状态](https://ci-apps.yunohost.org/ci/badges/synapse.maintain.svg)
 
@@ -21,7 +21,7 @@ Instant messaging server matrix network.
 Yunohost chatroom with matrix : [https://matrix.to/#/#yunohost:matrix.org](https://matrix.to/#/#yunohost:matrix.org)
 
 
-**分发版本：** 1.105.1~ynh1
+**分发版本：** 1.107.0~ynh1
 ## 文档与资源
 
 - 官方应用网站： <https://matrix.org/>
