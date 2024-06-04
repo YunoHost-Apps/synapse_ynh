@@ -72,7 +72,7 @@ configure_coturn() {
     then
         turn_external_ip+="$public_ip6"
     fi
-    ynh_add_jinja_config --template="turnserver.conf" --destination="/etc/matrix-$app/coturn.conf"
+    ynh_add_config --jinja --template="turnserver.conf" --destination="/etc/matrix-$app/coturn.conf"
 }
 
 configure_nginx() {
