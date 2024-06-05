@@ -264,5 +264,6 @@ set_permissions() {
     chmod 600 /etc/matrix-"$app"/"$server_name".signing.key
 
     chown "$app":root -R /var/log/matrix-"$app"
+    chmod u=rwX,g=rX,o= -R /var/log/matrix-"$app"
     setfacl -R -m user:turnserver:rwX  /var/log/matrix-"$app"
 }
