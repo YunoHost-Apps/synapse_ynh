@@ -163,7 +163,7 @@ then
     else
         result="Failed"
     fi
-    msg="Build: $app_name version $app_version\n"
-    msg+="$(cat ${app_name}_build_temp.log)"
-    echo -e "$msg" | mail.mailutils -a "Content-Type: text/plain; charset=UTF-8" -s "Autoupgrade $app_name : $result" "$notify_email"
+    msg="Build: $app_name version $app_version"
+
+    echo "$msg" | mail.mailutils --content-type="text/plain; charset=UTF-8" -A "${app_name}_build_temp.log" -s "Autoupgrade $app_name : $result" "$notify_email"
 fi
