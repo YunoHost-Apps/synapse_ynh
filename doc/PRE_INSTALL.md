@@ -1,3 +1,3 @@
-- Synapse consumes a significant amount of resources (both CPU and ARM), and therefore is not recommended for "small" setups such as small ARM boards
+- Synapse consumes a significant amount of resources (both CPU and RAM), and therefore is not recommended for "small" setups such as small ARM boards
 - During the install, the generation of Diffie-Hellman parameters may take a significant amount of time. You can speed things up by manually initializing them before running the install: `openssl dhparam -out /etc/ssl/private/dh2048.pem -outform PEM -dsaparam 2048`
 - The package uses a prebuilt python virtual environnement. The binary are taken from this repository: <https://github.com/YunoHost-Apps/synapse_python_build>. The script to build the binary is also available.
