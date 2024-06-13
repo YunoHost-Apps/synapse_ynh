@@ -149,7 +149,7 @@ services = ["__APP__"]
 
 [advanced]
 name = "Advanced Settings"
-services = ["matrix-__APP__"]
+services = ["__APP__"]
 
     # Disabled as it don't work any more on bookworm
     #
