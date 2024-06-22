@@ -17,30 +17,25 @@ source /usr/share/yunohost/helpers
 #=================================================
 
 # Remove a service from the admin panel, added by `yunohost service add`
-yunohost service remove $app
-yunohost service remove $app-coturn
+yunohost service remove "$app"
+yunohost service remove "$app"-coturn
 
 #=================================================
 # STOP AND REMOVE SERVICE
 #=================================================
 ynh_script_progression --message="Stopping and removing the systemd service" --weight=2
 
-ynh_remove_systemd_config --service=$app
-ynh_remove_systemd_config --service=$app-coturn
+ynh_remove_systemd_config --service="$app"
+ynh_remove_systemd_config --service="$app"-coturn
 
 #=================================================
 # REMOVE APP MAIN DIR
 #=================================================
 ynh_script_progression --message="Removing app main directory" --weight=2
 
-ynh_secure_remove --file=$code_dir
-ynh_secure_remove --file=/etc/matrix-$app
-ynh_secure_remove --file=/etc/nginx/conf.d/${server_name}.d/${app}_server_name.conf
-
-if [ "$YNH_APP_PURGE" -eq 1 ]; then
-    ynh_script_progression --message="Removing logs..."
-    ynh_secure_remove --file=/var/log/matrix-"$app"
-fi
+ynh_secure_remove --file="$code_dir"
+ynh_secure_remove --file=/etc/matrix-"$app"
+ynh_secure_remove --file="/etc/nginx/conf.d/${server_name}.d/${app}_server_name.conf"
 
 #=================================================
 # REMOVE NGINX CONFIGURATION
