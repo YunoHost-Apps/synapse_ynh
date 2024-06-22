@@ -109,6 +109,11 @@ ensure_vars_set() {
         ynh_app_setting_set --app="$app" --key=turnserver_pwd --value="$turnserver_pwd"
     fi
 
+    if [ -z "${turnserver_cli_pwd:-}" ]; then
+        turnserver_cli_pwd=$(ynh_string_random --length=30)
+        ynh_app_setting_set --app="$app" --key=turnserver_cli_pwd --value="$turnserver_cli_pwd"
+    fi
+
     if [ -z "${web_client_location:-}" ]
     then
         web_client_location="https://matrix.to/"
