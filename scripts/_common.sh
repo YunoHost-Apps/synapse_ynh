@@ -1,7 +1,7 @@
 readonly python_version="$(python3 -V | cut -d' ' -f2 | cut -d. -f1-2)"
 readonly code_dir="/opt/yunohost/matrix-$app"
 readonly domain_whitelist_client="$(yunohost --output-as json domain list  | jq -r '.domains | .[]')"
-readonly db_name_slidingproxy=${db_name}_slidingproxy
+readonly db_name_slidingproxy="${db_name}"_slidingproxy
 
 install_sources() {
     # Install/upgrade synapse in virtualenv
@@ -80,7 +80,7 @@ configure_coturn() {
     then
         turn_external_ip+="$public_ip6"
     fi
-    ynh_add_jinja_config --template="turnserver.conf" --destination="/etc/matrix-$app/coturn.conf"
+    ynh_add_config --jinja --template="turnserver.conf" --destination="/etc/matrix-$app/coturn.conf"
 }
 
 configure_nginx() {
@@ -115,6 +115,11 @@ ensure_vars_set() {
     if [ -z "${turnserver_pwd:-}" ]; then
         turnserver_pwd=$(ynh_string_random --length=30)
         ynh_app_setting_set --app="$app" --key=turnserver_pwd --value="$turnserver_pwd"
+    fi
+
+    if [ -z "${turnserver_cli_pwd:-}" ]; then
+        turnserver_cli_pwd=$(ynh_string_random --length=30)
+        ynh_app_setting_set --app="$app" --key=turnserver_cli_pwd --value="$turnserver_cli_pwd"
     fi
 
     if [ -z "${web_client_location:-}" ]
@@ -279,5 +284,6 @@ set_permissions() {
     chmod 600 /etc/matrix-"$app"/"$server_name".signing.key
 
     chown "$app":root -R /var/log/matrix-"$app"
+    chmod u=rwX,g=rX,o= -R /var/log/matrix-"$app"
     setfacl -R -m user:turnserver:rwX  /var/log/matrix-"$app"
 }

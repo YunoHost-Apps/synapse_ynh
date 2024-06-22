@@ -32,7 +32,7 @@ ynh_script_progression --message="Updating Synapse config..." --weight=2
 # Force enable it because some client like Element X don't support CAS and so require to have password authentication enabled
 password_enabled=true
 
-ynh_add_jinja_config --template="homeserver.yaml" --destination="/etc/matrix-$app/homeserver.yaml"
+ynh_add_config --jinja --template="homeserver.yaml" --destination="/etc/matrix-$app/homeserver.yaml"
 ynh_add_config --template="log.yaml" --destination="/etc/matrix-$app/log.yaml"
 
 #=================================================

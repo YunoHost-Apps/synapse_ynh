@@ -150,7 +150,7 @@ services = ["__APP__"]
 
 [advanced]
 name = "Advanced Settings"
-services = ["matrix-__APP__"]
+services = ["__APP__"]
 
     # Disabled as it don't work any more on bookworm
     #
@@ -230,7 +230,7 @@ services = ["matrix-__APP__"]
     name = "Security"
 
             [advanced.security.enable_dtls_for_audio_video_turn_call]
-            ask = "Enable TLS/DTLS on Audio/Video coll"
+            ask = "Enable TLS/DTLS on Audio/Video call"
             type = "boolean"
             yes = "true"
             no = "false"
