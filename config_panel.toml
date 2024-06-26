@@ -229,7 +229,7 @@ services = ["matrix-__APP__"]
     name = "Security"
 
             [advanced.security.enable_dtls_for_audio_video_turn_call]
-            ask = "Enable TLS/DTLS on Audio/Video coll"
+            ask = "Enable TLS/DTLS on Audio/Video call"
             type = "boolean"
             yes = "true"
             no = "false"
