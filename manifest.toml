@@ -5,7 +5,7 @@ name = "Synapse"
 description.en = "Instant messaging server which uses Matrix"
 description.fr = "Serveur de messagerie instantané basé sur Matrix"
 
-version = "1.108.0~ynh1"
+version = "1.109.0~ynh1"
 
 maintainers = ["Josué Tille"]
 
@@ -18,7 +18,7 @@ cpe = "cpe:2.3:a:matrix:synapse"
 fund = "https://matrix.org/support/#"
 
 [integration]
-yunohost = ">= 11.2.11"
+yunohost = ">= 11.2.13"
 architectures = "all"
 multi_instance = true
 ldap = true
@@ -63,13 +63,13 @@ ram.runtime = "1G"
 [resources]
     [resources.sources.synapse_prebuilt_armv7_bookworm]
     prefetch = false
-    armhf.url = "https://github.com/YunoHost-Apps/synapse_python_build/releases/download/v1.108.0/matrix-synapse_1.108.0-bookworm-bin1_armv7l.tar.gz"
-    armhf.sha256 = "ceff2b044fede6a7294c3d85619e6bbbb8d6371260c3492e9194a59f6f3a9e59"
+    armhf.url = "https://github.com/YunoHost-Apps/synapse_python_build/releases/download/v1.109.0/matrix-synapse_1.109.0-bookworm-bin1_armv7l.tar.gz"
+    armhf.sha256 = "d80915247255433ddad2e8283361f9d4c13c4f10ac50bf0de4139231c4f8164b"
 
     [resources.sources.synapse_prebuilt_armv7_bullseye]
     prefetch = false
-    armhf.url = "https://github.com/YunoHost-Apps/synapse_python_build/releases/download/v1.108.0/matrix-synapse_1.108.0-bullseye-bin1_armv7l.tar.gz"
-    armhf.sha256 = "658c4134927facc4c7d87e712388600c2759bc32f31951311bb0589d0c6da4e5"
+    armhf.url = "https://github.com/YunoHost-Apps/synapse_python_build/releases/download/v1.109.0/matrix-synapse_1.109.0-bullseye-bin1_armv7l.tar.gz"
+    armhf.sha256 = "e1ff4c600fae6f9ccc7a7e758dbcefcf64e55e6f29eece75e903ea6b93f02e78"
 
     [resources.system_user]
     allow_email = true
