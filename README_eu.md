@@ -5,7 +5,7 @@ EZ editatu eskuz.
 
 # Synapse YunoHost-erako
 
-[![Integrazio maila](https://dash.yunohost.org/integration/synapse.svg)](https://dash.yunohost.org/appci/app/synapse) ![Funtzionamendu egoera](https://ci-apps.yunohost.org/ci/badges/synapse.status.svg) ![Mantentze egoera](https://ci-apps.yunohost.org/ci/badges/synapse.maintain.svg)
+[![Integrazio maila](https://dash.yunohost.org/integration/synapse.svg)](https://ci-apps.yunohost.org/ci/apps/synapse/) ![Funtzionamendu egoera](https://ci-apps.yunohost.org/ci/badges/synapse.status.svg) ![Mantentze egoera](https://ci-apps.yunohost.org/ci/badges/synapse.maintain.svg)
 
 [![Instalatu Synapse YunoHost-ekin](https://install-app.yunohost.org/install-with-yunohost.svg)](https://install-app.yunohost.org/?app=synapse)
 

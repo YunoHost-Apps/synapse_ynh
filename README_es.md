@@ -5,7 +5,7 @@ No se debe editar a mano.
 
 # Synapse para Yunohost
 
-[![Nivel de integración](https://dash.yunohost.org/integration/synapse.svg)](https://dash.yunohost.org/appci/app/synapse) ![Estado funcional](https://ci-apps.yunohost.org/ci/badges/synapse.status.svg) ![Estado En Mantención](https://ci-apps.yunohost.org/ci/badges/synapse.maintain.svg)
+[![Nivel de integración](https://dash.yunohost.org/integration/synapse.svg)](https://ci-apps.yunohost.org/ci/apps/synapse/) ![Estado funcional](https://ci-apps.yunohost.org/ci/badges/synapse.status.svg) ![Estado En Mantención](https://ci-apps.yunohost.org/ci/badges/synapse.maintain.svg)
 
 [![Instalar Synapse con Yunhost](https://install-app.yunohost.org/install-with-yunohost.svg)](https://install-app.yunohost.org/?app=synapse)
 
