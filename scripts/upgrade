@@ -279,7 +279,7 @@ fi
 # UPDATE SYNAPSE CONFIG
 #=================================================
 ynh_script_progression --message="Updating synapse config..." --weight=2
-ynh_add_jinja_config --template="homeserver.yaml" --destination="/etc/matrix-$app/homeserver.yaml"
+ynh_add_config --jinja --template="homeserver.yaml" --destination="/etc/matrix-$app/homeserver.yaml"
 ynh_add_config --template="log.yaml" --destination="/etc/matrix-$app/log.yaml"
 
 #=================================================

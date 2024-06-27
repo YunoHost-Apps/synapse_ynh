@@ -16,6 +16,7 @@ source ../scripts/_common.sh
 domain=$(ynh_app_setting_get --app=$app --key=domain)
 port_cli=$(ynh_app_setting_get --app=$app --key=port_cli)
 turnserver_pwd=$(ynh_app_setting_get --app=$app --key=turnserver_pwd)
+turnserver_cli_pwd=$(ynh_app_setting_get --app=$app --key=turnserver_cli_pwd)
 port_turnserver_tls=$(ynh_app_setting_get --app=$app --key=port_turnserver_tls)
 port_turnserver_alt_tls=$(ynh_app_setting_get --app=$app --key=port_turnserver_alt_tls)
 enable_dtls_for_audio_video_turn_call=$(ynh_app_setting_get --app=$app --key=enable_dtls_for_audio_video_turn_call)

@@ -27,7 +27,7 @@ ynh_app_config_validate() {
 ynh_app_config_apply() {
     _ynh_app_config_apply
     configure_nginx
-    ynh_add_jinja_config --template="homeserver.yaml" --destination="/etc/matrix-$app/homeserver.yaml"
+    ynh_add_config --jinja --template="homeserver.yaml" --destination="/etc/matrix-$app/homeserver.yaml"
     ynh_add_config --template="log.yaml" --destination="/etc/matrix-$app/log.yaml"
     set_permissions
 }
