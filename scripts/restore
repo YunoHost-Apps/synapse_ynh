@@ -32,6 +32,7 @@ ynh_script_progression --message="Fixing database type..." --weight=1
 
 ynh_psql_execute_as_root \
     --sql="update pg_database set datcollate='C', datctype='C' where datname='$db_name';"
+ynh_''psql_setup_db --db_user="$db_user" --db_pwd="$db_pwd" --db_name="$db_name_slidingproxy"
 
 #=================================================
 # RESTORE ALL CONFIG AND DATA
