@@ -53,7 +53,7 @@ data_path="/home/yunohost.app/matrix-$app"
 main_domain=$(yunohost domain list --output-as json | jq -r .main)
 
 if [[ "$server_name" == "$default_domain_value" ]]; then
-    server_name=$domain    
+    server_name=$domain
 fi
 
 #=================================================
@@ -241,7 +241,7 @@ ynh_script_progression --message="Configuring nginx web server..." --weight=2
 
 # Create a dedicated php-fpm config
 ynh_script_progression --message="Configuring application..."
-ynh_add_fpm_config
+ynh_add_fpm_config  --phpversion=8.2
 
 # Create .well-known redirection for access by federation
 if yunohost --output-as plain domain list | grep -q "^$server_name$"
@@ -341,7 +341,7 @@ if yunohost --output-as plain domain list | grep -q "^$server_name$"; then
                           --label="Server info for clients. (well-known)" --show_tile=false --allowed=visitors \
                           --auth_header=false --protected=true
 fi
-                      
+
 #=================================================
 # UPDATE HOOKS
 #=================================================
