@@ -1,28 +1,28 @@
 <!--
-Nota bene : ce README est automatiquement généré par <https://github.com/YunoHost/apps/tree/master/tools/readme_generator>
-Il NE doit PAS être modifié à la main.
+N.B.: README ini dibuat secara otomatis oleh <https://github.com/YunoHost/apps/tree/master/tools/readme_generator>
+Ini TIDAK boleh diedit dengan tangan.
 -->
 
-# Synapse pour YunoHost
+# Synapse untuk YunoHost
 
-[![Niveau d’intégration](https://dash.yunohost.org/integration/synapse.svg)](https://ci-apps.yunohost.org/ci/apps/synapse/) ![Statut du fonctionnement](https://ci-apps.yunohost.org/ci/badges/synapse.status.svg) ![Statut de maintenance](https://ci-apps.yunohost.org/ci/badges/synapse.maintain.svg)
+[![Tingkat integrasi](https://dash.yunohost.org/integration/synapse.svg)](https://ci-apps.yunohost.org/ci/apps/synapse/) ![Status kerja](https://ci-apps.yunohost.org/ci/badges/synapse.status.svg) ![Status pemeliharaan](https://ci-apps.yunohost.org/ci/badges/synapse.maintain.svg)
 
-[![Installer Synapse avec YunoHost](https://install-app.yunohost.org/install-with-yunohost.svg)](https://install-app.yunohost.org/?app=synapse)
+[![Pasang Synapse dengan YunoHost](https://install-app.yunohost.org/install-with-yunohost.svg)](https://install-app.yunohost.org/?app=synapse)
 
-*[Lire le README dans d'autres langues.](./ALL_README.md)*
+*[Baca README ini dengan bahasa yang lain.](./ALL_README.md)*
 
-> *Ce package vous permet d’installer Synapse rapidement et simplement sur un serveur YunoHost.*  
-> *Si vous n’avez pas YunoHost, consultez [ce guide](https://yunohost.org/install) pour savoir comment l’installer et en profiter.*
+> *Paket ini memperbolehkan Anda untuk memasang Synapse secara cepat dan mudah pada server YunoHost.*  
+> *Bila Anda tidak mempunyai YunoHost, silakan berkonsultasi dengan [panduan](https://yunohost.org/install) untuk mempelajari bagaimana untuk memasangnya.*
 
-## Vue d’ensemble
+## Ringkasan
 
 Instant messaging server matrix network.
 
 Yunohost chatroom with matrix : [https://riot.im/app/#/room/#yunohost:matrix.org](https://riot.im/app/#/room/#yunohost:matrix.org)
 
 
-**Version incluse :** 1.61.0~ynh1
-## Avertissements / informations importantes
+**Versi terkirim:** 1.61.0~ynh1
+## Sangkalan / informasi penting
 
 ## Configuration
 
@@ -140,23 +140,23 @@ yunohost app setting synapse__<instancenumber> synapse_tls_port
 
 Before installing a second instance of the app it's really recommended to update all existing instances.
 
-## Documentations et ressources
+## Dokumentasi dan sumber daya
 
-- Site officiel de l’app : <https://matrix.org/>
-- Dépôt de code officiel de l’app : <https://github.com/matrix-org/synapse>
-- YunoHost Store : <https://apps.yunohost.org/app/synapse>
-- Signaler un bug : <https://github.com/YunoHost-Apps/synapse_ynh/issues>
+- Website aplikasi resmi: <https://matrix.org/>
+- Depot kode aplikasi hulu: <https://github.com/matrix-org/synapse>
+- Gudang YunoHost: <https://apps.yunohost.org/app/synapse>
+- Laporkan bug: <https://github.com/YunoHost-Apps/synapse_ynh/issues>
 
-## Informations pour les développeurs
+## Info developer
 
-Merci de faire vos pull request sur la [branche `testing`](https://github.com/YunoHost-Apps/synapse_ynh/tree/testing).
+Silakan kirim pull request ke [`testing` branch](https://github.com/YunoHost-Apps/synapse_ynh/tree/testing).
 
-Pour essayer la branche `testing`, procédez comme suit :
+Untuk mencoba branch `testing`, silakan dilanjutkan seperti:
 
 ```bash
 sudo yunohost app install https://github.com/YunoHost-Apps/synapse_ynh/tree/testing --debug
-ou
+atau
 sudo yunohost app upgrade synapse -u https://github.com/YunoHost-Apps/synapse_ynh/tree/testing --debug
 ```
 
-**Plus d’infos sur le packaging d’applications :** <https://yunohost.org/packaging_apps>
+**Info lebih lanjut mengenai pemaketan aplikasi:** <https://yunohost.org/packaging_apps>
