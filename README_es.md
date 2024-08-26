@@ -1,28 +1,28 @@
 <!--
-Nota bene : ce README est automatiquement généré par <https://github.com/YunoHost/apps/tree/master/tools/readme_generator>
-Il NE doit PAS être modifié à la main.
+Este archivo README esta generado automaticamente<https://github.com/YunoHost/apps/tree/master/tools/readme_generator>
+No se debe editar a mano.
 -->
 
-# Synapse pour YunoHost
+# Synapse para Yunohost
 
-[![Niveau d’intégration](https://dash.yunohost.org/integration/synapse.svg)](https://ci-apps.yunohost.org/ci/apps/synapse/) ![Statut du fonctionnement](https://ci-apps.yunohost.org/ci/badges/synapse.status.svg) ![Statut de maintenance](https://ci-apps.yunohost.org/ci/badges/synapse.maintain.svg)
+[![Nivel de integración](https://dash.yunohost.org/integration/synapse.svg)](https://ci-apps.yunohost.org/ci/apps/synapse/) ![Estado funcional](https://ci-apps.yunohost.org/ci/badges/synapse.status.svg) ![Estado En Mantención](https://ci-apps.yunohost.org/ci/badges/synapse.maintain.svg)
 
-[![Installer Synapse avec YunoHost](https://install-app.yunohost.org/install-with-yunohost.svg)](https://install-app.yunohost.org/?app=synapse)
+[![Instalar Synapse con Yunhost](https://install-app.yunohost.org/install-with-yunohost.svg)](https://install-app.yunohost.org/?app=synapse)
 
-*[Lire le README dans d'autres langues.](./ALL_README.md)*
+*[Leer este README en otros idiomas.](./ALL_README.md)*
 
-> *Ce package vous permet d’installer Synapse rapidement et simplement sur un serveur YunoHost.*  
-> *Si vous n’avez pas YunoHost, consultez [ce guide](https://yunohost.org/install) pour savoir comment l’installer et en profiter.*
+> *Este paquete le permite instalarSynapse rapidamente y simplement en un servidor YunoHost.*  
+> *Si no tiene YunoHost, visita [the guide](https://yunohost.org/install) para aprender como instalarla.*
 
-## Vue d’ensemble
+## Descripción general
 
 Instant messaging server matrix network.
 
 Yunohost chatroom with matrix : [https://matrix.to/#/#yunohost:matrix.org](https://matrix.to/#/#yunohost:matrix.org)
 
 
-**Version incluse :** 1.100.0~ynh1
-## Avertissements / informations importantes
+**Versión actual:** 1.100.0~ynh1
+## informaciones importantes
 
 ## Configuration
 
@@ -206,23 +206,23 @@ yunohost app setting synapse__<instancenumber> synapse_tls_port
 
 Before installing a second instance of the app it's really recommended to update all existing instances.
 
-## Documentations et ressources
+## Documentaciones y recursos
 
-- Site officiel de l’app : <https://matrix.org/>
-- Dépôt de code officiel de l’app : <https://github.com/matrix-org/synapse>
-- YunoHost Store : <https://apps.yunohost.org/app/synapse>
-- Signaler un bug : <https://github.com/YunoHost-Apps/synapse_ynh/issues>
+- Sitio web oficial: <https://matrix.org/>
+- Repositorio del código fuente oficial de la aplicación : <https://github.com/matrix-org/synapse>
+- Catálogo YunoHost: <https://apps.yunohost.org/app/synapse>
+- Reportar un error: <https://github.com/YunoHost-Apps/synapse_ynh/issues>
 
-## Informations pour les développeurs
+## Información para desarrolladores
 
-Merci de faire vos pull request sur la [branche `testing`](https://github.com/YunoHost-Apps/synapse_ynh/tree/testing).
+Por favor enviar sus correcciones a la [`branch testing`](https://github.com/YunoHost-Apps/synapse_ynh/tree/testing
 
-Pour essayer la branche `testing`, procédez comme suit :
+Para probar la rama `testing`, sigue asÍ:
 
 ```bash
 sudo yunohost app install https://github.com/YunoHost-Apps/synapse_ynh/tree/testing --debug
-ou
+o
 sudo yunohost app upgrade synapse -u https://github.com/YunoHost-Apps/synapse_ynh/tree/testing --debug
 ```
 
-**Plus d’infos sur le packaging d’applications :** <https://yunohost.org/packaging_apps>
+**Mas informaciones sobre el empaquetado de aplicaciones:** <https://yunohost.org/packaging_apps>
