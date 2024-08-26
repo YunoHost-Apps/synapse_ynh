@@ -4,6 +4,6 @@ test_format = 1.0
 
 [default]
 
-    test_upgrade_from.63e05d642565e6e9f9e5faae3addf3808b77ac49.name = "Post app user creation (branch old_version_for_CI_7)"
+    test_upgrade_from.672791a51c1d239918562d7a0d4420ec137e6694.name = "Post app user creation (branch old_version_for_CI_7)" 
 
-    test_upgrade_from.7cf8ba9549a999b754a67f2d9ab15b846f077fdd.name = "Before packaging v2 (branch old_version_for_CI_6)"
+    test_upgrade_from.971f2eb590325fb1d6e1ca5723f59aacd639c9ce.name = "Before packaging v2 (branch old_version_for_CI_6)"
