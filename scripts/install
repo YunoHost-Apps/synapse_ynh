@@ -329,7 +329,7 @@ ynh_script_progression --message="Configuring NGINX web server..." --weight=2
 # Create a dedicated php-fpm config
 ynh_script_progression --message="Configuring application..."
 
-ynh_add_fpm_config --usage=low --footprint=low
+ynh_add_fpm_config --usage=low --footprint=low --phpversion=8.2
 sed -i "s|user\s*=\s*$app|user = matrix-$app|g" /etc/php/*.*/fpm/pool.d/$app.conf
 sed -i "s|group\s*=\s*$app|group = matrix-$app|g" /etc/php/*.*/fpm/pool.d/$app.conf
 sed -i "s|chdir\s*=\s*/opt/yunohost/matrix-synapse.*|chdir = $final_www_path|g" /etc/php/*.*/fpm/pool.d/$app.conf
