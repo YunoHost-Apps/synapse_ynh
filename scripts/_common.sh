@@ -95,24 +95,10 @@ configure_nginx() {
 }
 
 ensure_vars_set() {
-    if [ -z "${report_stats:-}" ]; then
-        report_stats=false
-        ynh_app_setting_set --app="$app" --key=report_stats --value="$report_stats"
-    fi
-    if [ -z "${e2e_enabled_by_default:-}" ] ; then
-        e2e_enabled_by_default=invite
-        ynh_app_setting_set --app="$app" --key=e2e_enabled_by_default --value="$e2e_enabled_by_default"
-    fi
-
-    if [ -z "${turnserver_pwd:-}" ]; then
-        turnserver_pwd=$(ynh_string_random --length=30)
-        ynh_app_setting_set --app="$app" --key=turnserver_pwd --value="$turnserver_pwd"
-    fi
-
-    if [ -z "${turnserver_cli_pwd:-}" ]; then
-        turnserver_cli_pwd=$(ynh_string_random --length=30)
-        ynh_app_setting_set --app="$app" --key=turnserver_cli_pwd --value="$turnserver_cli_pwd"
-    fi
+    ynh_app_setting_set_default --app="$app" --key=report_stats --value=false
+    ynh_app_setting_set_default --app="$app" --key=e2e_enabled_by_default --value=invite
+    ynh_app_setting_set_default --app="$app" --key=turnserver_pwd --value="$(ynh_string_random --length=30)"
+    ynh_app_setting_set_default --app="$app" --key=turnserver_cli_pwd --value="$(ynh_string_random --length=30)"
 
     if [ -z "${web_client_location:-}" ]
     then
@@ -126,124 +112,31 @@ ensure_vars_set() {
         fi
         ynh_app_setting_set --app="$app" --key=web_client_location --value="$web_client_location"
     fi
-    if [ -z "${client_base_url:-}" ]
-    then
         client_base_url="$web_client_location"
-        ynh_app_setting_set --app="$app" --key=client_base_url --value="$client_base_url"
-    fi
-    if [ -z "${invite_client_location:-}" ]
-    then
-        invite_client_location="$web_client_location"
-        ynh_app_setting_set --app="$app" --key=invite_client_location --value="$invite_client_location"
+        ynh_app_setting_set_default --app="$app" --key=client_base_url --value="$web_client_location"
+        ynh_app_setting_set_default --app="$app" --key=invite_client_location --value="$web_client_location"
     fi
 
-    if [ -z "${allow_public_rooms_without_auth:-}" ]
-    then
-        allow_public_rooms_without_auth=${allow_public_rooms:-false}
-        ynh_app_setting_set --app="$app" --key=allow_public_rooms_without_auth --value="$allow_public_rooms_without_auth"
-    fi
-    if [ -z "${allow_public_rooms_over_federation:-}" ]
-    then
-        allow_public_rooms_over_federation=${allow_public_rooms:-false}
-        ynh_app_setting_set --app="$app" --key=allow_public_rooms_over_federation --value="$allow_public_rooms_over_federation"
-    fi
-    if [ -z "${max_upload_size:-}" ]
-    then
-        max_upload_size=100M
-        ynh_app_setting_set --app="$app" --key=max_upload_size --value="$max_upload_size"
-    fi
-    if [ -z "${disable_msisdn_registration:-}" ]
-    then
-        disable_msisdn_registration=true
-        ynh_app_setting_set --app="$app" --key=disable_msisdn_registration --value=$disable_msisdn_registration
-    fi
-    if [ -z "${account_threepid_delegates_msisdn:-}" ]
-    then
-        account_threepid_delegates_msisdn=''
-        ynh_app_setting_set --app="$app" --key=account_threepid_delegates_msisdn --value="$account_threepid_delegates_msisdn"
-    fi
-
-    if [ -z "${registrations_require_3pid:-}" ]
-    then
-        registrations_require_3pid=email
-        ynh_app_setting_set --app="$app" --key=registrations_require_3pid --value="$registrations_require_3pid"
-    fi
-    if [ -z "${allowed_local_3pids_email:-}" ]
-    then
-        allowed_local_3pids_email=''
-        ynh_app_setting_set --app="$app" --key=allowed_local_3pids_email --value="$allowed_local_3pids_email"
-    fi
-    if [ -z "${allowed_local_3pids_msisdn:-}" ]
-    then
-        allowed_local_3pids_msisdn=''
-        ynh_app_setting_set --app="$app" --key=allowed_local_3pids_msisdn --value="$allowed_local_3pids_msisdn"
-    fi
-    if [ -z "${account_threepid_delegates_msisdn:-}" ]
-    then
-        account_threepid_delegates_msisdn=""
-        ynh_app_setting_set --app="$app" --key=account_threepid_delegates_msisdn --value="$account_threepid_delegates_msisdn"
-    fi
-
-    if [ -z "${allow_guest_access:-}" ]
-    then
-        allow_guest_access=false
-        ynh_app_setting_set --app="$app" --key=allow_guest_access --value="$allow_guest_access"
-    fi
-    if [ -z "${default_identity_server:-}" ]
-    then
-        default_identity_server='https://matrix.org'
-        ynh_app_setting_set --app=$app --key=default_identity_server --value="$default_identity_server"
-    fi
-
-    if [ -z "${auto_join_rooms:-}" ]
-    then
-        auto_join_rooms=''
-        ynh_app_setting_set --app="$app" --key=auto_join_rooms --value="$auto_join_rooms"
-    fi
-    if [ -z "${autocreate_auto_join_rooms:-}" ]
-    then
-        autocreate_auto_join_rooms=false
-        ynh_app_setting_set --app="$app" --key=autocreate_auto_join_rooms --value="$autocreate_auto_join_rooms"
-    fi
-    if [ -z "${auto_join_rooms_for_guests:-}" ]
-    then
-        auto_join_rooms_for_guests=true
-        ynh_app_setting_set --app="$app" --key=auto_join_rooms_for_guests --value="$auto_join_rooms_for_guests"
-    fi
-
-    if [ -z "${enable_notifs:-}" ]
-    then
-        enable_notifs=true
-        ynh_app_setting_set --app="$app" --key=enable_notifs --value="$enable_notifs"
-    fi
-    if [ -z "${notif_for_new_users:-}" ]
-    then
-        notif_for_new_users=true
-        ynh_app_setting_set --app="$app" --key=notif_for_new_users --value="$notif_for_new_users"
-    fi
-    if [ -z "${enable_group_creation:-}" ]
-    then
-        enable_group_creation=true
-        ynh_app_setting_set --app="$app" --key=enable_group_creation --value="$enable_group_creation"
-    fi
-
-    if [ -z "${enable_3pid_lookup:-}" ]
-    then
-        enable_3pid_lookup=false
-        ynh_app_setting_set --app="$app" --key=enable_3pid_lookup --value="$enable_3pid_lookup"
-    fi
-
-    if [ -z "${push_include_content:-}" ]
-    then
-        push_include_content=true
-        ynh_app_setting_set --app="$app" --key=push_include_content --value="$push_include_content"
-    fi
-
-    if [ -z "${enable_dtls_for_audio_video_turn_call:-}" ]
-    then
-        enable_dtls_for_audio_video_turn_call=true
-        ynh_app_setting_set --app="$app" --key=enable_dtls_for_audio_video_turn_call --value="$enable_dtls_for_audio_video_turn_call"
-    fi
+    ynh_app_setting_set_default --app="$app" --key=allow_public_rooms_without_auth --value="${allow_public_rooms:-false}"
+    ynh_app_setting_set_default --app="$app" --key=allow_public_rooms_over_federation --value="${allow_public_rooms:-false}"
+    ynh_app_setting_set_default --app="$app" --key=max_upload_size --value=100M
+    ynh_app_setting_set_default --app="$app" --key=disable_msisdn_registration --value=true
+    ynh_app_setting_set_default --app="$app" --key=account_threepid_delegates_msisdn --value=''
+    ynh_app_setting_set_default --app="$app" --key=registrations_require_3pid --value=email
+    ynh_app_setting_set_default --app="$app" --key=allowed_local_3pids_email --value=''
+    ynh_app_setting_set_default --app="$app" --key=allowed_local_3pids_msisdn --value=''
+    ynh_app_setting_set_default --app="$app" --key=account_threepid_delegates_msisdn --value=''
+    ynh_app_setting_set_default --app="$app" --key=allow_guest_access --value=false
+    ynh_app_setting_set_default --app="$app" --key=default_identity_server --value='https://matrix.org'
+    ynh_app_setting_set_default --app="$app" --key=auto_join_rooms --value=''
+    ynh_app_setting_set_default --app="$app" --key=autocreate_auto_join_rooms --value=false
+    ynh_app_setting_set_default --app="$app" --key=auto_join_rooms_for_guests --value=true
+    ynh_app_setting_set_default --app="$app" --key=enable_notifs --value=true
+    ynh_app_setting_set_default --app="$app" --key=notif_for_new_users --value=true
+    ynh_app_setting_set_default --app="$app" --key=enable_group_creation --value=true
+    ynh_app_setting_set_default --app="$app" --key=enable_3pid_lookup --value=false
+    ynh_app_setting_set_default --app="$app" --key=push_include_content --value=true
+    ynh_app_setting_set_default --app="$app" --key=enable_dtls_for_audio_video_turn_call --value=true
 }
 
 set_permissions() {
