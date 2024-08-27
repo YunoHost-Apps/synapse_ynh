@@ -242,6 +242,16 @@ if grep -q "^matrix-$app" /etc/passwd; then
 fi
 
 #=================================================
+# MIGRATION 13 : set PHP version if unset
+#=================================================
+
+# If phpversion doesn't exist, create it
+if [ -z "${phpversion:-}" ]; then
+	phpversion=8.3
+	ynh_app_setting_set --app=$app --key=phpversion --value=$phpversion
+fi
+
+#=================================================
 # DOWNLOAD, CHECK AND UNPACK SOURCE
 #=================================================
 
