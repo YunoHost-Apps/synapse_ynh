@@ -112,10 +112,9 @@ ensure_vars_set() {
         fi
         ynh_app_setting_set --app="$app" --key=web_client_location --value="$web_client_location"
     fi
-        client_base_url="$web_client_location"
-        ynh_app_setting_set_default --app="$app" --key=client_base_url --value="$web_client_location"
-        ynh_app_setting_set_default --app="$app" --key=invite_client_location --value="$web_client_location"
-    fi
+
+    ynh_app_setting_set_default --app="$app" --key=client_base_url --value="$web_client_location"
+    ynh_app_setting_set_default --app="$app" --key=invite_client_location --value="$web_client_location"
 
     ynh_app_setting_set_default --app="$app" --key=allow_public_rooms_without_auth --value="${allow_public_rooms:-false}"
     ynh_app_setting_set_default --app="$app" --key=allow_public_rooms_over_federation --value="${allow_public_rooms:-false}"
