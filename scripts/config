@@ -1,11 +1,5 @@
 #!/bin/bash
 
-#=================================================
-# GENERIC START
-#=================================================
-# IMPORT GENERIC HELPERS
-#=================================================
-
 source ./experimental_helper.sh
 source ./_common.sh
 source /usr/share/yunohost/helpers
@@ -27,13 +21,11 @@ ynh_app_config_validate() {
 ynh_app_config_apply() {
     _ynh_app_config_apply
     configure_nginx
-    ynh_add_config --jinja --template="homeserver.yaml" --destination="/etc/matrix-$app/homeserver.yaml"
-    ynh_add_config --template="log.yaml" --destination="/etc/matrix-$app/log.yaml"
+    ynh_config_add --jinja --template="homeserver.yaml" --destination="/etc/matrix-$app/homeserver.yaml"
+    ynh_config_add --template="log.yaml" --destination="/etc/matrix-$app/log.yaml"
     set_permissions
 }
 
-#=================================================
-# GENERIC FINALIZATION
 #=================================================
 # SELECT THE ACTION FOLLOWING THE GIVEN ARGUMENT
 #=================================================

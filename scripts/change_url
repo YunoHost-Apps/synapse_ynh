@@ -10,44 +10,42 @@ source ./_common.sh
 source /usr/share/yunohost/helpers
 
 # We stop the service
-ynh_systemd_action --service_name="$app".service --action=stop
+ynh_systemctl --service="$app".service --action=stop
 
-#=================================================
-# STANDARD MODIFICATIONS
 #=================================================
 # NGINX CONFIGURATION
 #=================================================
 
-ynh_script_progression --message="Updating NGINX configuration..."
+ynh_script_progression "Updating NGINX configuration..."
 
-ynh_change_url_nginx_config
+ynh_config_change_url_nginx
 configure_nginx
 
 #=================================================
 # UPDATE SYNAPSE CONFIG
 #=================================================
 
-ynh_script_progression --message="Updating Synapse config..." --weight=2
-ynh_add_config --jinja --template="homeserver.yaml" --destination="/etc/matrix-$app/homeserver.yaml"
-ynh_add_config --template="log.yaml" --destination="/etc/matrix-$app/log.yaml"
+ynh_script_progression "Updating Synapse config..."
+ynh_config_add --jinja --template="homeserver.yaml" --destination="/etc/matrix-$app/homeserver.yaml"
+ynh_config_add --template="log.yaml" --destination="/etc/matrix-$app/log.yaml"
 
 #=================================================
 # SECURE FILES AND DIRECTORIES
 #=================================================
 
-ynh_script_progression --message="Protecting directories..." --weight=3
+ynh_script_progression "Protecting directories..."
 set_permissions
 
 #=================================================
 # RELOAD SERVICES
 #=================================================
-ynh_script_progression --message="Restarting Synapse services..." --weight=5
+ynh_script_progression "Restarting Synapse services..."
 
-ynh_systemd_action --service_name="$app"-coturn.service --action=restart
-ynh_systemd_action --service_name="$app".service --action=restart --line_match="Synapse now listening on TCP port $port_synapse_tls" --log_path="/var/log/matrix-$app/homeserver.log" --timeout=300
+ynh_systemctl --service="$app"-coturn.service --action=restart
+ynh_systemctl --service="$app".service --action=restart --wait_until="Synapse now listening on TCP port $port_synapse_tls" --log_path="/var/log/matrix-$app/homeserver.log" --timeout=300
 
 if ! yunohost --output-as plain domain list | grep -q "^$server_name"'$'; then
     ynh_print_warn "Note yunohost won't be able to manage the required config for $server_name. So please add the needed DNS config as described on the documentation"
 fi
 
-ynh_script_progression --message="Change of URL completed for $app" --last
+ynh_script_progression "Change of URL completed for $app"

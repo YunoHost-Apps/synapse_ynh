@@ -18,7 +18,8 @@ cpe = "cpe:2.3:a:matrix:synapse"
 fund = "https://matrix.org/support/#"
 
 [integration]
-yunohost = ">= 11.2.13"
+yunohost = ">= 11.2.18"
+helpers_version = "2.1"
 architectures = "all"
 multi_instance = true
 ldap = true
@@ -76,6 +77,7 @@ ram.runtime = "1G"
     home = "/opt/yunohost/matrix-__APP__"
 
     [resources.install_dir]
+    group = "www-data:r-x"
     dir = "/var/www/__APP__"
     owner = "__APP__:rwX"
     group = "__APP__:rX"
