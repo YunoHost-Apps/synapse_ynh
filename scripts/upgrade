@@ -231,12 +231,8 @@ fi
 # DOWNLOAD, CHECK AND UNPACK SOURCE
 #=================================================
 
-# FIXME: this is still supported but the recommendation is now to *always* re-setup the app sources wether or not the upstream sources changed
-if ynh_app_upstream_version_changed || [ ! -e $code_dir/bin/python3 ] || [ ! -e $code_dir/lib/python$python_version ]
-then
-    ynh_script_progression "Upgrading source files..."
-    install_sources
-fi
+ynh_script_progression "Upgrading source files..."
+install_sources
 
 #=================================================
 # MIGRATION 1 : GENERATE SYNAPSE SECRET
@@ -247,7 +243,7 @@ then
     ynh_script_progression "Generating synapse secret..."
 
     # Generate config and keys
-    $code_dir/bin/python -m synapse.app.homeserver --keys-directory /etc/matrix-$app/ --generate-config --generate-keys --server-name $server_name --report-stats=no -c homeserver.yml
+    "$code_dir"/bin/python -m synapse.app.homeserver --keys-directory /etc/matrix-"$app"/ --generate-config --generate-keys --server-name "$server_name" --report-stats=no -c homeserver.yml
 
     # Get random values from config
     registration_shared_secret=$(egrep "^registration_shared_secret:" homeserver.yml | cut -d'"' -f2)
@@ -273,10 +269,11 @@ ynh_config_add --template="log.yaml" --destination="/etc/matrix-$app/log.yaml"
 # WARNING : theses command are used in INSTALL, UPGRADE
 # For any update do it in all files
 
-mkdir -p $install_dir
-cp ../sources/cas_server.php $install_dir/
-#REMOVEME? Assuming the install dir is setup using ynh_setup_source, the proper chmod/chowns are now already applied and it shouldn't be necessary to tweak perms | chmod u=rwX,g=rX,o= -R $install_dir
-#REMOVEME? Assuming the install dir is setup using ynh_setup_source, the proper chmod/chowns are now already applied and it shouldn't be necessary to tweak perms | chown $app:root -R $install_dir
+mkdir -p "$install_dir"
+cp ../sources/cas_server.php "$install_dir"/
+chmod u=rwX,g=rX,o= -R "$install_dir"
+chown "$app":root -R "$install_dir"
+
 #=================================================
 # NGINX CONFIGURATION
 #=================================================
@@ -322,8 +319,8 @@ fi
 # ADVERTISE SERVICE IN ADMIN PANEL
 #=================================================
 
-yunohost service add $app --log "/var/log/matrix-$app/homeserver.log" --needs_exposed_ports $port_synapse_tls --description 'Main matrix server service.'
-yunohost service add $app-coturn --needs_exposed_ports $port_turnserver_tls --description 'Turn server for matrix server. Used for audio and video call.'
+yunohost service add "$app" --log "/var/log/matrix-$app/homeserver.log" --needs_exposed_ports "$port_synapse_tls" --description 'Main matrix server service.'
+yunohost service add "$app"-coturn --needs_exposed_ports "$port_turnserver_tls" --description 'Turn server for matrix server. Used for audio and video call.'
 
 #=================================================
 # UPDATE SYSTEMD
@@ -333,8 +330,8 @@ ynh_script_progression "Upgrading systemd configuration..."
 # Create systemd service for synapse and turnserver
 ynh_config_add_systemd  --template=synapse.service
 
-cp ../conf/default_coturn /etc/matrix-$app/coturn_env
-ynh_config_add_systemd --service=$app-coturn --template=synapse-coturn.service
+cp ../conf/default_coturn /etc/matrix-"$app"/coturn_env
+ynh_config_add_systemd --service="$app"-coturn --template=synapse-coturn.service
 
 #=================================================
 # UPGRADE FAIL2BAN
@@ -351,11 +348,11 @@ ynh_script_progression "Configuring permissions..."
 
 if yunohost --output-as plain domain list | grep -q "^$server_name"'$'; then
     if ! ynh_""permission_exists --permission=server_client_infos; then
-        ynh_""permission_create --permission=server_client_infos --url=$server_name/.well-known/matrix \
+        ynh_""permission_create --permission=server_client_infos --url="$server_name"/.well-known/matrix \
                               --label="Server info for clients. (well-known)" --show_tile=false --allowed=visitors \
                               --auth_header=false --protected=true
     else yunohost --output-as plain domain list | grep -q "^$server_name"'$'
-        ynh_""permission_url --permission=server_client_infos --url=$server_name/.well-known/matrix \
+        ynh_""permission_url --permission=server_client_infos --url="$server_name"/.well-known/matrix \
                           --auth_header=false
         ynh_""permission_update --permission=server_client_infos --label="Server info for clients. (well-known)" --show_tile=false \
                               --protected=true
@@ -375,16 +372,16 @@ set_permissions data
 
 # WARNING : theses command are used in INSTALL, UPGRADE
 # For any update do it in all files
-ynh_replace __APP__ $app ../hooks/post_cert_update
-ynh_replace __DOMAIN__ $domain ../hooks/post_cert_update
+ynh_replace __APP__ "$app" ../hooks/post_cert_update
+ynh_replace __DOMAIN__ "$domain" ../hooks/post_cert_update
 
 #=================================================
 # RELOAD SERVICES
 #=================================================
 ynh_script_progression "Restarting Synapse services..."
 
-ynh_systemctl --service=$app-coturn.service --action=restart
-ynh_systemctl --service=$app.service --action=restart --wait_until="Synapse now listening on TCP port $port_synapse_tls" --log_path="/var/log/matrix-$app/homeserver.log" --timeout=300
+ynh_systemctl --service="$app"-coturn.service --action=restart
+ynh_systemctl --service="$app".service --action=restart --wait_until="Synapse now listening on TCP port $port_synapse_tls" --log_path="/var/log/matrix-$app/homeserver.log" --timeout=300
 
 #=================================================
 # END OF SCRIPT

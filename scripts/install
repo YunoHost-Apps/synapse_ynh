@@ -115,7 +115,7 @@ cp ../sources/cas_server.php "$install_dir"/
 ynh_script_progression "Creating Synapse config..."
 
 # Generate config
-$code_dir/bin/python -m synapse.app.homeserver --keys-directory /etc/matrix-"$app"/ --generate-config --server-name "$server_name" --report-stats=no -c homeserver.yml
+"$code_dir"/bin/python -m synapse.app.homeserver --keys-directory /etc/matrix-"$app"/ --generate-config --server-name "$server_name" --report-stats=no -c homeserver.yml
 
 # Get random values from config
 registration_shared_secret="$(grep -E "^registration_shared_secret:" homeserver.yml | cut -d'"' -f2)"

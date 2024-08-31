@@ -68,7 +68,7 @@ configure_coturn() {
     then
         turn_external_ip+="$public_ip4,"
     fi
-    if [ -n "$public_ip6" ] && ynh_validate_ip6 --ip_address="$public_ip6"
+    if [ -n "$public_ip6" ] && ynh_validate_ip --family=6 --ip_address="$public_ip6"
     then
         turn_external_ip+="$public_ip6"
     fi
@@ -139,7 +139,7 @@ ensure_vars_set() {
 }
 
 set_permissions() {
-    chown $app:$app -R "$code_dir"
+    chown "$app":"$app" -R "$code_dir"
     chmod o= -R "$code_dir"
 
     chmod 770 "$code_dir"/Coturn_config_rotate.sh
