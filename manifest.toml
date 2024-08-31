@@ -77,10 +77,9 @@ ram.runtime = "1G"
     home = "/opt/yunohost/matrix-__APP__"
 
     [resources.install_dir]
-    group = "www-data:r-x"
     dir = "/var/www/__APP__"
     owner = "__APP__:rwX"
-    group = "__APP__:rX"
+    group = "www-data:r-x"
 
     [resources.data_dir]
     dir = "/home/yunohost.app/__APP__"
