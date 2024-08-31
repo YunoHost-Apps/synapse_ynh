@@ -79,7 +79,7 @@ adduser turnserver ssl-cert
 #=================================================
 ynh_script_progression "Fixing database type..."
 
-ynh_psql_execute_as_root \
+ynh_psql_db_shell \
     <<< "update pg_database set datcollate='C', datctype='C' where datname='$db_name';"
 
 #=================================================
@@ -203,8 +203,8 @@ fi
 
 # WARNING : theses command are used in INSTALL, UPGRADE
 # For any update do it in all files
-ynh_replace __APP__ "$app" ../hooks/post_cert_update
-ynh_replace __DOMAIN__ "$domain" ../hooks/post_cert_update
+ynh_replace --match=__APP__ --replace="$app" --file=../hooks/post_cert_update
+ynh_replace --match=__DOMAIN__  --replace="$domain"  --file=../hooks/post_cert_update
 
 #=================================================
 # SECURE FILES AND DIRECTORIES

@@ -21,7 +21,7 @@ ynh_script_progression "Stopping and removing the systemd service"
 
 ynh_config_remove_systemd
 
-ynh_config_remove_systemd"$app"-coturn
+ynh_config_remove_systemd "$app"-coturn
 
 #=================================================
 # REMOVE APP MAIN DIR

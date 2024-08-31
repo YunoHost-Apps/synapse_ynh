@@ -24,7 +24,7 @@ adduser turnserver ssl-cert
 #=================================================
 ynh_script_progression "Fixing database type..."
 
-ynh_psql_execute_as_root \
+ynh_psql_db_shell \
     <<< "update pg_database set datcollate='C', datctype='C' where datname='$db_name';"
 
 #=================================================

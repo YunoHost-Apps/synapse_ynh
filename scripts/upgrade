@@ -372,8 +372,8 @@ set_permissions data
 
 # WARNING : theses command are used in INSTALL, UPGRADE
 # For any update do it in all files
-ynh_replace __APP__ "$app" ../hooks/post_cert_update
-ynh_replace __DOMAIN__ "$domain" ../hooks/post_cert_update
+ynh_replace --match=__APP__ --replace="$app" --file=../hooks/post_cert_update
+ynh_replace --match=__DOMAIN__  --replace="$domain"  --file=../hooks/post_cert_update
 
 #=================================================
 # RELOAD SERVICES
