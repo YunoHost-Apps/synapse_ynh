@@ -18,7 +18,7 @@ cpe = "cpe:2.3:a:matrix:synapse"
 fund = "https://matrix.org/support/#"
 
 [integration]
-yunohost = ">= 11.2.18"
+yunohost = ">= 11.2.30"
 helpers_version = "2.1"
 architectures = "all"
 multi_instance = true
