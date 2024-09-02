@@ -140,7 +140,7 @@ ensure_vars_set() {
 
 set_permissions() {
     chown "$app":"$app" -R "$code_dir"
-    chmod o= -R "$code_dir"
+    chmod u+rwX,g+rX,o= -R "$code_dir"
 
     chmod 770 "$code_dir"/Coturn_config_rotate.sh
     chmod 700 "$code_dir"/update_synapse_for_appservice.sh
