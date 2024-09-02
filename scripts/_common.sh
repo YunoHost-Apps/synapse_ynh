@@ -139,14 +139,18 @@ ensure_vars_set() {
 }
 
 set_permissions() {
-    chown "$app":"$app" -R "$code_dir"
-    chmod u+rwX,g+rX,o= -R "$code_dir"
+    chown -R "$app:$app" "$install_dir"
+    chmod -R u+rwX,g+rX-w,o= "$install_dir"
 
-    chmod 770 "$code_dir"/Coturn_config_rotate.sh
+    chown -R "$app":"$app" "$code_dir"
+    chmod -R u+rwX,g+rX-w,o= "$code_dir"
+
+    chmod 750 "$code_dir"/Coturn_config_rotate.sh
     chmod 700 "$code_dir"/update_synapse_for_appservice.sh
     chmod 700 "$code_dir"/set_admin_user.sh
 
     if [ "${1:-}" == data ]; then
+        chmod 750 "$data_dir"
         find "$data_dir" \(   \! -perm -o= \
                          -o \! -user "$app" \
                          -o \! -group "$app" \) \
