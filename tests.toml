@@ -4,8 +4,9 @@ test_format = 1.0
 
 [default]
 
-    test_upgrade_from.672791a51c1d239918562d7a0d4420ec137e6694.name = "Post app user creation (branch old_version_for_CI_7)"
+    test_upgrade_from.9f273cac72baad192f046620dae33a97cd0ec749.name = "Post app user creation (branch old_version_for_CI_7)"
 
-    test_upgrade_from.971f2eb590325fb1d6e1ca5723f59aacd639c9ce.name = "Before packaging v2 (branch old_version_for_CI_6)"
+    test_upgrade_from.3b5a58e5d8b83f292c6160e8908ac662360aa03e.name = "Before packaging v2 (branch old_version_for_CI_6)"
 
     test_upgrade_from.0d433dc2d756cf39b13b1be8a7b9c00655edf4fb.name = "Before Matrix v2 implementation"
+
