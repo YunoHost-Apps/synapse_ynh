@@ -78,7 +78,7 @@ ram.runtime = "1G"
 
     [resources.install_dir]
     dir = "/var/www/__APP__"
-    owner = "__APP__:rwX"
+    owner = "__APP__:rwx"
     group = "www-data:r-x"
 
     [resources.data_dir]
