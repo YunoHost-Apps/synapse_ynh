@@ -22,7 +22,6 @@ Yunohost chatroom with matrix : [https://matrix.to/#/#yunohost:matrix.org](https
 
 
 **Geleverde versie:** 1.116.0~ynh1
-
 ## Documentatie en bronnen
 
 - Officiele website van de app: <https://matrix.org/>
