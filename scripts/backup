@@ -1,11 +1,5 @@
 #!/bin/bash
 
-#=================================================
-# GENERIC START
-#=================================================
-# IMPORT GENERIC HELPERS
-#=================================================
-
 source ../settings/scripts/_common.sh
 source ../settings/scripts/experimental_helper.sh
 source /usr/share/yunohost/helpers
@@ -15,13 +9,10 @@ source /usr/share/yunohost/helpers
 #=================================================
 
 if systemctl is-active "$app".service --quiet; then
-    ynh_print_warn --message="It's hightly recommended to make your backup when the service is stopped. Please stop $app service with this command before to run the backup 'systemctl stop $app.service'"
+    ynh_print_warn "It's hightly recommended to make your backup when the service is stopped. Please stop $app service with this command before to run the backup 'systemctl stop $app.service'"
 fi
 
-#=================================================
-# DECLARE DATA AND CONF FILES TO BACKUP
-#=================================================
-ynh_print_info --message="Declaring files to be backed up..."
+ynh_print_info "Declaring files to be backed up..."
 
 #=================================================
 # STANDARD BACKUP STEPS
@@ -29,34 +20,34 @@ ynh_print_info --message="Declaring files to be backed up..."
 # BACKUP THE APP MAIN DIR
 #=================================================
 
-ynh_backup --src_path="$code_dir"
-ynh_backup --src_path="$install_dir"
+ynh_backup "$code_dir"
+ynh_backup "$install_dir"
 
 #=================================================
 # BACKUP THE NGINX CONFIGURATION
 #=================================================
 
 # BACKUP THE PHP-FPM CONFIGURATION
-ynh_backup --src_path="/etc/php/$phpversion/fpm/pool.d/$app.conf"
+ynh_backup "/etc/php/$php_version/fpm/pool.d/$app.conf"
 
-ynh_backup --src_path="/etc/nginx/conf.d/$domain.d/$app.conf"
+ynh_backup "/etc/nginx/conf.d/$domain.d/$app.conf"
 if yunohost --output-as plain domain list | grep -q "^$server_name$"
 then
-    ynh_backup --src_path="/etc/nginx/conf.d/${server_name}.d/${app}_server_name.conf"
+    ynh_backup "/etc/nginx/conf.d/${server_name}.d/${app}_server_name.conf"
 fi
 
 #=================================================
 # BACKUP THE POSTGRESQL DATABASE
 #=================================================
 
-ynh_psql_dump_db --database="$db_name" > ${YNH_CWD}/dump.sql
+ynh_psql_dump_db > ${YNH_CWD}/dump.sql
 
 #=================================================
 # BACKUP FAIL2BAN CONFIGURATION
 #=================================================
 
-ynh_backup --src_path="/etc/fail2ban/jail.d/$app.conf"
-ynh_backup --src_path="/etc/fail2ban/filter.d/$app.conf"
+ynh_backup "/etc/fail2ban/jail.d/$app.conf"
+ynh_backup "/etc/fail2ban/filter.d/$app.conf"
 
 #=================================================
 # SPECIFIC BACKUP
@@ -64,36 +55,36 @@ ynh_backup --src_path="/etc/fail2ban/filter.d/$app.conf"
 # BACKUP SYNAPSE CONFIG
 #=================================================
 
-ynh_backup --src_path="/etc/matrix-$app"
+ynh_backup "/etc/matrix-$app"
 
 #=================================================
 # BACKUP SYSTEMD
 #=================================================
 
-ynh_backup --src_path="/etc/systemd/system/$app.service"
-ynh_backup --src_path="/etc/systemd/system/$app-coturn.service"
+ynh_backup "/etc/systemd/system/$app.service"
+ynh_backup "/etc/systemd/system/$app-coturn.service"
 
 #=================================================
 # BACKUP SYNAPSE DATA
 #=================================================
 
-ynh_backup --src_path="$data_dir" --is_big=1
+ynh_backup "$data_dir"
 
 #=================================================
 # BACKUP SYNAPSE LOG
 #=================================================
 
-ynh_backup --src_path="/var/log/matrix-$app" --is_big=1
+ynh_backup "/var/log/matrix-$app"
 
 #=================================================
 # BACKUP HOOKS
 #=================================================
 
 # Copy hook
-ynh_backup --src_path="/etc/yunohost/hooks.d/post_cert_update/50-$app"
+ynh_backup "/etc/yunohost/hooks.d/post_cert_update/50-$app"
 
 #=================================================
 # END OF SCRIPT
 #=================================================
 
-ynh_print_info --message="Backup script completed for $app. (YunoHost will then actually copy those files to the archive)."
+ynh_print_info "Backup script completed for $app. (YunoHost will then actually copy those files to the archive)."
