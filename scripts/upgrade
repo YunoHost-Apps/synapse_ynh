@@ -181,7 +181,7 @@ fi
 #=================================================
 
 if ynh_psql_db_shell <<< '\list' | grep matrix_$app; then
-    ynh_''psql_remove_db --db_user="user_wich_must_dont_exist_and_keep_current_user" --db_name=$db_name
+    ynh_psql_drop_db "$db_name"
     ynh_psql_db_shell <<< "ALTER DATABASE matrix_$app RENAME TO $db_name;"
     ynh_psql_db_shell  <<< "REASSIGN OWNED BY matrix_$app TO $db_user;"
     ynh_psql_db_shell <<< "UPDATE pg_database SET datcollate='C', datctype='C' WHERE datname='$db_name';"
