@@ -182,8 +182,8 @@ fi
 
 if ynh_psql_db_shell <<< '\list' | grep matrix_$app; then
     ynh_psql_drop_db "$db_name"
-    ynh_psql_db_shell <<< "ALTER DATABASE matrix_$app RENAME TO $db_name;"
-    ynh_psql_db_shell  <<< "REASSIGN OWNED BY matrix_$app TO $db_user;"
+    sudo --login --user=postgres psql <<< "ALTER DATABASE matrix_$app RENAME TO $db_name;"
+    ynh_psql_db_shell <<< "REASSIGN OWNED BY matrix_$app TO $db_user;"
     ynh_psql_db_shell <<< "UPDATE pg_database SET datcollate='C', datctype='C' WHERE datname='$db_name';"
     ynh_psql_db_shell <<< "DROP USER matrix_$app;"
     # for unknown reason we need to set again the password for synapse user. Without this synapse can't authenticate to postgresql
