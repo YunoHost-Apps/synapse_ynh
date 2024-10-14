@@ -60,8 +60,8 @@ configure_coturn() {
     # note : '|| true' is used to ignore the errors if we can't get the public ipv4 or ipv6
     local public_ip4
     local public_ip6
-    public_ip4="$(curl -s ip.yunohost.org)" || true
-    public_ip6="$(curl -s ipv6.yunohost.org)" || true
+    public_ip4="$(curl -s https://ip.yunohost.org)" || true
+    public_ip6="$(curl -s https://ipv6.yunohost.org)" || true
 
     local turn_external_ip=""
     if [ -n "$public_ip4" ] && ynh_validate_ip --family=4 --ip_address="$public_ip4"
