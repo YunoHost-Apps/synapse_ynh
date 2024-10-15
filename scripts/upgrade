@@ -219,9 +219,9 @@ fi
 
 if grep -q "^matrix-$app" /etc/passwd; then
     # Must stop php before remove user as user is used by php
-    systemctl stop php7.4-fpm.service
-    systemctl stop php8.2-fpm.service
-    systemctl stop php8.3-fpm.service
+    systemctl stop php7.4-fpm.service || true
+    systemctl stop php8.2-fpm.service || true
+    systemctl stop php8.3-fpm.service || true
 
     ynh_''system_user_delete --username=matrix-"$app" || true
     yunohost user delete $app || true
