@@ -1,36 +1,28 @@
 #!/bin/bash
 
-#=================================================
-# GENERIC START
-#=================================================
-# IMPORT GENERIC HELPERS
-#=================================================
-
 source _common.sh
 source experimental_helper.sh
 source /usr/share/yunohost/helpers
+
+ynh_app_setting_set_default --key=php_upload_max_filesize --value=100M
 
 #=================================================
 # SET ALL CONSTANT
 #=================================================
 
-upgrade_type=$(ynh_check_app_version_changed)
-
-#=================================================
-# STANDARD UPGRADE STEPS
 #=================================================
 # MIGRATION 5 : Manage old settings
 #=================================================
 
 # Migrate from settings 'special_domain' to 'domain' and 'special_path' to 'path'
 if [ -z "${domain:-}" ]; then
-    domain=$(ynh_app_setting_get --app=$app --key=special_domain)
-    path=$(ynh_app_setting_get --app=$app --key=special_path)
-    ynh_app_setting_set --app=$app --key=domain --value=$domain
-    ynh_app_setting_set --app=$app --key=path --value=$path
-    ynh_app_setting_delete --app=$app --key=special_domain
-    ynh_app_setting_delete --app=$app --key=special_path
-    ynh_app_setting_set --app=$app --key=no_sso --value=true
+    domain=$(ynh_app_setting_get --key=special_domain)
+    path=$(ynh_app_setting_get --key=special_path)
+    ynh_app_setting_set --key=domain --value=$domain
+    ynh_app_setting_set --key=path --value=$path
+    ynh_app_setting_delete --key=special_domain
+    ynh_app_setting_delete --key=special_path
+    ynh_app_setting_set --key=no_sso --value=true
 fi
 
 ensure_vars_set
@@ -43,33 +35,33 @@ ynh_app_setting_set_default --app="$app" --key=jitsi_server --value='jitsi.riot.
 
 if [ "$e2e_enabled_by_default" = "true" ] ; then
     e2e_enabled_by_default="all"
-    ynh_app_setting_set --app=$app --key=e2e_enabled_by_default --value=$e2e_enabled_by_default
+    ynh_app_setting_set --key=e2e_enabled_by_default --value=$e2e_enabled_by_default
 fi
 if [ "$e2e_enabled_by_default" = "false" ]; then
     e2e_enabled_by_default="off"
-    ynh_app_setting_set --app=$app --key=e2e_enabled_by_default --value=$e2e_enabled_by_default
+    ynh_app_setting_set --key=e2e_enabled_by_default --value=$e2e_enabled_by_default
 fi
 
 if [ "${registrations_require_3pid}" == none ]
 then
     registrations_require_3pid=email
-    ynh_app_setting_set --app=$app --key=registrations_require_3pid --value=$registrations_require_3pid
+    ynh_app_setting_set --key=registrations_require_3pid --value=$registrations_require_3pid
 fi
 if [[ "${allowed_local_3pids_email}" =~ \'.*\' ]] # Also remove shit value from previous config panel
 then
     allowed_local_3pids_email=''
-    ynh_app_setting_set --app=$app --key=allowed_local_3pids_email --value=$allowed_local_3pids_email
+    ynh_app_setting_set --key=allowed_local_3pids_email --value=$allowed_local_3pids_email
 fi
 if [[ "${allowed_local_3pids_msisdn}" =~ \'.*\' ]] # Also remove shit value from previous config panel
 then
     allowed_local_3pids_msisdn=''
-    ynh_app_setting_set --app=$app --key=allowed_local_3pids_msisdn --value=$allowed_local_3pids_msisdn
+    ynh_app_setting_set --key=allowed_local_3pids_msisdn --value=$allowed_local_3pids_msisdn
 fi
 
 if [ -z "${enable_registration:-}" ]
 then
   if [ -z "${is_free_registration:-}" ]; then
-      is_free_registration=$(ynh_app_setting_get --app=$app --key=is_""public)
+      is_free_registration=$(ynh_app_setting_get --key=is_""public)
   fi
 
   if [ "$is_free_registration" -eq "0" ]
@@ -81,12 +73,12 @@ then
       enable_registration="true"
       password_enabled="true"
   fi
-  ynh_app_setting_set --app=$app --key=enable_registration --value=$enable_registration
-  ynh_app_setting_set --app=$app --key=password_enabled --value=$password_enabled
+  ynh_app_setting_set --key=enable_registration --value=$enable_registration
+  ynh_app_setting_set --key=password_enabled --value=$password_enabled
 fi
 
 # remove legacy env file into /etc/default
-ynh_secure_remove --file=/etc/default/coturn-$app
+ynh_safe_rm /etc/default/coturn-$app
 
 #=================================================
 # MIGRATION 7 : STANDARDIZE SYSTEMD UNIT
@@ -94,7 +86,7 @@ ynh_secure_remove --file=/etc/default/coturn-$app
 
 if [ -e /etc/systemd/system/matrix-$app.service ]
 then
-    ynh_script_progression --message='Migrating systemd unit to standard name...'
+    ynh_script_progression 'Migrating systemd unit to standard name...'
 
     systemctl stop matrix-$app.service || true
     systemctl stop coturn-$app.service || true
@@ -102,8 +94,8 @@ then
     yunohost service remove matrix-$app || true
     yunohost service remove coturn-$app || true
 
-    ynh_secure_remove --file=/etc/systemd/system/matrix-$app.service
-    ynh_secure_remove --file=/etc/systemd/system/coturn-$app.service
+    ynh_safe_rm /etc/systemd/system/matrix-$app.service
+    ynh_safe_rm /etc/systemd/system/coturn-$app.service
 
     touch /etc/systemd/system/$app.service
     systemctl daemon-reload || true
@@ -114,16 +106,16 @@ fi
 #=================================================
 
 # We stop the service
-ynh_systemd_action --service_name=$app.service --action=stop
+ynh_systemctl --service=$app.service --action=stop
 
-ynh_script_progression --message='Managing migrations...'
+ynh_script_progression 'Managing migrations...'
 
 #=================================================
 # MIGRATION 6 : Migrate data directory
 #=================================================
 
 if [ -e "/var/lib/matrix-$app" ]; then
-    ynh_script_progression --message="Moving data directory to $data_dir..." --weight=1
+    ynh_script_progression "Moving data directory to $data_dir..."
     if [ -e "$data_dir" ]; then
         old_data_dir_path="$data_dir$(date '+%Y%m%d.%H%M%S')"
         ynh_print_warn "A data directory already exist. Data was renamed to $old_data_dir_path"
@@ -139,7 +131,7 @@ fi
 # Fix issue about certificates access
 if [ ! $(grep "ssl-cert:x:[0-9]*:.*$app" /etc/group) ]
 then
-    ynh_script_progression --message="Use standard access for certificate..." --weight=1
+    ynh_script_progression "Use standard access for certificate..."
 
     adduser $app ssl-cert
     adduser turnserver ssl-cert
@@ -155,9 +147,9 @@ fi
 # Make dh cert for synapse if it doesn't exist
 if [ ! -e /etc/ssl/private/dh2048.pem ]
 then
-    ynh_script_progression --message="Creating a dh file..." --weight=1
+    ynh_script_progression "Creating a dh file..."
 
-    ynh_exec_warn_less openssl dhparam -out /etc/ssl/private/dh2048.pem -outform PEM -dsaparam 2048
+    ynh_hide_warnings openssl dhparam -out /etc/ssl/private/dh2048.pem -outform PEM -dsaparam 2048
     chown root:ssl-cert /etc/ssl/private/dh2048.pem
     chmod 640 /etc/ssl/private/dh2048.pem
 fi
@@ -168,7 +160,7 @@ fi
 
 if [ ! -e /etc/matrix-$app/coturn.conf ]
 then
-    ynh_script_progression --message="Creating an independant service for coturn..." --weight=1
+    ynh_script_progression "Creating an independant service for coturn..."
 
     #=================================================
     # CREATE AN INDEPENDANT SERVICE FOR COTURN
@@ -181,21 +173,21 @@ then
     # MAKE A CLEAN LOGROTATE CONFIG
     #=================================================
 
-    ynh_use_logrotate --logfile=/var/log/matrix-$app --nonappend
+    ynh_config_add_logrotate /var/log/matrix-$app
 fi
 
 #=================================================
 # MIGRATION 8 : Migrate database to managed database (Migrate db name from matrix_$app to $app)
 #=================================================
 
-if ynh_psql_execute_as_root --sql='\list' | grep matrix_$app; then
-    ynh_''psql_remove_db --db_user="user_wich_must_dont_exist_and_keep_current_user" --db_name=$db_name
-    ynh_psql_execute_as_root --sql="ALTER DATABASE matrix_$app RENAME TO $db_name;"
-    ynh_psql_execute_as_root --database=$db_name --sql="REASSIGN OWNED BY matrix_$app TO $db_user;"
-    ynh_psql_execute_as_root --sql="UPDATE pg_database SET datcollate='C', datctype='C' WHERE datname='$db_name';"
-    ynh_psql_execute_as_root --sql="DROP USER matrix_$app;"
+if ynh_psql_db_shell <<< '\list' | grep matrix_$app; then
+    ynh_psql_drop_db "$db_name"
+    sudo --login --user=postgres psql <<< "ALTER DATABASE matrix_$app RENAME TO $db_name;"
+    ynh_psql_db_shell <<< "REASSIGN OWNED BY matrix_$app TO $db_user;"
+    ynh_psql_db_shell <<< "UPDATE pg_database SET datcollate='C', datctype='C' WHERE datname='$db_name';"
+    ynh_psql_db_shell <<< "DROP USER matrix_$app;"
     # for unknown reason we need to set again the password for synapse user. Without this synapse can't authenticate to postgresql
-    ynh_psql_execute_as_root --sql="ALTER USER $db_user WITH ENCRYPTED PASSWORD '$db_pwd';"
+    ynh_psql_db_shell <<< "ALTER USER $db_user WITH ENCRYPTED PASSWORD '$db_pwd';"
 fi
 
 #=================================================
@@ -204,14 +196,14 @@ fi
 
 if [ -e /home/yunohost.app/matrix-$app ]; then
     mv -t $data_dir /home/yunohost.app/matrix-$app/*
-    ynh_secure_remove --file=/home/yunohost.app/matrix-$app
+    ynh_safe_rm /home/yunohost.app/matrix-$app
 fi
 
 #=================================================
 # MIGRATION 11 : make this app using full domain
 #=================================================
 
-ynh_app_setting_set --app=$app --key=path --value=/
+ynh_app_setting_set --key=path --value=/
 
 if yunohost app map -r --output-as json | jq -r '."'$domain'" | select( . != null ) | .[] | .id' | grep -v "$app" -q; then
     ynh_print_warn 'An other app is installed on this domain. Now synapse require to be alone on the domain.'
@@ -227,23 +219,26 @@ fi
 
 if grep -q "^matrix-$app" /etc/passwd; then
     # Must stop php before remove user as user is used by php
-    systemctl stop php$YNH_PHP_VERSION-fpm.service
+    systemctl stop php7.4-fpm.service || true
+    systemctl stop php8.2-fpm.service || true
+    systemctl stop php8.3-fpm.service || true
 
     ynh_''system_user_delete --username=matrix-"$app" || true
     yunohost user delete $app || true
     ynh_''system_user_create --username=$app --home_dir=$code_dir
     adduser $app ssl-cert
+
+    systemctl start php7.4-fpm.service || true
+    systemctl start php8.2-fpm.service || true
+    systemctl start php8.3-fpm.service || true
 fi
 
 #=================================================
 # DOWNLOAD, CHECK AND UNPACK SOURCE
 #=================================================
 
-if [ "$upgrade_type" == "UPGRADE_APP" ] || [ ! -e $code_dir/bin/python3 ] || [ ! -e $code_dir/lib/python$python_version ]
-then
-    ynh_script_progression --message="Upgrading source files..." --weight=6
-    install_sources
-fi
+ynh_script_progression "Upgrading source files..."
+install_sources
 
 #=================================================
 # MIGRATION 1 : GENERATE SYNAPSE SECRET
@@ -251,30 +246,28 @@ fi
 
 if [ -z "${registration_shared_secret:-}" ] || [ "$form_secret" == "form_secret: " ]
 then
-    ynh_script_progression --message="Generating synapse secret..." --weight=1
+    ynh_script_progression "Generating synapse secret..."
 
     # Generate config and keys
-    $code_dir/bin/python -m synapse.app.homeserver --keys-directory /etc/matrix-$app/ --generate-config --generate-keys --server-name $server_name --report-stats=no -c homeserver.yml
+    "$code_dir"/bin/python -m synapse.app.homeserver --keys-directory /etc/matrix-"$app"/ --generate-config --generate-keys --server-name "$server_name" --report-stats=no -c homeserver.yml
 
     # Get random values from config
     registration_shared_secret=$(egrep "^registration_shared_secret:" homeserver.yml | cut -d'"' -f2)
     form_secret=$(egrep "^form_secret:" homeserver.yml | cut -d'"' -f2)
 
     # store in yunohost settings
-    ynh_app_setting_set --app=$app --key=registration_shared_secret --value="$registration_shared_secret"
-    ynh_app_setting_set --app=$app --key=form_secret --value="$form_secret"
+    ynh_app_setting_set --key=registration_shared_secret --value="$registration_shared_secret"
+    ynh_app_setting_set --key=form_secret --value="$form_secret"
 fi
 
-#=================================================
-# STANDARD UPGRADE STEPS
 #=================================================
 
 #=================================================
 # UPDATE SYNAPSE CONFIG
 #=================================================
-ynh_script_progression --message="Updating synapse config..." --weight=2
-ynh_add_config --jinja --template="homeserver.yaml" --destination="/etc/matrix-$app/homeserver.yaml"
-ynh_add_config --template="log.yaml" --destination="/etc/matrix-$app/log.yaml"
+ynh_script_progression "Updating synapse config..."
+ynh_config_add --jinja --template="homeserver.yaml" --destination="/etc/matrix-$app/homeserver.yaml"
+ynh_config_add --template="log.yaml" --destination="/etc/matrix-$app/log.yaml"
 
 #=================================================
 # CREATE SMALL CAS SERVER
@@ -282,30 +275,27 @@ ynh_add_config --template="log.yaml" --destination="/etc/matrix-$app/log.yaml"
 # WARNING : theses command are used in INSTALL, UPGRADE
 # For any update do it in all files
 
-mkdir -p $install_dir
-cp ../sources/cas_server.php $install_dir/
-chmod u=rwX,g=rX,o= -R $install_dir
-chown $app:root -R $install_dir
-
+mkdir -p "$install_dir"
+cp ../sources/cas_server.php "$install_dir"/
+chmod u=rwX,g=rX,o= -R "$install_dir"
+chown "$app":root -R "$install_dir"
 
 #=================================================
 # NGINX CONFIGURATION
 #=================================================
-ynh_script_progression --message="Upgrading NGINX web server configuration..." --weight=2
+ynh_script_progression "Upgrading NGINX web server configuration..."
 
 # Create a dedicated php-fpm config
-ynh_script_progression --message="Configuring application..."
+ynh_script_progression "Configuring application..."
 
-ynh_add_fpm_config --usage=low --footprint=low
+ynh_config_add_phpfpm
 
 configure_nginx
 
 #=================================================
-# SPECIFIC UPGRADE
-#=================================================
 # UPDATE COTURN CONFIG
 #=================================================
-ynh_script_progression --message="Updating Coturn config..." --weight=1
+ynh_script_progression "Updating Coturn config..."
 
 configure_coturn
 
@@ -316,9 +306,9 @@ configure_coturn
 # WARNING : theses command are used in INSTALL, UPGRADE
 # For any update do it in all files
 
-ynh_add_config --template="../sources/Coturn_config_rotate.sh" --destination="$code_dir/Coturn_config_rotate.sh"
-ynh_add_config --template="../sources/update_synapse_for_appservice.sh" --destination="$code_dir/update_synapse_for_appservice.sh"
-ynh_add_config --template=../sources/set_admin_user.sh --destination=$code_dir/set_admin_user.sh
+ynh_config_add --template="../sources/Coturn_config_rotate.sh" --destination="$code_dir/Coturn_config_rotate.sh"
+ynh_config_add --template="../sources/update_synapse_for_appservice.sh" --destination="$code_dir/update_synapse_for_appservice.sh"
+ynh_config_add --template=../sources/set_admin_user.sh --destination=$code_dir/set_admin_user.sh
 
 # Ensure app-service folder has exists and the config file exit (Migration)
 mkdir -p /etc/matrix-$app/app-service
@@ -335,42 +325,40 @@ fi
 # ADVERTISE SERVICE IN ADMIN PANEL
 #=================================================
 
-yunohost service add $app --log "/var/log/matrix-$app/homeserver.log" --needs_exposed_ports $port_synapse_tls --description 'Main matrix server service.'
-yunohost service add $app-coturn --needs_exposed_ports $port_turnserver_tls --description 'Turn server for matrix server. Used for audio and video call.'
+yunohost service add "$app" --log "/var/log/matrix-$app/homeserver.log" --needs_exposed_ports "$port_synapse_tls" --description 'Main matrix server service.'
+yunohost service add "$app"-coturn --needs_exposed_ports "$port_turnserver_tls" --description 'Turn server for matrix server. Used for audio and video call.'
 
 #=================================================
 # UPDATE SYSTEMD
 #=================================================
-ynh_script_progression --message="Upgrading systemd configuration..." --weight=3
+ynh_script_progression "Upgrading systemd configuration..."
 
 # Create systemd service for synapse and turnserver
-ynh_add_systemd_config --service=$app --template=synapse.service
+ynh_config_add_systemd  --template=synapse.service
 
-cp ../conf/default_coturn /etc/matrix-$app/coturn_env
-ynh_add_systemd_config --service=$app-coturn --template=synapse-coturn.service
+cp ../conf/default_coturn /etc/matrix-"$app"/coturn_env
+ynh_config_add_systemd --service="$app"-coturn --template=synapse-coturn.service
 
 #=================================================
 # UPGRADE FAIL2BAN
 #=================================================
-ynh_script_progression --message="Reconfiguring Fail2Ban..." --weight=8
+ynh_script_progression "Reconfiguring Fail2Ban..."
 
-ynh_add_fail2ban_config --use_template
+ynh_config_add_fail2ban
 
-#=================================================
-# GENERIC FINALIZATION
 #=================================================
 # SETUP PERMISSIONS
 #=================================================
 
-ynh_script_progression --message="Configuring permissions..." --weight=1
+ynh_script_progression "Configuring permissions..."
 
 if yunohost --output-as plain domain list | grep -q "^$server_name"'$'; then
     if ! ynh_""permission_exists --permission=server_client_infos; then
-        ynh_""permission_create --permission=server_client_infos --url=$server_name/.well-known/matrix \
+        ynh_""permission_create --permission=server_client_infos --url="$server_name"/.well-known/matrix \
                               --label="Server info for clients. (well-known)" --show_tile=false --allowed=visitors \
                               --auth_header=false --protected=true
     else yunohost --output-as plain domain list | grep -q "^$server_name"'$'
-        ynh_""permission_url --permission=server_client_infos --url=$server_name/.well-known/matrix \
+        ynh_""permission_url --permission=server_client_infos --url="$server_name"/.well-known/matrix \
                           --auth_header=false
         ynh_""permission_update --permission=server_client_infos --label="Server info for clients. (well-known)" --show_tile=false \
                               --protected=true
@@ -381,7 +369,7 @@ fi
 # SECURE FILES AND DIRECTORIES
 #=================================================
 
-ynh_script_progression --message="Protecting directories... (note that it could take a long time depending of your install size)" --weight=3
+ynh_script_progression "Protecting directories... (note that it could take a long time depending of your install size)"
 set_permissions data
 
 #=================================================
@@ -390,19 +378,19 @@ set_permissions data
 
 # WARNING : theses command are used in INSTALL, UPGRADE
 # For any update do it in all files
-ynh_replace_string __APP__ $app ../hooks/post_cert_update
-ynh_replace_string __DOMAIN__ $domain ../hooks/post_cert_update
+ynh_replace --match=__APP__ --replace="$app" --file=../hooks/post_cert_update
+ynh_replace --match=__DOMAIN__  --replace="$domain"  --file=../hooks/post_cert_update
 
 #=================================================
 # RELOAD SERVICES
 #=================================================
-ynh_script_progression --message="Restarting Synapse services..." --weight=5
+ynh_script_progression "Restarting Synapse services..."
 
-ynh_systemd_action --service_name=$app-coturn.service --action=restart
-ynh_systemd_action --service_name=$app.service --action=restart --line_match="Synapse now listening on TCP port $port_synapse_tls" --log_path="/var/log/matrix-$app/homeserver.log" --timeout=300
+ynh_systemctl --service="$app"-coturn.service --action=restart
+ynh_systemctl --service="$app".service --action=restart --wait_until="Synapse now listening on TCP port $port_synapse_tls" --log_path="/var/log/matrix-$app/homeserver.log" --timeout=300
 
 #=================================================
 # END OF SCRIPT
 #=================================================
 
-ynh_script_progression --message="Upgrade of $app completed" --last
+ynh_script_progression "Upgrade of $app completed"
