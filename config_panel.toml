@@ -14,12 +14,13 @@ services = ["__APP__"]
         no = "false"
         help = "Defaults to 'false'. If 'true', it is highly recommended to use either captcha, email, or token-based verification to avoid SPAM."
 
-        [main.welcome.password_enabled]
-        ask = "Enable Password Login"
-        type = "boolean"
-        yes = "true"
-        no = "false"
-        help = "If disabled, Login with Non-YunoHost Users impossible. But it simplies Login process if your Matrix server only has YunoHost SSO Users."
+        # Disabled for matrix V2 because some client like Element X don't support cas and so require to have password authentication enabled
+        # [main.welcome.password_enabled]
+        # ask = "Enable Password Login"
+        # type = "boolean"
+        # yes = "true"
+        # no = "false"
+        # help = "If disabled, Login with Non-YunoHost Users impossible. But it simplies Login process if your Matrix server only has YunoHost SSO Users."
         # Temporary disable the visible flag due of https://github.com/YunoHost/issues/issues/2331
         # visible = "! enable_registration"
 
