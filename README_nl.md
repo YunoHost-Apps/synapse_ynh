@@ -21,7 +21,7 @@ Instant messaging server matrix network.
 Yunohost chatroom with matrix : [https://matrix.to/#/#yunohost:matrix.org](https://matrix.to/#/#yunohost:matrix.org)
 
 
-**Geleverde versie:** 1.115.0~ynh1
+**Geleverde versie:** 1.117.0~ynh1
 ## Documentatie en bronnen
 
 - Officiele website van de app: <https://matrix.org/>
