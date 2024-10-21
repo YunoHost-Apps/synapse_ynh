@@ -1,11 +1,5 @@
 #!/bin/bash
 
-#=================================================
-# GENERIC START
-#=================================================
-# IMPORT GENERIC HELPERS
-#=================================================
-
 source _common.sh
 source experimental_helper.sh
 source /usr/share/yunohost/helpers
@@ -23,50 +17,50 @@ yunohost service remove "$app"-coturn
 #=================================================
 # STOP AND REMOVE SERVICE
 #=================================================
-ynh_script_progression --message="Stopping and removing the systemd service" --weight=2
+ynh_script_progression "Stopping and removing the systemd service"
 
-ynh_remove_systemd_config --service="$app"
-ynh_remove_systemd_config --service="$app"-coturn
+ynh_config_remove_systemd
+
+ynh_config_remove_systemd "$app"-coturn
 
 #=================================================
 # REMOVE APP MAIN DIR
 #=================================================
-ynh_script_progression --message="Removing app main directory" --weight=2
+ynh_script_progression "Removing app main directory"
 
-ynh_secure_remove --file="$code_dir"
-ynh_secure_remove --file=/etc/matrix-"$app"
-ynh_secure_remove --file="/etc/nginx/conf.d/${server_name}.d/${app}_server_name.conf"
+ynh_safe_rm "$code_dir"
+ynh_safe_rm /etc/matrix-"$app"
+ynh_safe_rm "/etc/nginx/conf.d/${server_name}.d/${app}_server_name.conf"
 
 #=================================================
 # REMOVE NGINX CONFIGURATION
 #=================================================
-ynh_script_progression --message="Removing NGINX web server configuration" --weight=2
+ynh_script_progression "Removing NGINX web server configuration"
 
 # Remove the dedicated nginx config
-ynh_remove_nginx_config
+ynh_config_remove_nginx
 
 # Remove the dedicated php-fpm config
-ynh_remove_fpm_config
+ynh_config_remove_phpfpm
 
 #=================================================
 # REMOVE LOGROTATE CONFIGURATION
 #=================================================
-ynh_script_progression --message="Removing logrotate configuration" --weight=1
+ynh_script_progression "Removing logrotate configuration"
 
 # Remove the app-specific logrotate config
-ynh_remove_logrotate
+ynh_config_remove_logrotate
 
 #=================================================
 # REMOVE FAIL2BAN CONFIGURATION
 #=================================================
-ynh_script_progression --message="Removing Fail2Ban configuration..." --weight=8
+ynh_script_progression "Removing Fail2Ban configuration..."
 
 # Remove the dedicated fail2ban config
-ynh_remove_fail2ban_config
+ynh_config_remove_fail2ban
 
 #=================================================
-# GENERIC FINALIZATION
-#=================================================
 
-ynh_script_progression --message="Removal of $app completed" --last
+ynh_script_progression "Removal of $app completed"
+
 sleep 1
