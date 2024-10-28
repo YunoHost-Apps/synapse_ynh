@@ -26,7 +26,6 @@ ynh_script_progression "Fixing database type..."
 
 ynh_psql_db_shell \
     <<< "update pg_database set datcollate='C', datctype='C' where datname='$db_name';"
-ynh_''psql_setup_db --db_user="$db_user" --db_pwd="$db_pwd" --db_name="$db_name_slidingproxy"
 
 #=================================================
 # RESTORE ALL CONFIG AND DATA
@@ -63,7 +62,6 @@ ynh_script_progression "Enable systemd services"
 # systemctl daemon-reload
 systemctl enable "$app".service --quiet
 systemctl enable "$app"-coturn.service --quiet
-systemctl enable "$app"-sliding-proxy.service --quiet
 
 #=================================================
 # ADVERTISE SERVICE IN ADMIN PANEL
@@ -71,7 +69,6 @@ systemctl enable "$app"-sliding-proxy.service --quiet
 
 yunohost service add "$app" --log "/var/log/matrix-$app/homeserver.log" --needs_exposed_ports $port_synapse_tls --description 'Main matrix server service.'
 yunohost service add "$app-coturn" --needs_exposed_ports "$port_turnserver_tls" --description 'Turn server for matrix server. Used for audio and video call.'
-yunohost service add "$app"-sliding-proxy --description 'Matrix v2 service for clients.'
 
 #=================================================
 # CREATE A DH FILE
@@ -117,7 +114,6 @@ ynh_script_progression "Restarting Synapse services..."
 
 ynh_systemctl --service="$app"-coturn.service --action=restart
 ynh_systemctl --service="$app".service --action=restart --wait_until="Synapse now listening on TCP port $port_synapse_tls" --log_path="/var/log/matrix-$app/homeserver.log" --timeout=300
-ynh_systemctl --service="$app"-sliding-proxy.service --action=restart
 
 #=================================================
 # RELOAD NGINX

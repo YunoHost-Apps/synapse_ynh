@@ -13,7 +13,6 @@ source /usr/share/yunohost/helpers
 # Remove a service from the admin panel, added by `yunohost service add`
 yunohost service remove "$app"
 yunohost service remove "$app"-coturn
-yunohost service remove "$app"-sliding-proxy
 
 #=================================================
 # STOP AND REMOVE SERVICE
@@ -23,7 +22,6 @@ ynh_script_progression "Stopping and removing the systemd service"
 ynh_config_remove_systemd
 
 ynh_config_remove_systemd "$app"-coturn
-ynh_config_remove_systemd "$app"-sliding-proxy
 
 #=================================================
 # REMOVE APP MAIN DIR
@@ -33,13 +31,6 @@ ynh_script_progression "Removing app main directory"
 ynh_safe_rm "$code_dir"
 ynh_safe_rm /etc/matrix-"$app"
 ynh_safe_rm "/etc/nginx/conf.d/${server_name}.d/${app}_server_name.conf"
-
-#=================================================
-# REMOVE DATABASE
-#=================================================
-ynh_script_progression --message="Removing database" --weight=2
-
-ynh_''psql_remove_db --db_user=user_wich_must_dont_exist_and_keep_current_user --db_name=$db_name_slidingproxy
 
 #=================================================
 # REMOVE NGINX CONFIGURATION

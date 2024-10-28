@@ -261,13 +261,18 @@ then
 fi
 
 #=================================================
-# MIGRATION 13 : ADD SLIDING PROXY DB
+# MIGRATION 13 : REMOVE SLIDING SYNC PROXY COMPONENTS
 #=================================================
-ynh_script_progression --message="Updating db if needed..."
+ynh_script_progression --message="Cleaning sliding sync proxy components..."
 
-if ! ynh_''psql_database_exists -d $db_name_slidingproxy; then
-    ynh_''psql_setup_db --db_user=$db_user --db_pwd=$db_pwd --db_name=$db_name_slidingproxy
+if ynh_''psql_database_exists "${db_name}"_slidingproxy; then
+    ynh_''psql_drop_db "${db_name}"_slidingproxy
 fi
+
+ynh_safe_rm /etc/matrix-$app/sliding_proxy.conf
+
+test -e /etc/systemd/system/"$app"-sliding-proxy.service && (yunohost service remove "$app"-sliding-proxy || true)
+ynh_config_remove_systemd "$app"-sliding-proxy
 
 #=================================================
 # STANDARD UPGRADE STEPS
@@ -283,7 +288,6 @@ password_enabled=true
 
 ynh_config_add --jinja --template="homeserver.yaml" --destination="/etc/matrix-$app/homeserver.yaml"
 ynh_config_add --template="log.yaml" --destination="/etc/matrix-$app/log.yaml"
-ynh_config_add --template=sliding_proxy.conf --destination=/etc/matrix-$app/sliding_proxy.conf
 
 #=================================================
 # CREATE SMALL CAS SERVER
@@ -343,7 +347,6 @@ fi
 
 yunohost service add "$app" --log "/var/log/matrix-$app/homeserver.log" --needs_exposed_ports "$port_synapse_tls" --description 'Main matrix server service.'
 yunohost service add "$app"-coturn --needs_exposed_ports "$port_turnserver_tls" --description 'Turn server for matrix server. Used for audio and video call.'
-yunohost service add $app-sliding-proxy --description 'Matrix v2 service for clients.'
 
 #=================================================
 # UPDATE SYSTEMD
@@ -355,8 +358,6 @@ ynh_config_add_systemd  --template=synapse.service
 
 cp ../conf/default_coturn /etc/matrix-"$app"/coturn_env
 ynh_config_add_systemd --service="$app"-coturn --template=synapse-coturn.service
-
-ynh_config_add_systemd --service="$app"-sliding-proxy --template=synapse-sliding-proxy.service
 
 #=================================================
 # UPGRADE FAIL2BAN
@@ -407,7 +408,6 @@ ynh_script_progression "Restarting Synapse services..."
 
 ynh_systemctl --service="$app"-coturn.service --action=restart
 ynh_systemctl --service="$app".service --action=restart --wait_until="Synapse now listening on TCP port $port_synapse_tls" --log_path="/var/log/matrix-$app/homeserver.log" --timeout=300
-ynh_systemctl --service=$app-sliding-proxy.service --action=restart
 
 #=================================================
 # END OF SCRIPT
