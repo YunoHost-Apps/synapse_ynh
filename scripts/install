@@ -8,20 +8,22 @@ source _common.sh
 source experimental_helper.sh
 source /usr/share/yunohost/helpers
 
+ynh_app_setting_set --key=php_upload_max_filesize --value=100M
+
 #=================================================
 # RETRIEVE ARGUMENTS FROM THE MANIFEST
 #=================================================
 
 if [ "$server_name" == "Same than the domain" ]; then
     server_name="$domain"
-    ynh_app_setting_set --app="$app" --key=server_name --value="$server_name"
+    ynh_app_setting_set --key=server_name --value="$server_name"
 fi
 
 #=================================================
 ## SET STANDARD SETTINGS FROM DEFAULT CONFIG
 #=================================================
 
-ynh_script_progression --message="Storing installation settings..." --weight=1
+ynh_script_progression "Storing installation settings..."
 
 ensure_vars_set
 
@@ -34,11 +36,9 @@ else
     password_enabled=true
 fi
 
-ynh_app_setting_set --app="$app" --key=password_enabled --value="$password_enabled"
-ynh_app_setting_set --app="$app" --key=enable_registration --value="$enable_registration"
+ynh_app_setting_set --key=password_enabled --value="$password_enabled"
+ynh_app_setting_set --key=enable_registration --value="$enable_registration"
 
-#=================================================
-# STANDARD MODIFICATIONS
 #=================================================
 # Check datadir empty
 #=================================================
@@ -53,7 +53,7 @@ fi
 #=================================================
 # CREATE A DH FILE
 #=================================================
-ynh_script_progression --message="Creating a dh file..." --weight=3
+ynh_script_progression "Creating a dh file..."
 
 # WARNING : theses command are used in INSTALL, UPGRADE, RESTORE
 # For any update do it in all files
@@ -61,7 +61,7 @@ ynh_script_progression --message="Creating a dh file..." --weight=3
 # Make dh cert for synapse if it doesn't exist
 if [ ! -e /etc/ssl/private/dh2048.pem ]
 then
-    ynh_exec_warn_less openssl dhparam -out /etc/ssl/private/dh2048.pem -outform PEM -dsaparam 2048
+    ynh_hide_warnings openssl dhparam -out /etc/ssl/private/dh2048.pem -outform PEM -dsaparam 2048
     chown root:ssl-cert /etc/ssl/private/dh2048.pem
     chmod 640 /etc/ssl/private/dh2048.pem
 fi
@@ -69,7 +69,7 @@ fi
 #=================================================
 # CREATE DEDICATED USER
 #=================================================
-ynh_script_progression --message='Configuring system groups'
+ynh_script_progression 'Configuring system groups'
 
 adduser "$app" ssl-cert
 adduser turnserver ssl-cert
@@ -77,16 +77,16 @@ adduser turnserver ssl-cert
 #=================================================
 # FIX DB CONFIG AND CREATE SYLING PROXY DB
 #=================================================
-ynh_script_progression --message="Fixing database type..." --weight=1
+ynh_script_progression "Fixing database type..."
 
-ynh_psql_execute_as_root \
-    --sql="update pg_database set datcollate='C', datctype='C' where datname='$db_name';"
+ynh_psql_db_shell \
+    <<< "update pg_database set datcollate='C', datctype='C' where datname='$db_name';"
 ynh_''psql_setup_db --db_user=$db_user --db_pwd=$db_pwd --db_name=$db_name_slidingproxy
 
 #=================================================
 # DOWNLOAD, CHECK AND UNPACK SOURCE
 #=================================================
-ynh_script_progression --message="Setting up source files..." --weight=50
+ynh_script_progression "Setting up source files..."
 
 # Create empty dir for synapse
 
@@ -107,17 +107,15 @@ install_sources
 # For any update do it in all files
 
 cp ../sources/cas_server.php "$install_dir"/
-chmod u=rwX,g=rX,o= -R "$install_dir"
-chown "$app:$app" -R "$install_dir"
 
 #=================================================
 # CREATE SYNAPSE CONFIG
 #=================================================
 
-ynh_script_progression --message="Creating Synapse config..." --weight=3
+ynh_script_progression "Creating Synapse config..."
 
 # Generate config
-$code_dir/bin/python -m synapse.app.homeserver --keys-directory /etc/matrix-"$app"/ --generate-config --server-name "$server_name" --report-stats=no -c homeserver.yml
+"$code_dir"/bin/python -m synapse.app.homeserver --keys-directory /etc/matrix-"$app"/ --generate-config --server-name "$server_name" --report-stats=no -c homeserver.yml
 
 # Get random values from config
 registration_shared_secret="$(grep -E "^registration_shared_secret:" homeserver.yml | cut -d'"' -f2)"
@@ -125,60 +123,60 @@ form_secret="$(grep -E "^form_secret:" homeserver.yml | cut -d'"' -f2)"
 macaroon_secret_key="$(grep -E "^macaroon_secret_key:" homeserver.yml | cut -d'"' -f2)"
 
 # store in yunohost settings
-ynh_app_setting_set --app="$app" --key=registration_shared_secret --value="$registration_shared_secret"
-ynh_app_setting_set --app="$app" --key=form_secret --value="$form_secret"
-ynh_app_setting_set --app="$app" --key=macaroon_secret_key --value="$macaroon_secret_key"
+ynh_app_setting_set --key=registration_shared_secret --value="$registration_shared_secret"
+ynh_app_setting_set --key=form_secret --value="$form_secret"
+ynh_app_setting_set --key=macaroon_secret_key --value="$macaroon_secret_key"
 
 #=================================================
 # SETUP SYSTEMD
 #=================================================
-ynh_script_progression --message="Configuring a systemd service..." --weight=2
+ynh_script_progression "Configuring $app's systemd service..."
 
 # Create systemd service for synapse and turnserver
-ynh_add_systemd_config --service="$app" --template=synapse.service
+ynh_config_add_systemd  --template=synapse.service
 
 cp ../conf/default_coturn /etc/matrix-"$app"/coturn_env
-ynh_add_systemd_config --service="$app"-coturn --template=synapse-coturn.service
+ynh_config_add_systemd --service="$app"-coturn --template=synapse-coturn.service
 
-ynh_add_systemd_config --service=$app-sliding-proxy --template=synapse-sliding-proxy.service
+ynh_config_add_systemd --service="$app"-sliding-proxy --template=synapse-sliding-proxy.service
 
 #=================================================
 # NGINX CONFIGURATION
 #=================================================
-ynh_script_progression --message="Configuring NGINX web server..." --weight=2
+ynh_script_progression "Configuring NGINX web server..."
 
 # Create a dedicated php-fpm config
-ynh_script_progression --message="Configuring application..."
+ynh_script_progression "Configuring application..."
 
-ynh_add_fpm_config --usage=low --footprint=low
+ynh_config_add_phpfpm
 
 configure_nginx
 
 #=================================================
 # SET SYNAPSE CONFIG
 #=================================================
-ynh_script_progression --message="Configuring Synapse..." --weight=2
+ynh_script_progression "Configuring Synapse..."
 
 # Force enable it because some client like Element X don't support CAS and so require to have password authentication enabled
 password_enabled=true
 
-ynh_add_config --jinja --template="homeserver.yaml" --destination="/etc/matrix-$app/homeserver.yaml"
-ynh_add_config --template="log.yaml" --destination="/etc/matrix-$app/log.yaml"
-ynh_add_config --template=sliding_proxy.conf --destination=/etc/matrix-$app/sliding_proxy.conf
+ynh_config_add --jinja --template="homeserver.yaml" --destination="/etc/matrix-$app/homeserver.yaml"
+ynh_config_add --template="log.yaml" --destination="/etc/matrix-$app/log.yaml"
+ynh_config_add --template=sliding_proxy.conf --destination=/etc/matrix-$app/sliding_proxy.conf
 
 #=================================================
 # SET COTURN CONFIG
 #=================================================
-ynh_script_progression --message="Configuring Coturn..." --weight=1
+ynh_script_progression "Configuring Coturn..."
 
 configure_coturn
 
 #=================================================
 # SETUP LOGROTATE
 #=================================================
-ynh_script_progression --message="Configuring log rotation..." --weight=2
+ynh_script_progression "Configuring log rotation..."
 
-ynh_use_logrotate --logfile="/var/log/matrix-$app"
+ynh_config_add_logrotate "/var/log/matrix-$app"
 
 #=================================================
 # ADD SCRIPT FOR COTURN CRON AND APP SERVICE
@@ -187,17 +185,15 @@ ynh_use_logrotate --logfile="/var/log/matrix-$app"
 # WARNING : theses command are used in INSTALL, UPGRADE
 # For any update do it in all files
 
-ynh_add_config --template="../sources/Coturn_config_rotate.sh" --destination="$code_dir/Coturn_config_rotate.sh"
-ynh_add_config --template="../sources/update_synapse_for_appservice.sh" --destination="$code_dir/update_synapse_for_appservice.sh"
-ynh_add_config --template=../sources/set_admin_user.sh --destination="$code_dir"/set_admin_user.sh
+ynh_config_add --template="../sources/Coturn_config_rotate.sh" --destination="$code_dir/Coturn_config_rotate.sh"
+ynh_config_add --template="../sources/update_synapse_for_appservice.sh" --destination="$code_dir/update_synapse_for_appservice.sh"
+ynh_config_add --template=../sources/set_admin_user.sh --destination="$code_dir"/set_admin_user.sh
 
-#=================================================
-# GENERIC FINALIZATION
 #=================================================
 # SETUP PERMISSIONS
 #=================================================
 
-ynh_script_progression --message="Configuring permissions..." --weight=1
+ynh_script_progression "Configuring permissions..."
 
 if yunohost --output-as plain domain list | grep -q "^$server_name$"; then
     ynh_""permission_create --permission=server_client_infos --url="$server_name"/.well-known/matrix \
@@ -213,14 +209,14 @@ fi
 
 # WARNING : theses command are used in INSTALL, UPGRADE
 # For any update do it in all files
-ynh_replace_string __APP__ "$app" ../hooks/post_cert_update
-ynh_replace_string __DOMAIN__ "$domain" ../hooks/post_cert_update
+ynh_replace --match=__APP__ --replace="$app" --file=../hooks/post_cert_update
+ynh_replace --match=__DOMAIN__  --replace="$domain"  --file=../hooks/post_cert_update
 
 #=================================================
 # SECURE FILES AND DIRECTORIES
 #=================================================
 
-ynh_script_progression --message="Protecting directories..." --weight=3
+ynh_script_progression "Protecting directories..."
 set_permissions data
 
 #=================================================
@@ -234,21 +230,21 @@ yunohost service add "$app"-sliding-proxy --description 'Matrix v2 service for c
 #=================================================
 # RELOAD SERVICES
 #=================================================
-ynh_script_progression --message="Restarting Synapse services..." --weight=11
+ynh_script_progression "Restarting Synapse services..."
 
-ynh_systemd_action --service_name="$app"-coturn.service --action=restart
-ynh_systemd_action --service_name="$app".service --action=restart --line_match="Synapse now listening on TCP port $port_synapse_tls" --log_path="/var/log/matrix-$app/homeserver.log" --timeout=300
-ynh_systemd_action --service_name="$app"-sliding-proxy.service --action=restart
+ynh_systemctl --service="$app"-coturn.service --action=restart
+ynh_systemctl --service="$app".service --action=restart --wait_until="Synapse now listening on TCP port $port_synapse_tls" --log_path="/var/log/matrix-$app/homeserver.log" --timeout=300
+ynh_systemctl --service="$app"-sliding-proxy.service --action=restart
 
 #=================================================
 # SETUP FAIL2BAN
 #=================================================
-ynh_script_progression --message="Configuring Fail2Ban..." --weight=10
+ynh_script_progression "Configuring Fail2Ban..."
 
-ynh_add_fail2ban_config --use_template
+ynh_config_add_fail2ban
 
 #=================================================
 # END OF SCRIPT
 #=================================================
 
-ynh_script_progression --message="Installation of $app completed" --last
+ynh_script_progression "Installation of $app completed"

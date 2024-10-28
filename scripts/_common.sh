@@ -8,12 +8,12 @@ install_sources() {
 
     # Clean venv is it was on python2.7 or python3 with old version in case major upgrade of debian
     if [ ! -e "$code_dir"/bin/python3 ] || [ ! -e "$code_dir/lib/python$python_version" ]; then
-        ynh_secure_remove --file="$code_dir"/bin
-        ynh_secure_remove --file="$code_dir"/lib
-        ynh_secure_remove --file="$code_dir"/lib64
-        ynh_secure_remove --file="$code_dir"/include
-        ynh_secure_remove --file="$code_dir"/share
-        ynh_secure_remove --file="$code_dir"/pyvenv.cfg
+        ynh_safe_rm "$code_dir"/bin
+        ynh_safe_rm "$code_dir"/lib
+        ynh_safe_rm "$code_dir"/lib64
+        ynh_safe_rm "$code_dir"/include
+        ynh_safe_rm "$code_dir"/share
+        ynh_safe_rm "$code_dir"/pyvenv.cfg
     fi
 
     mkdir -p "$code_dir"
@@ -22,17 +22,17 @@ install_sources() {
     if [ -n "$(uname -m | grep arm)" ]
     then
         # Clean old file, sometimes it could make some big issues if we don't do this!!
-        ynh_secure_remove --file="$code_dir"/bin
-        ynh_secure_remove --file="$code_dir"/lib
-        ynh_secure_remove --file="$code_dir"/include
-        ynh_secure_remove --file="$code_dir"/share
+        ynh_safe_rm "$code_dir"/bin
+        ynh_safe_rm "$code_dir"/lib
+        ynh_safe_rm "$code_dir"/include
+        ynh_safe_rm "$code_dir"/share
 
         ynh_setup_source --dest_dir="$code_dir"/ --source_id="synapse_prebuilt_armv7_$(lsb_release --codename --short)"
 
         # Fix multi-instance support
         for f in "$code_dir"/bin/*; do
             if ! [[ $f =~ "__" ]]; then
-                ynh_replace_special_string --match_string='#!/opt/yunohost/matrix-synapse' --replace_string='#!'"$code_dir" --target_file="$f"
+                ynh_replace_regex --match='#!/opt/yunohost/matrix-synapse' --replace='#!'"$code_dir" --file="$f"
             fi
         done
     else
@@ -72,15 +72,15 @@ configure_coturn() {
     public_ip6="$(curl -s https://ipv6.yunohost.org)" || true
 
     local turn_external_ip=""
-    if [ -n "$public_ip4" ] && ynh_validate_ip4 --ip_address="$public_ip4"
+    if [ -n "$public_ip4" ] && ynh_validate_ip --family=4 --ip_address="$public_ip4"
     then
         turn_external_ip+="$public_ip4,"
     fi
-    if [ -n "$public_ip6" ] && ynh_validate_ip6 --ip_address="$public_ip6"
+    if [ -n "$public_ip6" ] && ynh_validate_ip --family=6 --ip_address="$public_ip6"
     then
         turn_external_ip+="$public_ip6"
     fi
-    ynh_add_config --jinja --template="turnserver.conf" --destination="/etc/matrix-$app/coturn.conf"
+    ynh_config_add --jinja --template="turnserver.conf" --destination="/etc/matrix-$app/coturn.conf"
 }
 
 configure_nginx() {
@@ -95,11 +95,11 @@ configure_nginx() {
         else
             e2e_enabled_by_default_client_config=true
         fi
-        ynh_add_config --template="server_name.conf" --destination="/etc/nginx/conf.d/${server_name}.d/${app}_server_name.conf"
+        ynh_config_add --template="server_name.conf" --destination="/etc/nginx/conf.d/${server_name}.d/${app}_server_name.conf"
     fi
 
     # Create a dedicated NGINX config
-    ynh_add_nginx_config
+    ynh_config_add_nginx
 }
 
 ensure_vars_set() {
@@ -118,7 +118,7 @@ ensure_vars_set() {
             element_path=$(ynh_app_setting_get --app=$element_instance --key=path)
             web_client_location="https://""$element_domain""$element_path"
         fi
-        ynh_app_setting_set --app="$app" --key=web_client_location --value="$web_client_location"
+        ynh_app_setting_set --key=web_client_location --value="$web_client_location"
     fi
 
     ynh_app_setting_set_default --app="$app" --key=client_base_url --value="$web_client_location"
@@ -145,19 +145,23 @@ ensure_vars_set() {
     ynh_app_setting_set_default --app="$app" --key=push_include_content --value=true
     ynh_app_setting_set_default --app="$app" --key=enable_dtls_for_audio_video_turn_call --value=true
 
-    ynh_app_setting_set_default --app=$app --key=sync_proxy_secret --value="$(ynh_string_random -l 40)"
+    ynh_app_setting_set_default --app="$app" --key=sync_proxy_secret --value="$(ynh_string_random -l 40)"
 }
 
 set_permissions() {
-    chown $app:$app -R "$code_dir"
-    chmod o= -R "$code_dir"
+    chown -R "$app:$app" "$install_dir"
+    chmod -R u+rwX,g+rX-w,o= "$install_dir"
 
-    chmod 770 "$code_dir"/Coturn_config_rotate.sh
+    chown -R "$app":"$app" "$code_dir"
+    chmod -R u+rwX,g+rX-w,o= "$code_dir"
+
+    chmod 750 "$code_dir"/Coturn_config_rotate.sh
     chmod 700 "$code_dir"/update_synapse_for_appservice.sh
     chmod 700 "$code_dir"/set_admin_user.sh
     chmod 755 "$code_dir"/sliding-chroot/bin/sliding-proxy
 
     if [ "${1:-}" == data ]; then
+        chmod 750 "$data_dir"
         find "$data_dir" \(   \! -perm -o= \
                          -o \! -user "$app" \
                          -o \! -group "$app" \) \
