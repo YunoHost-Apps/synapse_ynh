@@ -93,7 +93,6 @@ ram.runtime = "1G"
     main.protected = true
 
     server_api.url = "/_matrix"
-    server_api.additional_urls = ["/client"]
     server_api.label = "Server access for client apps"
     server_api.allowed = "visitors"
     server_api.auth_header = false
