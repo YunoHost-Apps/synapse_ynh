@@ -1,11 +1,5 @@
 #!/bin/bash
 
-#=================================================
-# GENERIC START
-#=================================================
-# IMPORT GENERIC HELPERS
-#=================================================
-
 #Keep this path for calling _common.sh inside the execution's context of backup and restore scripts
 source ../settings/scripts/_common.sh
 source ../settings/scripts/experimental_helper.sh
@@ -14,75 +8,72 @@ source /usr/share/yunohost/helpers
 #=================================================
 # LOAD SETTINGS
 #=================================================
-ynh_script_progression --message="Loading settings..."
+ynh_script_progression "Loading settings..."
 
 #=================================================
 # RECREATE THE DEDICATED USER
 #=================================================
-ynh_script_progression --message='Configuring system groups'
+ynh_script_progression 'Configuring system groups'
 
 # Create the dedicated user (if not existing)
-adduser $app ssl-cert
+adduser "$app" ssl-cert
 adduser turnserver ssl-cert
 
 #=================================================
 # FIX DB CONFIG
 #=================================================
-ynh_script_progression --message="Fixing database type..." --weight=1
+ynh_script_progression "Fixing database type..."
 
-ynh_psql_execute_as_root \
-    --sql="update pg_database set datcollate='C', datctype='C' where datname='$db_name';"
-ynh_''psql_setup_db --db_user="$db_user" --db_pwd="$db_pwd" --db_name="$db_name_slidingproxy"
+ynh_psql_db_shell \
+    <<< "update pg_database set datcollate='C', datctype='C' where datname='$db_name';"
 
 #=================================================
 # RESTORE ALL CONFIG AND DATA
 #=================================================
 
-ynh_script_progression --message="Restoring directory and configuration..." --weight=10
-ynh_restore
-mkdir -p /etc/matrix-$app/app-service
+ynh_script_progression "Restoring directory and configuration..."
+ynh_restore_everything
+mkdir -p /etc/matrix-"$app"/app-service
 
 # Check that the good python version is installed
 # If not upgrade the source
-ynh_script_progression --message="Check for source up to date..." --weight=5
+ynh_script_progression "Check for source up to date..."
 install_sources
 
 #=================================================
 # RESTORE FAIL2BAN CONFIGURATION
 #=================================================
-ynh_script_progression --message="Reload Fail2Ban..." --weight=6
+ynh_script_progression "Reload Fail2Ban..."
 
-ynh_systemd_action --action=restart --service_name=fail2ban
+ynh_systemctl --action=restart --service=fail2ban
 
 #=================================================
 # RESTORE THE POSTGRESQL DATABASE
 #=================================================
-ynh_script_progression --message="Restoring the PostgreSQL database..." --weight=13
+ynh_script_progression "Restoring the PostgreSQL database..."
 
-ynh_psql_execute_file_as_root --file="${YNH_CWD}/dump.sql" --database="$db_name"
+ynh_psql_db_shell  < "${YNH_CWD}/dump.sql"
 
 #=================================================
 # RESTORE SYSTEMD
 #=================================================
-ynh_script_progression --message="Enable systemd services" --weight=2
+ynh_script_progression "Enable systemd services"
 
 # systemctl daemon-reload
-systemctl enable $app.service --quiet
-systemctl enable $app-coturn.service --quiet
-systemctl enable $app-sliding-proxy.service --quiet
+systemctl enable "$app".service --quiet
+systemctl enable "$app"-coturn.service --quiet
 
 #=================================================
 # ADVERTISE SERVICE IN ADMIN PANEL
 #=================================================
 
-yunohost service add $app --log "/var/log/matrix-$app/homeserver.log" --needs_exposed_ports $port_synapse_tls --description 'Main matrix server service.'
-yunohost service add $app-coturn --needs_exposed_ports $port_turnserver_tls --description 'Turn server for matrix server. Used for audio and video call.'
-yunohost service add $app-sliding-proxy --description 'Matrix v2 service for clients.'
+yunohost service add "$app" --log "/var/log/matrix-$app/homeserver.log" --needs_exposed_ports $port_synapse_tls --description 'Main matrix server service.'
+yunohost service add "$app-coturn" --needs_exposed_ports "$port_turnserver_tls" --description 'Turn server for matrix server. Used for audio and video call.'
 
 #=================================================
 # CREATE A DH FILE
 #=================================================
-ynh_script_progression --message="Creating a dh file..." --weight=40
+ynh_script_progression "Creating a dh file..."
 
 # WARNING : theses command are used in INSTALL, UPGRADE, RESTORE
 # For any update do it in all files
@@ -90,7 +81,7 @@ ynh_script_progression --message="Creating a dh file..." --weight=40
 # Make dh cert for synapse if it doesn't exist
 if [ ! -e /etc/ssl/private/dh2048.pem ]
 then
-    ynh_exec_warn_less openssl dhparam -out /etc/ssl/private/dh2048.pem -outform PEM -dsaparam 2048
+    ynh_hide_warnings openssl dhparam -out /etc/ssl/private/dh2048.pem -outform PEM -dsaparam 2048
     chown root:ssl-cert /etc/ssl/private/dh2048.pem
     chmod 640 /etc/ssl/private/dh2048.pem
 fi
@@ -98,47 +89,42 @@ fi
 #=================================================
 # RECONFIGURE THE TURNSERVER
 #=================================================
-ynh_script_progression --message="Reconfiguring Coturn..." --weight=23
+ynh_script_progression "Reconfiguring Coturn..."
 
 configure_coturn
 
 #=================================================
 # SETUP LOGROTATE
 #=================================================
-ynh_script_progression --message="Configuring log rotation..."
+ynh_script_progression "Configuring log rotation..."
 
-ynh_use_logrotate --logfile=/var/log/matrix-$app
+ynh_config_add_logrotate /var/log/matrix-"$app"
 
-#=================================================
-# GENERIC FINALIZATION
 #=================================================
 # SECURE FILES AND DIRECTORIES
 #=================================================
 
-ynh_script_progression --message="Protecting directories..." --weight=3
+ynh_script_progression "Protecting directories..."
 set_permissions data
 
 #=================================================
 # RELOAD NGINX, SYNAPSE AND COTURN
 #=================================================
-ynh_script_progression --message="Restarting Synapse services..." --weight=7
+ynh_script_progression "Restarting Synapse services..."
 
-ynh_systemd_action --service_name=$app-coturn.service --action=restart
-ynh_systemd_action --service_name=$app.service --action=restart --line_match="Synapse now listening on TCP port $port_synapse_tls" --log_path="/var/log/matrix-$app/homeserver.log" --timeout=300
-ynh_systemd_action --service_name=$app-sliding-proxy.service --action=restart
+ynh_systemctl --service="$app"-coturn.service --action=restart
+ynh_systemctl --service="$app".service --action=restart --wait_until="Synapse now listening on TCP port $port_synapse_tls" --log_path="/var/log/matrix-$app/homeserver.log" --timeout=300
 
-#=================================================
-# GENERIC FINALIZATION
 #=================================================
 # RELOAD NGINX
 #=================================================
-ynh_script_progression --message="Reloading NGINX web server..."
+ynh_script_progression "Reloading NGINX web server..."
 
-ynh_systemd_action --service_name=php$phpversion-fpm --action=reload
-ynh_systemd_action --service_name=nginx --action=reload
+ynh_systemctl --service=php"$php_version"-fpm --action=reload
+ynh_systemctl --service=nginx --action=reload
 
 #=================================================
 # END OF SCRIPT
 #=================================================
 
-ynh_script_progression --message="Restoration completed for $app" --last
+ynh_script_progression "Restoration completed for $app"
