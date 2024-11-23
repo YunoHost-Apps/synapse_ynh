@@ -5,7 +5,9 @@
 
 # YunoHost 上的 Synapse
 
-[![集成程度](https://dash.yunohost.org/integration/synapse.svg)](https://ci-apps.yunohost.org/ci/apps/synapse/) ![工作状态](https://ci-apps.yunohost.org/ci/badges/synapse.status.svg) ![维护状态](https://ci-apps.yunohost.org/ci/badges/synapse.maintain.svg)
+[![集成程度](https://apps.yunohost.org/badge/integration/synapse)](https://ci-apps.yunohost.org/ci/apps/synapse/)
+![工作状态](https://apps.yunohost.org/badge/state/synapse)
+![维护状态](https://apps.yunohost.org/badge/maintained/synapse)
 
 [![使用 YunoHost 安装 Synapse](https://install-app.yunohost.org/install-with-yunohost.svg)](https://install-app.yunohost.org/?app=synapse)
 

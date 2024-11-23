@@ -5,7 +5,9 @@ Hij mag NIET handmatig aangepast worden.
 
 # Synapse voor Yunohost
 
-[![Integratieniveau](https://dash.yunohost.org/integration/synapse.svg)](https://ci-apps.yunohost.org/ci/apps/synapse/) ![Mate van functioneren](https://ci-apps.yunohost.org/ci/badges/synapse.status.svg) ![Onderhoudsstatus](https://ci-apps.yunohost.org/ci/badges/synapse.maintain.svg)
+[![Integratieniveau](https://apps.yunohost.org/badge/integration/synapse)](https://ci-apps.yunohost.org/ci/apps/synapse/)
+![Mate van functioneren](https://apps.yunohost.org/badge/state/synapse)
+![Onderhoudsstatus](https://apps.yunohost.org/badge/maintained/synapse)
 
 [![Synapse met Yunohost installeren](https://install-app.yunohost.org/install-with-yunohost.svg)](https://install-app.yunohost.org/?app=synapse)
 
