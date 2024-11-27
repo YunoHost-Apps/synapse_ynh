@@ -5,7 +5,9 @@ NON debe editarse manualmente.
 
 # Synapse para YunoHost
 
-[![Nivel de integración](https://dash.yunohost.org/integration/synapse.svg)](https://ci-apps.yunohost.org/ci/apps/synapse/) ![Estado de funcionamento](https://ci-apps.yunohost.org/ci/badges/synapse.status.svg) ![Estado de mantemento](https://ci-apps.yunohost.org/ci/badges/synapse.maintain.svg)
+[![Nivel de integración](https://apps.yunohost.org/badge/integration/synapse)](https://ci-apps.yunohost.org/ci/apps/synapse/)
+![Estado de funcionamento](https://apps.yunohost.org/badge/state/synapse)
+![Estado de mantemento](https://apps.yunohost.org/badge/maintained/synapse)
 
 [![Instalar Synapse con YunoHost](https://install-app.yunohost.org/install-with-yunohost.svg)](https://install-app.yunohost.org/?app=synapse)
 
@@ -21,7 +23,7 @@ Instant messaging server matrix network.
 Yunohost chatroom with matrix : [https://matrix.to/#/#yunohost:matrix.org](https://matrix.to/#/#yunohost:matrix.org)
 
 
-**Versión proporcionada:** 1.119.0~ynh1
+**Versión proporcionada:** 1.120.0~ynh1
 ## Documentación e recursos
 
 - Web oficial da app: <https://matrix.org/>

@@ -2,11 +2,12 @@
 
 set -eu
 
-source /usr/share/yunohost/helpers
-
+YNH_HELPERS_VERSION=2.1
 app=__APP__
 YNH_APP_BASEDIR=/etc/yunohost/apps/"$app"
-YNH_HELPERS_VERSION=2.1
+YNH_APP_ACTION=''
+
+source /usr/share/yunohost/helpers
 
 db_name=$(ynh_app_setting_get --key=db_name)
 db_user=$(ynh_app_setting_get --key=db_user)
@@ -18,6 +19,6 @@ if [ -z ${1:-} ]; then
     exit 1
 fi
 
-ynh_psql_db_shell --database=$db_name --sql="UPDATE users SET admin = 1 WHERE name = '@$1:$server_name'"
+ynh_psql_db_shell <<< "UPDATE users SET admin = 1 WHERE name = '@$1:$server_name'"
 
 exit 0

@@ -5,7 +5,9 @@ Ini TIDAK boleh diedit dengan tangan.
 
 # Synapse untuk YunoHost
 
-[![Tingkat integrasi](https://dash.yunohost.org/integration/synapse.svg)](https://ci-apps.yunohost.org/ci/apps/synapse/) ![Status kerja](https://ci-apps.yunohost.org/ci/badges/synapse.status.svg) ![Status pemeliharaan](https://ci-apps.yunohost.org/ci/badges/synapse.maintain.svg)
+[![Tingkat integrasi](https://apps.yunohost.org/badge/integration/synapse)](https://ci-apps.yunohost.org/ci/apps/synapse/)
+![Status kerja](https://apps.yunohost.org/badge/state/synapse)
+![Status pemeliharaan](https://apps.yunohost.org/badge/maintained/synapse)
 
 [![Pasang Synapse dengan YunoHost](https://install-app.yunohost.org/install-with-yunohost.svg)](https://install-app.yunohost.org/?app=synapse)
 
@@ -21,7 +23,7 @@ Instant messaging server matrix network.
 Yunohost chatroom with matrix : [https://matrix.to/#/#yunohost:matrix.org](https://matrix.to/#/#yunohost:matrix.org)
 
 
-**Versi terkirim:** 1.119.0~ynh1
+**Versi terkirim:** 1.120.0~ynh1
 ## Dokumentasi dan sumber daya
 
 - Website aplikasi resmi: <https://matrix.org/>

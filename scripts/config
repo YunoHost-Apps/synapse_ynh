@@ -5,7 +5,7 @@ source ./_common.sh
 source /usr/share/yunohost/helpers
 
 ynh_app_config_validate() {
-    # Depending of the status of the $enable_regirtration we should default value of the hidden fields
+    # Depending of the status of the $enable_registration we should default value of the hidden fields
     if $enable_registration; then
         # Must enable password authentication when free registration is enabled as any user must be able to authenticate
         password_enabled=true
@@ -14,6 +14,9 @@ ynh_app_config_validate() {
         allowed_local_3pids_email=''
         allowed_local_3pids_msisdn=''
         disable_msisdn_registration=true
+    fi
+    if ! $enable_notifs; then
+        notif_for_new_users=false
     fi
     _ynh_app_config_validate
 }
@@ -28,6 +31,11 @@ ynh_app_config_apply() {
     ynh_config_add --jinja --template="homeserver.yaml" --destination="/etc/matrix-$app/homeserver.yaml"
     ynh_config_add --template="log.yaml" --destination="/etc/matrix-$app/log.yaml"
     set_permissions
+}
+
+run__add_admin_user() {
+    ynh_print_info "Settings '$add_admin_user_username' as admin."
+    ynh_psql_db_shell <<< "UPDATE users SET admin = 1 WHERE name = '@$add_admin_user_username:$server_name'"
 }
 
 #=================================================
