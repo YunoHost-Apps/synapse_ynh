@@ -20,8 +20,7 @@ services = ["__APP__"]
         yes = "true"
         no = "false"
         help = "If disabled, Login with Non-YunoHost Users impossible. But it simplies Login process if your Matrix server only has YunoHost SSO Users."
-        # Temporary disable the visible flag due of https://github.com/YunoHost/issues/issues/2331
-        # visible = "! enable_registration"
+        visible = "! enable_registration"
 
         [main.welcome.registrations_require_3pid]
         ask = "Registration requires all following 3PID personal identifier"
@@ -134,6 +133,19 @@ services = ["__APP__"]
         type = "url"
         help = "Used to be called 'riot_base_url', still supported"
         visible = "enable_notifs"
+
+    [main.admin_users]
+    name = "Add admin user"
+
+        [main.admin_users.add_admin_user_username]
+        type = "user"
+        bind = "null"
+        ask = "Give the username to set as admin"
+
+        [main.admin_users.add_admin_user]
+        type = "button"
+        ask = "Set user as admin"
+        enabled = "add_admin_user_username"
 
 [resources]
 name = "Resource Usage"
