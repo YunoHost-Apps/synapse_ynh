@@ -34,13 +34,11 @@ services = ["__APP__"]
         ask = "Register only with given email formats"
         type = "tags"
         help = '( e.g. ^[^@]+@matrix\\.org$ )'
-        visible = 'enable_registration && (registrations_require_3pid == "email" || registrations_require_3pid == "email&msisdn")'
 
         [main.welcome.allowed_local_3pids_msisdn]
         ask = "Register only with given phone number formats"
         type = "tags"
         help = '( e.g. \\+33 )'
-        visible = 'enable_registration && (registrations_require_3pid == "email&msisdn" || registrations_require_3pid == "msisdn")'
 
         [main.welcome.disable_msisdn_registration]
         ask = "Disable asking Phone Number in Registration flow"
@@ -163,17 +161,6 @@ services = ["__APP__"]
 [advanced]
 name = "Advanced Settings"
 services = ["__APP__"]
-
-    # Disabled as it don't work any more on bookworm
-    #
-    # [advanced.help]
-    # name = "SETTINGS FOR EXPERTS IN SERVER ADMINISTRATION"
-    #
-    #     [advanced.help.text]
-    #     ask = '''
-    #     !!There are security and privacy risks if you change these settings without knowing what you do!!
-    #     '''
-    #     type = "markdown"
 
     [advanced.others]
     name = "Others"
