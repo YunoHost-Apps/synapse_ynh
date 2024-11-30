@@ -11,8 +11,6 @@ ynh_app_config_validate() {
         password_enabled=true
     else
         registrations_require_3pid=email
-        allowed_local_3pids_email=''
-        allowed_local_3pids_msisdn=''
         disable_msisdn_registration=true
     fi
     if ! $enable_notifs; then
