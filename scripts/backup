@@ -31,8 +31,8 @@ ynh_backup "$install_dir"
 ynh_backup "/etc/php/$php_version/fpm/pool.d/$app.conf"
 
 ynh_backup "/etc/nginx/conf.d/$domain.d/$app.conf"
-if yunohost --output-as plain domain list | grep -q "^$server_name$"
-then
+# Backup only server name config if it exist
+if [ -e "/etc/nginx/conf.d/${server_name}.d/${app}_server_name.conf" ]; then
     ynh_backup "/etc/nginx/conf.d/${server_name}.d/${app}_server_name.conf"
 fi
 
