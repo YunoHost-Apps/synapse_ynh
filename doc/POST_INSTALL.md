@@ -10,7 +10,7 @@ For more details, see : https://github.com/element-hq/synapse#setting-up-federat
 
 You also need to open the TCP port __PORT_SYNAPSE_TLS__ on your ISP box if it's not automatically done.
 
-Your synapse server also implements a turnserver (for VoIP), to have this fully functional please read the 'Turnserver' section in the README available here: https://github.com/YunoHost-Apps/synapse_ynh .
+Your synapse server also implements a turnserver (for VoIP), to have this fully functional please read [the 'Turnserver' section in here](https://github.com/YunoHost-Apps/synapse_ynh/blob/master/doc/ADMIN.md#turnserver).
 
 If you're facing an issue or want to improve this app, please open a new issue in this project: https://github.com/YunoHost-Apps/synapse_ynh
 
