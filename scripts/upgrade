@@ -344,7 +344,7 @@ ynh_config_add_systemd --service="$app"-coturn --template=synapse-coturn.service
 #=================================================
 ynh_script_progression "Reconfiguring Fail2Ban..."
 
-ynh_config_add_fail2ban
+ynh_config_add_fail2ban --logpath=/var/log/matrix-"$app"/homeserver.log
 
 #=================================================
 # SETUP PERMISSIONS
