@@ -235,7 +235,7 @@ ynh_systemctl --service="$app".service --action=restart --wait_until="Synapse no
 #=================================================
 ynh_script_progression "Configuring Fail2Ban..."
 
-ynh_config_add_fail2ban
+ynh_config_add_fail2ban --logpath=/var/log/matrix-"$app"/homeserver.log
 
 #=================================================
 # END OF SCRIPT
