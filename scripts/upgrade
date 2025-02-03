@@ -261,11 +261,31 @@ then
 fi
 
 #=================================================
+# MIGRATION 13 : REMOVE SLIDING SYNC PROXY COMPONENTS
+#=================================================
+ynh_script_progression --message="Cleaning sliding sync proxy components..."
+
+if ynh_''psql_database_exists "${db_name}"_slidingproxy; then
+    ynh_''psql_drop_db "${db_name}"_slidingproxy
+fi
+
+ynh_safe_rm /etc/matrix-$app/sliding_proxy.conf
+
+test -e /etc/systemd/system/"$app"-sliding-proxy.service && (yunohost service remove "$app"-sliding-proxy || true)
+ynh_config_remove_systemd "$app"-sliding-proxy
+
+#=================================================
+# STANDARD UPGRADE STEPS
+#=================================================
 
 #=================================================
 # UPDATE SYNAPSE CONFIG
 #=================================================
 ynh_script_progression "Updating synapse config..."
+
+# Force enable it because some client like Element X don't support CAS and so require to have password authentication enabled
+password_enabled=true
+
 ynh_config_add --jinja --template="homeserver.yaml" --destination="/etc/matrix-$app/homeserver.yaml"
 ynh_config_add --template="log.yaml" --destination="/etc/matrix-$app/log.yaml"
 
