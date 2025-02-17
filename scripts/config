@@ -22,6 +22,10 @@ ynh_app_config_validate() {
 ynh_app_config_apply() {
     _ynh_app_config_apply
     configure_nginx
+
+    # Force enable it because some client like Element X don't support CAS and so require to have password authentication enabled
+    password_enabled=true
+
     ynh_config_add --jinja --template="homeserver.yaml" --destination="/etc/matrix-$app/homeserver.yaml"
     ynh_config_add --template="log.yaml" --destination="/etc/matrix-$app/log.yaml"
     set_permissions
