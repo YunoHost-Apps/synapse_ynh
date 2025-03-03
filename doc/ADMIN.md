@@ -16,10 +16,14 @@ Then, to log in the API with your admin credentials (cf next section)
 
 ### Set user as admin
 
-Currently, the client interface doesn't allow to grant admin rights. The workaround is to enable it manually in the database. The YunoHost app provides a small script to do so, which can be invoked:
-
+Currently, the client interface doesn't allow to grant admin rights.
+So you can follow this process to set the user as admin:
+1. Login with any client as a standards user (like Element). This will create the user in synapse.
+2. You have theses 2 solution:
+    - On the Yunohost Webadmin, go on: Applications > Synapse > Main Settings > On the "Add admin user" section you can select the user to set as admin.
+    - You can run this following script:
 ```bash
-/opt/yunohost/matrix-__APP__/set_admin_user.sh '@user_to_be_admin:domain.tld'
+/opt/yunohost/matrix-__APP__/set_admin_user.sh '@<user_to_be_admin>:<domain.tld>'
 ```
 
 ## Access by federation
