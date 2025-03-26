@@ -3,7 +3,7 @@ Este archivo README esta generado automaticamente<https://github.com/YunoHost/ap
 No se debe editar a mano.
 -->
 
-# Synapse para Yunohost
+# Synapse para YunoHost
 
 [![Nivel de integración](https://apps.yunohost.org/badge/integration/synapse)](https://ci-apps.yunohost.org/ci/apps/synapse/)
 ![Estado funcional](https://apps.yunohost.org/badge/state/synapse)
@@ -23,7 +23,7 @@ Instant messaging server matrix network.
 Yunohost chatroom with matrix : [https://matrix.to/#/#yunohost:matrix.org](https://matrix.to/#/#yunohost:matrix.org)
 
 
-**Versión actual:** 1.126.0~ynh1
+**Versión actual:** 1.127.0~ynh1
 ## Documentaciones y recursos
 
 - Sitio web oficial: <https://matrix.org/>
