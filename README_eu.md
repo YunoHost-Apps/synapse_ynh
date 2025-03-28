@@ -23,7 +23,7 @@ Instant messaging server matrix network.
 Yunohost chatroom with matrix : [https://matrix.to/#/#yunohost:matrix.org](https://matrix.to/#/#yunohost:matrix.org)
 
 
-**Paketatutako bertsioa:** 1.126.0~ynh1
+**Paketatutako bertsioa:** 1.127.1~ynh1
 ## Dokumentazioa eta baliabideak
 
 - Aplikazioaren webgune ofiziala: <https://matrix.org/>
@@ -36,7 +36,7 @@ Yunohost chatroom with matrix : [https://matrix.to/#/#yunohost:matrix.org](https
 
 Bidali `pull request`a [`testing` abarrera](https://github.com/YunoHost-Apps/synapse_ynh/tree/testing).
 
-`testing` abarra probatzeko, ondorengoa egin:
+`testing` abarra probatzeko, honakoa egin:
 
 ```bash
 sudo yunohost app install https://github.com/YunoHost-Apps/synapse_ynh/tree/testing --debug
