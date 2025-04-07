@@ -31,7 +31,10 @@ ensure_vars_set
 ynh_app_setting_set_default --app="$app" --key=server_name --value="$domain"
 
 # Define $jitsi_server if not already defined
-ynh_app_setting_set_default --app="$app" --key=jitsi_server --value='jitsi.riot.im'
+ynh_app_setting_set_default --app="$app" --key=jitsi_server --value='jitsi.riot.i'
+
+# Define $livekit_server if not already defined
+ynh_app_setting_set_default --app="$app" --key=livekit_server --value='livekit-jwt.call.matrix.org"'
 
 if [ "$e2e_enabled_by_default" = "true" ] ; then
     e2e_enabled_by_default="all"
