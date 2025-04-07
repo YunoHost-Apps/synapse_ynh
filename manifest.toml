@@ -55,6 +55,13 @@ ram.runtime = "1G"
     example = "domain.org"
     default = "jitsi.riot.im"
 
+    [install.livekit_server]
+    ask.en = "Livekit server address for conferencing?"
+    ask.fr = "Adresse du serveur Livekit pour les conférences ?"
+    type = "string"
+    example = "domain.org"
+    default = "livekit-jwt.call.matrix.org"
+
     [install.init_main_permission]
     help.en = "Define the users allowed to access to synapse. Setting this to 'visitors' don't make sens in this case."
     type = "group"
