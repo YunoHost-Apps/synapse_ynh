@@ -717,7 +717,7 @@ sso:
     # By default, this list contains only the login fallback page.
     #
     client_whitelist:
-{%- for domain in domain_whitelist_client.splitlines() %}
+{%- for domain in domains_list.splitlines() %}
       - {{ domain }}
 {%- endfor %}
 
@@ -1004,3 +1004,6 @@ encryption_enabled_by_default_for_room_type: {{ e2e_enabled_by_default }}
 # Uncomment to allow non-server-admin users to create groups on this server
 #
 enable_group_creation: {{ enable_group_creation }}
+
+experimental_features:
+    msc3266_enabled: true

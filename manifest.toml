@@ -20,7 +20,11 @@ fund = "https://matrix.org/support/#"
 [integration]
 yunohost = ">= 11.2.30"
 helpers_version = "2.1"
-architectures = "all"
+architectures = [
+    "amd64",
+    "armhf",
+    "arm64"
+]
 multi_instance = true
 ldap = true
 sso = "not_relevant"
@@ -34,11 +38,14 @@ ram.runtime = "1G"
     type = "domain"
 
     [install.server_name]
-    ask.en = "If your Synapse domain is a subdomain, you can choose a name for your Synapse server to have your Matrix user-ids looking like @user:domain.org instead of @user:synapse.domain.org"
-    ask.fr = "Si votre domaine pour Synapse est un sous-domaine, vous pouvez choisir un nom pour votre serveur Synapse afin que vos identifiants Matrix soient @utilisateur:domain.org plutôt que @utilisateur:synapse.domain.org"
+    ask.en = "Chose a server name if (optional)"
+    ask.fr = "Choissez un nom de serveur (optionnel)"
+    help.en = "If your Synapse domain is a subdomain, you can choose a name for your Synapse server to have your Matrix user-ids looking like @user:domain.org instead of @user:synapse.domain.org. Leave the value empty to use the same value than the domain."
+    help.fr = "Si votre domaine pour Synapse est un sous-domaine, vous pouvez choisir un nom pour votre serveur Synapse afin que vos identifiants Matrix soient @utilisateur:domain.org plutôt que @utilisateur:synapse.domain.org. Laissez la valeur vide afin d'utiliser le même nom que le domaine."
     type = "string"
     example = "domain.org"
-    default = "Same than the domain"
+    default = ""
+    optional = true
 
     [install.is_free_registration]
     ask.en = "Is it a server with free registration?"
@@ -47,13 +54,6 @@ ram.runtime = "1G"
     help.fr = "Un serveur public signifie que n'importe qui pourra s'enregistrer sur ce serveur."
     type = "boolean"
     default = false
-
-    [install.jitsi_server]
-    ask.en = "Jitsi server address for conferencing?"
-    ask.fr = "Adresse du serveur Jitsi pour les conférences ?"
-    type = "string"
-    example = "domain.org"
-    default = "jitsi.riot.im"
 
     [install.init_main_permission]
     help.en = "Define the users allowed to access to synapse. Setting this to 'visitors' don't make sens in this case."
@@ -72,9 +72,28 @@ ram.runtime = "1G"
     armhf.url = "https://github.com/YunoHost-Apps/synapse_python_build/releases/download/v1.128.0/matrix-synapse_1.128.0-bullseye-bin1_armv7l.tar.gz"
     armhf.sha256 = "076f383a8bc54a4e6e9257016c1e78f3261063974feceb40cf254f5aa34a6bd4"
 
+    [resources.sources.lk_jwt]
+    prefetch = true
+    extract = true
+
+    url = "https://github.com/element-hq/lk-jwt-service/archive/refs/tags/v0.2.2.tar.gz"
+    sha256 = "b6f6212dffd5a198f3653e9ee81f63371da70e785aa0c65e20fe541bfee31360"
+
+    [resources.sources.livekit]
+    prefetch = true
+    extract = true
+    in_subdir = false
+
+    amd64.url = "https://github.com/livekit/livekit/releases/download/v1.8.4/livekit_1.8.4_linux_amd64.tar.gz"
+    amd64.sha256 = "b660f4a72fe493e7c2a27861c403fba3d8c8fec4ce5e223515b26850c24d2dae"
+    arm64.url = "https://github.com/livekit/livekit/releases/download/v1.8.4/livekit_1.8.4_linux_arm64.tar.gz"
+    arm64.sha256 = "02f7a7b252d9bd1298e5bc3e301a138cc7d1bc00dc6855fd4c566ff61fb06324"
+    armhf.url = "https://github.com/livekit/livekit/releases/download/v1.8.4/livekit_1.8.4_linux_armv7.tar.gz"
+    armhf.sha256 = "02f7a7b252d9bd1298e5bc3e301a138cc7d1bc00dc6855fd4c566ff61fb06324"
+
     [resources.system_user]
     allow_email = true
-    home = "/opt/yunohost/matrix-__APP__"
+    home = "/var/www/__APP__"
 
     [resources.install_dir]
     dir = "/var/www/__APP__"
@@ -106,6 +125,14 @@ ram.runtime = "1G"
     admin_api.show_tile = false
     admin_api.protected = true
 
+    livekit.url = "/livekit/jwt"
+    livekit.additional_urls = ["/settings", "/rtc"]
+    livekit.label = "Element call backend"
+    livekit.allowed = "visitors"
+    livekit.auth_header = false
+    livekit.show_tile = false
+    livekit.protected = true
+
     [resources.ports]
     synapse_tls.default = 8448
     synapse_tls.exposed = "TCP"
@@ -115,6 +142,12 @@ ram.runtime = "1G"
     turnserver_alt_tls.default = 5350
     turnserver_alt_tls.exposed = "Both"
     cli.default = 5766
+    livekit.default = 7880
+    livekit_rtc.default = 7881
+    livekit_rtc.exposed = "Both"
+    livekit_turn.default = 5351
+    livekit_turn.exposed = "Both"
+    livekit_jwt.default = 8080
 
     [resources.apt]
     packages = ["coturn", "acl", "postgresql", "php8.3-fpm",

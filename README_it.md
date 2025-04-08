@@ -85,7 +85,7 @@ To prevent the situation when the server is behind a NAT, the public IP is writt
 If you have a dynamic IP address, you also might need to update this config automatically. To do that just edit a file named `/etc/cron.d/coturn_config_rotate` and add the following content (just adapt the __SYNAPSE_INSTANCE_NAME__ which could be `synapse` or maybe `synapse__2`).
 
 ```
-*/15 * * * * root bash /opt/yunohost/__SYNAPSE_INSTANCE_NAME__/Coturn_config_rotate.sh;
+*/15 * * * * root bash /var/www/__SYNAPSE_INSTANCE_NAME__/Coturn_config_rotate.sh;
 ```
 
 #### OpenVPN

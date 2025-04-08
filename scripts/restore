@@ -62,6 +62,8 @@ ynh_script_progression "Enable systemd services"
 # systemctl daemon-reload
 systemctl enable "$app".service --quiet
 systemctl enable "$app"-coturn.service --quiet
+systemctl enable "$app"-livekit.service --quiet
+systemctl enable "$app"-lk-jwt.service --quiet
 
 #=================================================
 # ADVERTISE SERVICE IN ADMIN PANEL
@@ -69,6 +71,8 @@ systemctl enable "$app"-coturn.service --quiet
 
 yunohost service add "$app" --log "/var/log/matrix-$app/homeserver.log" --needs_exposed_ports $port_synapse_tls --description 'Main matrix server service.'
 yunohost service add "$app-coturn" --needs_exposed_ports "$port_turnserver_tls" --description 'Turn server for matrix server. Used for audio and video call.'
+yunohost service add "$app"-livekit --description 'Livekit server for element call.'
+yunohost service add "$app"-lk-jwt --description 'RTC Livekit JWT service for element call.'
 
 #=================================================
 # CREATE A DH FILE
@@ -114,6 +118,8 @@ ynh_script_progression "Restarting Synapse services..."
 
 ynh_systemctl --service="$app"-coturn.service --action=restart
 ynh_systemctl --service="$app".service --action=restart --wait_until="Synapse now listening on TCP port $port_synapse_tls" --log_path="/var/log/matrix-$app/homeserver.log" --timeout=300
+ynh_systemctl --service="$app"-livekit.service --action=restart
+ynh_systemctl --service="$app"-lk-jwt.service --action=restart
 
 #=================================================
 # RELOAD NGINX
