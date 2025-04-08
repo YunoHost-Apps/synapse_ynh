@@ -1,34 +1,35 @@
 [Unit]
-Description=Synapse Matrix homeserver
+Description=Synapse livekit RTC backend
 After=network.target
 
 [Service]
 Type=simple
 User=__APP__
-WorkingDirectory=__INSTALL_DIR__
-BindPaths=/etc/matrix-__APP__
-ExecStartPre=__INSTALL_DIR__/venv/bin/python -m synapse.app.homeserver --config-path=/etc/matrix-__APP__/homeserver.yaml --config-path=/etc/matrix-__APP__/conf.d/ --generate-keys
-ExecStart=__INSTALL_DIR__/venv/bin/python -m synapse.app.homeserver --config-path=/etc/matrix-__APP__/homeserver.yaml --config-path=/etc/matrix-__APP__/conf.d/
-Restart=always
-RestartSec=3
+Group=__APP__
+WorkingDirectory=__INSTALL_DIR__/livekit
+ExecStart=__INSTALL_DIR__/livekit/livekit-server --config /etc/matrix-__APP__/livekit.yml
 
+### Depending on specificities of your service/app, you may need to tweak these
+### .. but this should be a good baseline
 # Sandboxing options to harden security
-# Depending on specificities of your service/app, you may need to tweak these
-# .. but this should be a good baseline
 # Details for these options: https://www.freedesktop.org/software/systemd/man/systemd.exec.html
 NoNewPrivileges=yes
 PrivateTmp=yes
 PrivateDevices=yes
-RestrictAddressFamilies=AF_UNIX AF_INET AF_INET6
+RestrictAddressFamilies=AF_UNIX AF_INET AF_INET6 AF_NETLINK
 RestrictNamespaces=yes
 RestrictRealtime=yes
 DevicePolicy=closed
+ProtectClock=yes
+ProtectHostname=yes
+ProtectProc=invisible
 ProtectSystem=full
 ProtectControlGroups=yes
 ProtectKernelModules=yes
 ProtectKernelTunables=yes
 LockPersonality=yes
-SystemCallFilter=~@clock @debug @module @mount @obsolete @reboot @setuid @swap
+SystemCallArchitectures=native
+SystemCallFilter=~@clock @debug @module @mount @obsolete @reboot @setuid @swap @cpu-emulation @privileged
 
 # Denying access to capabilities that should not be relevant for webapps
 # Doc: https://man7.org/linux/man-pages/man7/capabilities.7.html

@@ -20,11 +20,14 @@ json_str = json.dumps(loaded_toml)
 print(json_str)
 EOL
     )
-    echo $result | jq -r "$1"
+    echo "$result" | jq -r "$1"
 }
 
 check_app_version() {
-    local app_remote_version=$(curl 'https://api.github.com/repos/element-hq/synapse/releases/latest' -H 'Host: api.github.com' --compressed | jq -r ".tag_name" | cut -dv -f2)
+    local app_remote_version
+    app_remote_version=$(curl 'https://api.github.com/repos/element-hq/synapse/releases/latest' -H 'Host: api.github.com' --compressed | jq -r ".tag_name" | cut -dv -f2)
+    lk_jwt_version=$(curl 'https://api.github.com/repos/element-hq/lk-jwt-service/releases/latest' -H 'Host: api.github.com' --compressed | jq -r ".tag_name" | cut -dv -f2)
+    livekit_version=$(curl 'https://api.github.com/repos/livekit/livekit/releases/latest' -H 'Host: api.github.com' --compressed | jq -r ".tag_name" | cut -dv -f2)
 
     ## Check if new build is needed
     if [[ "$app_version" != "$app_remote_version" ]]
@@ -39,6 +42,8 @@ check_app_version() {
 upgrade_app() {
     (
         set -eu
+        local new_checksum
+        local prev_checksum
 
         # Define output file name
         # arm build: ${result_prefix_name_deb_1}-bin1_armv7l.tar.gz
@@ -48,8 +53,8 @@ upgrade_app() {
         readonly result_prefix_name_deb_2="matrix-synapse_${app_version}-$debian_version_name_2"
 
         # Build armv7 build
-        build_cmd_deb_1 $app_version $result_prefix_name_deb_1
-        build_cmd_deb_2 $app_version $result_prefix_name_deb_2
+        build_cmd_deb_1 "$app_version" "$result_prefix_name_deb_1"
+        build_cmd_deb_2 "$app_version" "$result_prefix_name_deb_2"
         push_armv7_build
 
         # Update python requirement
@@ -57,19 +62,38 @@ upgrade_app() {
         cp "$build_result_path_deb_2/${result_prefix_name_deb_2}"-build1_requirement.txt ../conf/requirement_"$debian_version_name_2".txt
 
         # Update manifest
-        sed -r -i 's|version = "[[:alnum:].]{4,8}~ynh[[:alnum:].]{1,2}"|version = "'${app_version}'~ynh1"|' ../manifest.toml
+        sed -r -i 's|version = "[[:alnum:].]{4,8}~ynh[[:alnum:].]{1,2}"|version = "'"${app_version}"'~ynh1"|' ../manifest.toml
 
-        # Update this link
+        # Update synapse link
         sed -r -i "s|armhf.url\s*=(.*)/releases/download/v[[:alnum:].]{4,10}/matrix-synapse_[[:alnum:].]{4,10}-$debian_version_name_1-bin[[:digit:]]_armv7l.tar.gz|armhf.url =\1/releases/download/v${app_version}/matrix-synapse_${app_version}-$debian_version_name_1-bin1_armv7l.tar.gz|"  ../manifest.toml
-        sed -r -i "s|armhf.url\s*=(.*)/releases/download/v[[:alnum:].]{4,10}/matrix-synapse_[[:alnum:].]{4,10}-$debian_version_name_2-bin[[:digit:]]_armv7l.tar.gz|armhf.url =\1/releases/download/v${app_version}/matrix-synapse_${app_version}-$debian_version_name_2-bin1_armv7l.tar.gz|"  ../manifest.toml
+        sed -r -i "s|armhf.url\s*=(.*)/releases/download/v[[:alnum:].]{4,10}/matrix-synapse_[[:alnum:].]{4,10}-$debian_version_name_2-bin[[:digit:]]_armv7l\.tar\.gz|armhf.url =\1/releases/download/v${app_version}/matrix-synapse_${app_version}-$debian_version_name_2-bin1_armv7l.tar.gz|"  ../manifest.toml
 
-        # Update checksum
-        sha256sum_arm_archive_deb_1=$(cat $build_result_path_deb_1/${result_prefix_name_deb_1}-bin1_armv7l-sha256.txt)
-        sha256sum_arm_archive_deb_2=$(cat $build_result_path_deb_2/${result_prefix_name_deb_2}-bin1_armv7l-sha256.txt)
+        # Update synapse link checksum
+        sha256sum_arm_archive_deb_1=$(cat "$build_result_path_deb_1/${result_prefix_name_deb_1}-bin1_armv7l-sha256.txt")
+        sha256sum_arm_archive_deb_2=$(cat "$build_result_path_deb_2/${result_prefix_name_deb_2}-bin1_armv7l-sha256.txt")
         prev_sha256sum_arm_archive_deb_1=$(get_from_manifest ".resources.sources.${app_name}_prebuilt_armv7_$debian_version_name_1.armhf.sha256")
         prev_sha256sum_arm_archive_deb_2=$(get_from_manifest ".resources.sources.${app_name}_prebuilt_armv7_$debian_version_name_2.armhf.sha256")
         sed -r -i "s|$prev_sha256sum_arm_archive_deb_1|$sha256sum_arm_archive_deb_1|" ../manifest.toml
         sed -r -i "s|$prev_sha256sum_arm_archive_deb_2|$sha256sum_arm_archive_deb_2|" ../manifest.toml
+
+        # Update lk-jwt
+        wget -O archive.tar.gz "https://github.com/element-hq/lk-jwt-service/archive/refs/tags/v${lk_jwt_version}.tar.gz"
+        new_checksum=$(sha256sum archive.tar.gz | cut -d' ' -f1)
+        rm archive.tar.gz
+
+        sed -r -i "s|url\s*=(.*)/element-hq/lk-jwt-service/archive/refs/tags/v[[:alnum:].]{4,10}\.tar\.gz|url =\1/element-hq/lk-jwt-service/archive/refs/tags/v${lk_jwt_version}.tar.gz|"  ../manifest.toml
+        prev_checksum=$(get_from_manifest ".resources.sources.lk_jwt.sha256")
+        sed -r -i "s|$prev_checksum|$new_checksum|" ../manifest.toml
+
+        # Update livekit
+        wget -O checksum.txt "https://github.com/livekit/livekit/releases/download/v${livekit_version}/checksums.txt"
+        for arch in amd64 arm64 armhf; do
+            sed -r -i "s|url\s*=(.*)/livekit/livekit/releases/download/v[[:alnum:].]{4,10}/livekit_[[:alnum:].]{4,10}_linux_${arch}.tar.gz|${arch}.url =\1/livekit/livekit/releases/download/v${livekit_version}/livekit_${livekit_version}_linux_${arch}.tar.gz|"  ../manifest.toml
+            prev_checksum=$(get_from_manifest ".resources.sources.livekit.${arch}.sha256")
+            new_checksum=$(grep -F "livekit_${livekit_version}_linux_${arch}.tar.gz" | cut -d' ' -f1)
+            sed -r -i "s|$prev_checksum|$new_checksum|" ../manifest.toml
+        done
+        rm checksum.txt
 
         git commit -a -m "Upgrade $app_name to $app_version"
         git push gitea auto_update:auto_update

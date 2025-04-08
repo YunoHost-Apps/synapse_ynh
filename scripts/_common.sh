@@ -1,46 +1,50 @@
 readonly python_version="$(python3 -V | cut -d' ' -f2 | cut -d. -f1-2)"
-readonly code_dir="/opt/yunohost/matrix-$app"
-readonly domain_whitelist_client="$(yunohost --output-as json domain list  | jq -r '.domains | .[]')"
+go_version=1.24.2
+readonly domains_list="$(yunohost --output-as json domain list  | jq -r '.domains | .[]')"
+#
+# TODO Ideally we must have a dedicated domain for this but for now it's not supported
+# so we just use the main app domain
+# Since Yunohost support multiple domain for the same app we should move it to sfu.$domain
+#
+readonly sfu_domain="$domain"
 
 install_sources() {
     # Install/upgrade synapse in virtualenv
 
     # Clean venv is it was on python2.7 or python3 with old version in case major upgrade of debian
-    if [ ! -e "$code_dir"/bin/python3 ] || [ ! -e "$code_dir/lib/python$python_version" ]; then
-        ynh_safe_rm "$code_dir"/bin
-        ynh_safe_rm "$code_dir"/lib
-        ynh_safe_rm "$code_dir"/lib64
-        ynh_safe_rm "$code_dir"/include
-        ynh_safe_rm "$code_dir"/share
-        ynh_safe_rm "$code_dir"/pyvenv.cfg
+    if [ ! -e "$install_dir/venv"/bin/python3 ] || [ ! -e "$install_dir/venv/lib/python$python_version" ]; then
+        ynh_safe_rm "$install_dir/venv"/bin
+        ynh_safe_rm "$install_dir/venv"/lib
+        ynh_safe_rm "$install_dir/venv"/lib64
+        ynh_safe_rm "$install_dir/venv"/include
+        ynh_safe_rm "$install_dir/venv"/share
+        ynh_safe_rm "$install_dir/venv"/pyvenv.cfg
     fi
 
-    mkdir -p "$code_dir"
-    chown "$app":root -R "$code_dir"
+    mkdir -p "$install_dir/venv"
+    chown "$app":root -R "$install_dir/venv"
 
     if [ -n "$(uname -m | grep arm)" ]
     then
         # Clean old file, sometimes it could make some big issues if we don't do this!!
-        ynh_safe_rm "$code_dir"/bin
-        ynh_safe_rm "$code_dir"/lib
-        ynh_safe_rm "$code_dir"/include
-        ynh_safe_rm "$code_dir"/share
+        ynh_safe_rm "$install_dir/venv"/bin
+        ynh_safe_rm "$install_dir/venv"/lib
+        ynh_safe_rm "$install_dir/venv"/include
+        ynh_safe_rm "$install_dir/venv"/share
 
-        ynh_setup_source --dest_dir="$code_dir"/ --source_id="synapse_prebuilt_armv7_$(lsb_release --codename --short)"
+        ynh_setup_source --dest_dir="$install_dir/venv"/ --source_id="synapse_prebuilt_armv7_$(lsb_release --codename --short)"
 
         # Fix multi-instance support
-        for f in "$code_dir"/bin/*; do
-            if ! [[ $f =~ "__" ]]; then
-                ynh_replace_regex --match='#!/opt/yunohost/matrix-synapse' --replace='#!'"$code_dir" --file="$f"
-            fi
+        for f in "$install_dir/venv"/bin/*; do
+            ynh_replace_regex --match='#!/opt/yunohost/matrix-synapse' --replace='#!'"$install_dir/venv" --file="$f"
         done
     else
 
         # Install virtualenv if it don't exist
-        test -e "$code_dir"/bin/python3 || python3 -m venv "$code_dir"
+        test -e "$install_dir/venv"/bin/python3 || python3 -m venv "$install_dir/venv"
 
         # Install synapse in virtualenv
-        local pip3="$code_dir"/bin/pip3
+        local pip3="$install_dir/venv"/bin/pip3
 
         $pip3 install --upgrade setuptools wheel pip cffi
         $pip3 install --upgrade -r "$YNH_APP_BASEDIR/conf/requirement_$(lsb_release --codename --short).txt"
@@ -48,11 +52,24 @@ install_sources() {
 
     # Apply patch for LDAP auth if needed
     # Note that we put patch into scripts dir because /source are not stored and can't be used on restore
-    if ! grep -F -q '# LDAP Filter anonymous user Applied' "$code_dir/lib/python$python_version/site-packages/ldap_auth_provider.py"; then
-        pushd "$code_dir/lib/python$python_version/site-packages"
+    if ! grep -F -q '# LDAP Filter anonymous user Applied' "$install_dir/venv/lib/python$python_version/site-packages/ldap_auth_provider.py"; then
+        pushd "$install_dir/venv/lib/python$python_version/site-packages"
         patch < "$YNH_APP_BASEDIR"/scripts/patch/ldap_auth_filter_anonymous_user.patch
         popd
     fi
+
+    # Install livekit jwt
+    ynh_setup_source --source_id=lk_jwt --dest_dir="$install_dir/lk_jwt"
+
+    ynh_hide_warnings ynh_go_install
+    chown "$app" -R "$install_dir"
+
+    pushd "$install_dir/lk_jwt"
+    ynh_hide_warnings ynh_exec_as_app go build -o lk-jwt-service .
+    popd
+
+    # Install livekit server for element-call
+    ynh_setup_source --source_id=livekit --dest_dir="$install_dir/livekit"
 }
 
 configure_coturn() {
@@ -90,8 +107,19 @@ configure_nginx() {
         ynh_config_add --template="server_name.conf" --destination="/etc/nginx/conf.d/${server_name}.d/${app}_server_name.conf"
     fi
 
+#     ynh_config_add --template="sfu_nginx.conf" --destination="/etc/nginx/conf.d/${sfu_domain}.d/${app}.conf"
+
     # Create a dedicated NGINX config
     ynh_config_add_nginx
+}
+
+configure_php() {
+    ynh_config_add_phpfpm
+    ynh_replace --match="chdir = $install_dir" \
+                --replace="chdir = $install_dir/cas" \
+                --file="/etc/php/$php_version/fpm/pool.d/$app.conf"
+    ynh_store_file_checksum "/etc/php/$php_version/fpm/pool.d/$app.conf"
+    ynh_systemctl --service="php$php_version-fpm" --action=reload
 }
 
 ensure_vars_set() {
@@ -112,6 +140,8 @@ ensure_vars_set() {
         fi
         ynh_app_setting_set --key=web_client_location --value="$web_client_location"
     fi
+
+    ynh_app_setting_set_default --app="$app" --key=jitsi_server --value=jitsi.riot.im
 
     ynh_app_setting_set_default --app="$app" --key=client_base_url --value="$web_client_location"
     ynh_app_setting_set_default --app="$app" --key=invite_client_location --value="$web_client_location"
@@ -136,18 +166,20 @@ ensure_vars_set() {
     ynh_app_setting_set_default --app="$app" --key=enable_3pid_lookup --value=false
     ynh_app_setting_set_default --app="$app" --key=push_include_content --value=true
     ynh_app_setting_set_default --app="$app" --key=enable_dtls_for_audio_video_turn_call --value=true
+
+    ynh_app_setting_set_default --app="$app" --key=livekit_secret --value="$(ynh_string_random --length=40)"
 }
 
 set_permissions() {
     chown -R "$app:$app" "$install_dir"
     chmod -R u+rwX,g+rX-w,o= "$install_dir"
 
-    chown -R "$app":"$app" "$code_dir"
-    chmod -R u+rwX,g+rX-w,o= "$code_dir"
+    chmod 750 "$install_dir"/Coturn_config_rotate.sh
+    chmod 700 "$install_dir"/update_synapse_for_appservice.sh
+    chmod 700 "$install_dir"/set_admin_user.sh
 
-    chmod 750 "$code_dir"/Coturn_config_rotate.sh
-    chmod 700 "$code_dir"/update_synapse_for_appservice.sh
-    chmod 700 "$code_dir"/set_admin_user.sh
+    chmod 640 "$install_dir"/cas/cas_server.php
+    chown "$app":www-data "$install_dir"
 
     if [ "${1:-}" == data ]; then
         chmod 750 "$data_dir"

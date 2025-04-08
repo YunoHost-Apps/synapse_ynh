@@ -26,6 +26,7 @@ if [ -z "${domain:-}" ]; then
 fi
 
 ensure_vars_set
+mkdir -p "$install_dir"/{cas,venv}
 
 # Define $server_name if not already defined
 ynh_app_setting_set_default --app="$app" --key=server_name --value="$domain"
@@ -78,13 +79,13 @@ then
 fi
 
 # remove legacy env file into /etc/default
-ynh_safe_rm /etc/default/coturn-$app
+ynh_safe_rm /etc/default/coturn-"$app"
 
 #=================================================
 # MIGRATION 7 : STANDARDIZE SYSTEMD UNIT
 #=================================================
 
-if [ -e /etc/systemd/system/matrix-$app.service ]
+if [ -e /etc/systemd/system/matrix-"$app".service ]
 then
     ynh_script_progression 'Migrating systemd unit to standard name...'
 
@@ -106,7 +107,10 @@ fi
 #=================================================
 
 # We stop the service
-ynh_systemctl --service=$app.service --action=stop
+ynh_systemctl --service="$app".service --action=stop
+ynh_systemctl --service="$app"-coturn.service --action=stop
+ynh_systemctl --service="$app"-livekit.service --action=stop
+ynh_systemctl --service="$app"-lk-jwt.service --action=stop
 
 ynh_script_progression 'Managing migrations...'
 
@@ -194,9 +198,9 @@ fi
 # MIGRATION 9 : migrate data path (from matrix-$app to $app)
 #=================================================
 
-if [ -e /home/yunohost.app/matrix-$app ]; then
-    mv -t $data_dir /home/yunohost.app/matrix-$app/*
-    ynh_safe_rm /home/yunohost.app/matrix-$app
+if [ -e /home/yunohost.app/matrix-"$app" ]; then
+    mv -t "$data_dir" /home/yunohost.app/matrix-"$app"/*
+    ynh_safe_rm /home/yunohost.app/matrix-"$app"
 fi
 
 #=================================================
@@ -224,14 +228,16 @@ if grep -q "^matrix-$app" /etc/passwd; then
     systemctl stop php8.3-fpm.service || true
 
     ynh_''system_user_delete --username=matrix-"$app" || true
-    yunohost user delete $app || true
-    ynh_''system_user_create --username=$app --home_dir=$code_dir
-    adduser $app ssl-cert
+    yunohost user delete "$app" || true
+    ynh_''system_user_create --username="$app" --home_dir="$install_dir"/venv
+    adduser "$app" ssl-cert
 
     systemctl start php7.4-fpm.service || true
     systemctl start php8.2-fpm.service || true
     systemctl start php8.3-fpm.service || true
 fi
+
+ynh_safe_rm /opt/yunohost/matrix-"$app"
 
 #=================================================
 # DOWNLOAD, CHECK AND UNPACK SOURCE
@@ -249,7 +255,7 @@ then
     ynh_script_progression "Generating synapse secret..."
 
     # Generate config and keys
-    "$code_dir"/bin/python -m synapse.app.homeserver --keys-directory /etc/matrix-"$app"/ --generate-config --generate-keys --server-name "$server_name" --report-stats=no -c homeserver.yml
+    "$install_dir/venv"/bin/python -m synapse.app.homeserver --keys-directory /etc/matrix-"$app"/ --generate-config --generate-keys --server-name "$server_name" --report-stats=no -c homeserver.yml
 
     # Get random values from config
     registration_shared_secret=$(egrep "^registration_shared_secret:" homeserver.yml | cut -d'"' -f2)
@@ -263,13 +269,13 @@ fi
 #=================================================
 # MIGRATION 13 : REMOVE SLIDING SYNC PROXY COMPONENTS
 #=================================================
-ynh_script_progression --message="Cleaning sliding sync proxy components..."
+ynh_script_progression "Cleaning sliding sync proxy components..."
 
 if ynh_''psql_database_exists "${db_name}"_slidingproxy; then
     ynh_''psql_drop_db "${db_name}"_slidingproxy
 fi
 
-ynh_safe_rm /etc/matrix-$app/sliding_proxy.conf
+ynh_safe_rm /etc/matrix-"$app"/sliding_proxy.conf
 
 test -e /etc/systemd/system/"$app"-sliding-proxy.service && (yunohost service remove "$app"-sliding-proxy || true)
 ynh_config_remove_systemd "$app"-sliding-proxy
@@ -308,7 +314,7 @@ ynh_script_progression "Upgrading NGINX web server configuration..."
 # Create a dedicated php-fpm config
 ynh_script_progression "Configuring application..."
 
-ynh_config_add_phpfpm
+configure_php
 
 configure_nginx
 
@@ -320,15 +326,22 @@ ynh_script_progression "Updating Coturn config..."
 configure_coturn
 
 #=================================================
+# SET Element call CONFIG
+#=================================================
+ynh_script_progression "Configuring Element call..." --weight=1
+
+ynh_config_add --template=livekit.yml --destination=/etc/matrix-"$app"/livekit.yml
+
+#=================================================
 # ADD SCRIPT FOR COTURN CRON AND APP SERVICE
 #=================================================
 
 # WARNING : theses command are used in INSTALL, UPGRADE
 # For any update do it in all files
 
-ynh_config_add --template="../sources/Coturn_config_rotate.sh" --destination="$code_dir/Coturn_config_rotate.sh"
-ynh_config_add --template="../sources/update_synapse_for_appservice.sh" --destination="$code_dir/update_synapse_for_appservice.sh"
-ynh_config_add --template=../sources/set_admin_user.sh --destination=$code_dir/set_admin_user.sh
+ynh_config_add --template="../sources/Coturn_config_rotate.sh" --destination="$install_dir/Coturn_config_rotate.sh"
+ynh_config_add --template="../sources/update_synapse_for_appservice.sh" --destination="$install_dir/update_synapse_for_appservice.sh"
+ynh_config_add --template=../sources/set_admin_user.sh --destination="$install_dir"/set_admin_user.sh
 
 # Ensure app-service folder has exists and the config file exit (Migration)
 mkdir -p /etc/matrix-$app/app-service
@@ -347,6 +360,8 @@ fi
 
 yunohost service add "$app" --log "/var/log/matrix-$app/homeserver.log" --needs_exposed_ports "$port_synapse_tls" --description 'Main matrix server service.'
 yunohost service add "$app"-coturn --needs_exposed_ports "$port_turnserver_tls" --description 'Turn server for matrix server. Used for audio and video call.'
+yunohost service add "$app"-livekit --description 'Livekit server for element call.'
+yunohost service add "$app"-lk-jwt --description 'RTC Livekit JWT service for element call.'
 
 #=================================================
 # UPDATE SYSTEMD
@@ -358,6 +373,8 @@ ynh_config_add_systemd  --template=synapse.service
 
 cp ../conf/default_coturn /etc/matrix-"$app"/coturn_env
 ynh_config_add_systemd --service="$app"-coturn --template=synapse-coturn.service
+ynh_config_add_systemd --service="$app"-livekit --template=synapse-livekit.service
+ynh_config_add_systemd --service="$app"-lk-jwt --template=synapse-lk-jwt.service
 
 #=================================================
 # UPGRADE FAIL2BAN
@@ -408,6 +425,8 @@ ynh_script_progression "Restarting Synapse services..."
 
 ynh_systemctl --service="$app"-coturn.service --action=restart
 ynh_systemctl --service="$app".service --action=restart --wait_until="Synapse now listening on TCP port $port_synapse_tls" --log_path="/var/log/matrix-$app/homeserver.log" --timeout=300
+ynh_systemctl --service="$app"-livekit.service --action=restart
+ynh_systemctl --service="$app"-lk-jwt.service --action=restart
 
 #=================================================
 # END OF SCRIPT
