@@ -10,7 +10,7 @@ version = "1.128.0~ynh1"
 maintainers = ["Josué Tille"]
 
 [upstream]
-license = "Apache-2.0"
+license = "AGPL-3.0,Apache-2.0"
 website = "https://matrix.org/"
 code = "https://github.com/element-hq/synapse"
 admindoc = "https://matrix-org.github.io/synapse/latest/welcome_and_overview.html"
