@@ -301,10 +301,7 @@ ynh_config_add --template="log.yaml" --destination="/etc/matrix-$app/log.yaml"
 # WARNING : theses command are used in INSTALL, UPGRADE
 # For any update do it in all files
 
-mkdir -p "$install_dir"
-cp ../sources/cas_server.php "$install_dir"/
-chmod u=rwX,g=rX,o= -R "$install_dir"
-chown "$app":root -R "$install_dir"
+cp ../sources/cas_server.php "$install_dir"/cas/
 
 #=================================================
 # NGINX CONFIGURATION
