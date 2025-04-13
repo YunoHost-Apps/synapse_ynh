@@ -7,7 +7,7 @@ Type=simple
 User=__APP__
 Group=__APP__
 WorkingDirectory=__INSTALL_DIR__/lk_jwt
-Environment="LIVEKIT_URL=ws://__SFU_DOMAIN__" "LIVEKIT_KEY=element_call" "LIVEKIT_SECRET=__LIVEKIT_SECRET__"  LIVEKIT_JWT_PORT=__PORT_LIVEKIT_JWT__
+EnvironmentFile=/etc/matrix-__APP__/lk-jwt.conf
 ExecStart=__INSTALL_DIR__/lk_jwt/lk-jwt-service
 
 ### Depending on specificities of your service/app, you may need to tweak these
