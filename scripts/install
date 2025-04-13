@@ -177,6 +177,7 @@ configure_coturn
 ynh_script_progression "Configuring Element call backend..." --weight=1
 
 ynh_config_add --template=livekit.yml --destination=/etc/matrix-"$app"/livekit.yml
+ynh_config_add --template=lk-jwt.conf --destination=/etc/matrix-"$app"/lk-jwt.conf
 
 #=================================================
 # SETUP LOGROTATE
