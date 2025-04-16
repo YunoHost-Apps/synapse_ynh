@@ -7,7 +7,7 @@ Type=simple
 User=__APP__
 Group=__APP__
 WorkingDirectory=__INSTALL_DIR__/livekit
-ExecStart=__INSTALL_DIR__/livekit/livekit-server --config /etc/matrix-__APP__/livekit.yml
+ExecStart=__INSTALL_DIR__/livekit/livekit-server --config /etc/matrix-__APP__/livekit.yml __LK_NODE_IP__
 
 ### Depending on specificities of your service/app, you may need to tweak these
 ### .. but this should be a good baseline

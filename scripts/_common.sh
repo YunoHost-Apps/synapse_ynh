@@ -72,6 +72,17 @@ install_sources() {
     ynh_setup_source --source_id=livekit --dest_dir="$install_dir/livekit"
 }
 
+get_lk_node_ip() {
+    local public_ip4
+    public_ip4="$(curl -s https://ip.yunohost.org)" || true
+
+    lk_node_ip=""
+    if [ -n "$public_ip4" ] && ynh_validate_ip --family=4 --ip_address="$public_ip4"
+    then
+        lk_node_ip="--node-ip $public_ip4"
+    fi
+}
+
 configure_coturn() {
     # Get public IP and set as external IP for coturn
     # note : '|| true' is used to ignore the errors if we can't get the public ipv4 or ipv6

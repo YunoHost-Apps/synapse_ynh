@@ -144,9 +144,7 @@ ram.runtime = "1G"
     cli.default = 5766
     livekit.default = 7880
     livekit_rtc.default = 7881
-    livekit_rtc.exposed = "Both"
-    livekit_turn.default = 5351
-    livekit_turn.exposed = "Both"
+    livekit_rtc.exposed = "TCP"
     livekit_jwt.default = 8080
 
     [resources.apt]
