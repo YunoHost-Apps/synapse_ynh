@@ -371,6 +371,7 @@ ynh_config_add_systemd  --template=synapse.service
 
 cp ../conf/default_coturn /etc/matrix-"$app"/coturn_env
 ynh_config_add_systemd --service="$app"-coturn --template=synapse-coturn.service
+get_lk_node_ip
 ynh_config_add_systemd --service="$app"-livekit --template=synapse-livekit.service
 ynh_config_add_systemd --service="$app"-lk-jwt --template=synapse-lk-jwt.service
 
