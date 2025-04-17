@@ -125,8 +125,7 @@ ram.runtime = "1G"
     admin_api.show_tile = false
     admin_api.protected = true
 
-    livekit.url = "/livekit/jwt"
-    livekit.additional_urls = ["/settings", "/rtc"]
+    livekit.url = "/livekit"
     livekit.label = "Element call backend"
     livekit.allowed = "visitors"
     livekit.auth_header = false
