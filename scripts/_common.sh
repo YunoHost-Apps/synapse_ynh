@@ -46,7 +46,8 @@ install_sources() {
         # Install synapse in virtualenv
         local pip3="$install_dir/venv"/bin/pip3
 
-        $pip3 install --upgrade setuptools wheel pip cffi
+        # TODO we should move Authlib dependency in the requirement but we don't wan't to edit the requirement for now (for conflict reason...)
+        $pip3 install --upgrade setuptools wheel pip cffi Authlib
         $pip3 install --upgrade -r "$YNH_APP_BASEDIR/conf/requirement_$(lsb_release --codename --short).txt"
     fi
 
@@ -70,6 +71,9 @@ install_sources() {
 
     # Install livekit server for element-call
     ynh_setup_source --source_id=livekit --dest_dir="$install_dir/livekit"
+
+    # Install matrix authentication service
+    ynh_setup_source --source_id=mas --dest_dir="$install_dir/mas"
 }
 
 get_lk_node_ip() {
@@ -180,6 +184,55 @@ ensure_vars_set() {
     ynh_app_setting_set_default --app="$app" --key=livekit_secret --value="$(ynh_string_random --length=40)"
 }
 
+yaml_to_json() {
+    python3 -c 'import yaml, json, sys; print(json.dumps(yaml.safe_load(sys.stdin)))'
+}
+
+generate_ulid() {
+    python3 - << EOF
+import os
+import codecs
+ENCODING = "0123456789ABCDEFGHJKMNPQRSTVWXYZ"
+LENCODING = len(ENCODING)
+
+def encode_random_16bytes():
+     b = os.urandom(10)
+     x = int(codecs.encode(b, 'hex'), 16)
+     s = ''
+     while len(s) < 16:
+         x, i = divmod(x, LENCODING)
+         s = ENCODING[i] + s
+     return s
+print(encode_random_16bytes() + "0SYNAPSE00")
+EOF
+}
+
+get_mas_keys() {
+    mas_keys_list="$(find "/etc/matrix-$app/mas_keys/" -name '*.key' -exec basename {} \; | sed 's|.key||g')"
+}
+
+maybe_generate_mas_keys() {
+    local mas_config_base
+    if [ -z "${mas_client_id_synapse:-}" ]; then
+        mas_client_id_synapse="$(generate_ulid)"
+        mas_config_base="$("$install_dir/mas/mas-cli" config generate 2>/dev/null | yaml_to_json)"
+        mas_synapse_secret=$(echo "$mas_config_base" | jq -r '.matrix.secret')
+        mas_secrets_encryption=$(echo "$mas_config_base" | jq -r '.secrets.encryption')
+
+        ynh_app_setting_set --key=mas_client_id_synapse --value="$mas_client_id_synapse"
+        ynh_app_setting_set --key=mas_synapse_secret --value="$mas_synapse_secret"
+        ynh_app_setting_set --key=mas_secrets_encryption --value="$mas_secrets_encryption"
+
+        ynh_app_setting_set_default --key=mas_synapse_oidc_secret --value="$(ynh_string_random --length=40)"
+
+        mkdir -p "/etc/matrix-$app/mas_keys"
+
+        for kid in $(echo "$mas_config_base" | jq -r '.secrets.keys | .[].kid'); do
+            echo "$mas_config_base" | jq  -r -j '.secrets.keys | .[] | select(.kid =="'"$kid"'") | .key' > "/etc/matrix-$app/mas_keys/$kid.key"
+        done
+    fi
+}
+
 set_permissions() {
     chown -R "$app:$app" "$install_dir"
     chmod -R u+rwX,g+rX-w,o= "$install_dir"
@@ -188,8 +241,8 @@ set_permissions() {
     chmod 700 "$install_dir"/update_synapse_for_appservice.sh
     chmod 700 "$install_dir"/set_admin_user.sh
 
-    chmod 640 "$install_dir"/cas/cas_server.php
-    chown "$app":www-data "$install_dir" "$install_dir"/cas "$install_dir"/cas/cas_server.php
+    chown "$app":www-data "$install_dir" "$install_dir/"{mas,mas/share}
+    chown "$app":www-data -R  "$install_dir"/mas/share/assets
 
     if [ "${1:-}" == data ]; then
         chmod 750 "$data_dir"
@@ -205,6 +258,8 @@ set_permissions() {
     setfacl -R -m user:turnserver:rX  /etc/matrix-"$app"
 
     chmod 600 /etc/matrix-"$app"/"$server_name".signing.key
+    chmod 700 "/etc/matrix-$app/mas_keys"
+    chmod 600 "/etc/matrix-$app/mas_keys/"*.key
 
     chown "$app":root -R /var/log/matrix-"$app"
     chmod u=rwX,g=rX,o= -R /var/log/matrix-"$app"

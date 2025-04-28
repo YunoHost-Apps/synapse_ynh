@@ -108,6 +108,7 @@ fi
 
 # We stop the service
 ynh_systemctl --service="$app".service --action=stop
+ynh_systemctl --service="$app-mas.service" --action=stop
 ynh_systemctl --service="$app"-coturn.service --action=stop
 ynh_systemctl --service="$app"-livekit.service --action=stop
 ynh_systemctl --service="$app"-lk-jwt.service --action=stop
@@ -253,6 +254,8 @@ ynh_safe_rm "/etc/nginx/conf.d/${domain}.d/${app}_server_name.conf"
 ynh_script_progression "Upgrading source files..."
 install_sources
 
+maybe_generate_mas_keys
+
 #=================================================
 # MIGRATION 1 : GENERATE SYNAPSE SECRET
 #=================================================
@@ -303,12 +306,25 @@ ynh_config_add --jinja --template="homeserver.yaml" --destination="/etc/matrix-$
 ynh_config_add --template="log.yaml" --destination="/etc/matrix-$app/log.yaml"
 
 #=================================================
-# CREATE SMALL CAS SERVER
+# SET MAS CONFIG
 #=================================================
-# WARNING : theses command are used in INSTALL, UPGRADE
-# For any update do it in all files
+ynh_script_progression "Configuring MAS..."
 
-cp ../sources/cas_server.php "$install_dir"/cas/
+get_mas_keys
+ynh_config_add --jinja --template="mas.yaml" --destination="/etc/matrix-$app/mas.yaml"
+
+#=================================================
+# MIGRATION 14 : migrate to MAS
+#=================================================
+
+# Remove the dedicated php-fpm config
+ynh_config_remove_phpfpm
+ynh_safe_rm "$install_dir"/cas
+# TODO check with following command if everything is OK
+# ./mas-cli syn2mas check --config /etc/matrix-synapse/mas.yaml --synapse-config /etc/matrix-synapse/homeserver.yaml
+if [ "$(sudo --login --user=postgres psql -qAt "$db_name_mas" <<< "SELECT count(user_id) FROM public.users")" -eq 0 ]; then
+    "$install_dir/mas/mas-cli" syn2mas migrate --config "/etc/matrix-$app/mas.yaml" --synapse-config "/etc/matrix-$app/homeserver.yaml"
+fi
 
 #=================================================
 # NGINX CONFIGURATION
@@ -365,6 +381,7 @@ fi
 
 yunohost service add "$app" --log "/var/log/matrix-$app/homeserver.log" --needs_exposed_ports "$port_synapse_tls" --description 'Main matrix server service.'
 yunohost service add "$app"-coturn --needs_exposed_ports "$port_turnserver_tls" --description 'Turn server for matrix server. Used for audio and video call.'
+yunohost service add "$app"-mas --description 'Matrix authentication service.'
 yunohost service add "$app"-livekit --description 'Livekit server for element call.'
 yunohost service add "$app"-lk-jwt --description 'RTC Livekit JWT service for element call.'
 
@@ -375,6 +392,7 @@ ynh_script_progression "Upgrading systemd configuration..."
 
 # Create systemd service for synapse and turnserver
 ynh_config_add_systemd  --template=synapse.service
+ynh_config_add_systemd --service="$app"-mas --template=synapse-mas.service
 
 cp ../conf/default_coturn /etc/matrix-"$app"/coturn_env
 ynh_config_add_systemd --service="$app"-coturn --template=synapse-coturn.service
@@ -420,6 +438,7 @@ ynh_replace --match=__DOMAIN__  --replace="$domain"  --file=../hooks/post_cert_u
 #=================================================
 ynh_script_progression "Restarting Synapse services..."
 
+ynh_systemctl --service="$app-mas.service" --action=restart
 ynh_systemctl --service="$app"-coturn.service --action=restart
 ynh_systemctl --service="$app".service --action=restart --wait_until="Synapse now listening on TCP port $port_synapse_tls" --log_path="/var/log/matrix-$app/homeserver.log" --timeout=300
 ynh_systemctl --service="$app"-livekit.service --action=restart
