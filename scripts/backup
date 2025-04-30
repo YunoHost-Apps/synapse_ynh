@@ -30,7 +30,7 @@ ynh_backup "$install_dir"
 ynh_backup "/etc/php/$php_version/fpm/pool.d/$app.conf"
 
 ynh_backup "/etc/nginx/conf.d/$domain.d/$app.conf"
-# ynh_backup --src_path="/etc/nginx/conf.d/${sfu_domain}.d/${app}.conf"
+ynh_backup --src_path="/etc/nginx/conf.d/${domain}.d/${app}.conf.inc"
 
 # Backup only server name config if it exist
 if [ -e "/etc/nginx/conf.d/${server_name}.d/${app}_server_name.conf" ]; then

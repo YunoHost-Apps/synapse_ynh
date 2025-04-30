@@ -237,7 +237,14 @@ if grep -q "^matrix-$app" /etc/passwd; then
     systemctl start php8.3-fpm.service || true
 fi
 
+#=================================================
+# MIGRATION : some cleanup ...
+#=================================================
+
 ynh_safe_rm /opt/yunohost/matrix-"$app"
+
+# Clean old server_name config if $server_name == $domain because now it's provided by the main nginx config
+ynh_safe_rm "/etc/nginx/conf.d/${domain}.d/${app}_server_name.conf"
 
 #=================================================
 # DOWNLOAD, CHECK AND UNPACK SOURCE
@@ -389,16 +396,7 @@ ynh_config_add_fail2ban --logpath=/var/log/matrix-"$app"/homeserver.log
 ynh_script_progression "Configuring permissions..."
 
 if yunohost --output-as plain domain list | grep -q "^$server_name"'$'; then
-    if ! ynh_""permission_exists --permission=server_client_infos; then
-        ynh_""permission_create --permission=server_client_infos --url="$server_name"/.well-known/matrix \
-                                --show_tile=false --allowed=visitors \
-                                --auth_header=false --protected=true
-    else yunohost --output-as plain domain list | grep -q "^$server_name"'$'
-        ynh_""permission_url --permission=server_client_infos --url="$server_name"/.well-known/matrix \
-                          --auth_header=false
-        ynh_""permission_update --permission=server_client_infos --show_tile=false \
-                                --protected=true
-    fi
+    ynh_""permission_url --permission=server_client_infos --add_url="$server_name"/.well-known/matrix
 fi
 
 #=================================================

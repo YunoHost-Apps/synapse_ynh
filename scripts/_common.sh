@@ -105,20 +105,19 @@ configure_coturn() {
 
 configure_nginx() {
     local e2e_enabled_by_default_client_config
+    if [ "$e2e_enabled_by_default" == "off" ]; then
+        e2e_enabled_by_default_client_config=false
+    else
+        e2e_enabled_by_default_client_config=true
+    fi
 
     # Create .well-known redirection for access by federation
-    if yunohost --output-as plain domain list | grep -q "^$server_name$"
+    if yunohost --output-as plain domain list | grep -q "^$server_name$" && [ "$server_name" != "$domain" ]
     then
-        local e2e_enabled_by_default_client_config
-        if [ "$e2e_enabled_by_default" == "off" ]; then
-            e2e_enabled_by_default_client_config=false
-        else
-            e2e_enabled_by_default_client_config=true
-        fi
         ynh_config_add --template="server_name.conf" --destination="/etc/nginx/conf.d/${server_name}.d/${app}_server_name.conf"
     fi
 
-#     ynh_config_add --template="sfu_nginx.conf" --destination="/etc/nginx/conf.d/${sfu_domain}.d/${app}.conf"
+    ynh_config_add --template='nginx.conf.inc' --destination="/etc/nginx/conf.d/${domain}.d/${app}.conf.inc"
 
     # Create a dedicated NGINX config
     ynh_config_add_nginx
@@ -190,7 +189,7 @@ set_permissions() {
     chmod 700 "$install_dir"/set_admin_user.sh
 
     chmod 640 "$install_dir"/cas/cas_server.php
-    chown "$app":www-data "$install_dir"
+    chown "$app":www-data "$install_dir" "$install_dir"/cas "$install_dir"/cas/cas_server.php
 
     if [ "${1:-}" == data ]; then
         chmod 750 "$data_dir"

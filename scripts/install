@@ -205,9 +205,7 @@ ynh_config_add --template=../sources/set_admin_user.sh --destination="$install_d
 ynh_script_progression "Configuring permissions..."
 
 if yunohost --output-as plain domain list | grep -q "^$server_name$"; then
-    ynh_""permission_create --permission=server_client_infos --url="$server_name"/.well-known/matrix \
-                            --show_tile=false --allowed=visitors \
-                            --auth_header=false --protected=true
+    ynh_""permission_url --permission=server_client_infos --add_url="$server_name"/.well-known/matrix
 else
     ynh_print_warn "Note yunohost won't be able to manage the required config for $server_name. So please add the needed DNS config as described on the documentation"
 fi

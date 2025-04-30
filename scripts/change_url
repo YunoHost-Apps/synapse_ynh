@@ -19,9 +19,9 @@ ynh_systemctl --service="$app".service --action=stop
 ynh_script_progression "Updating NGINX configuration..."
 
 ynh_config_change_url_nginx
-# if [ "$domain" != "$old_domain" ]; then
-#     mv "/etc/nginx/conf.d/sfu.${old_domain}.d/${app}.conf" "/etc/nginx/conf.d/${sfu_domain}.d/${app}.conf"
-# fi
+if [ "$domain" != "$old_domain" ]; then
+    mv "/etc/nginx/conf.d/${old_domain}.d/${app}.conf.inc" "/etc/nginx/conf.d/${domain}.d/${app}.conf.inc"
+fi
 configure_nginx
 
 #=================================================
