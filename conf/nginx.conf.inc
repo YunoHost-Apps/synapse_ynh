@@ -1,7 +1,7 @@
 location = /.well-known/matrix/server {
     return 200 '{"m.server": "__DOMAIN__:__PORT_SYNAPSE_TLS__"}';
     default_type application/json;
-    add_header Access-Control-Allow-Origin '*';
+    more_set_headers "Access-Control-Allow-Origin: *";
 }
 
 location = /.well-known/matrix/client {
@@ -21,5 +21,5 @@ location = /.well-known/matrix/client {
         ]
     }';
     default_type application/json;
-    add_header Access-Control-Allow-Origin '*';
+    more_set_headers "Access-Control-Allow-Origin: *";
 }
