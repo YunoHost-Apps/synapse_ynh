@@ -6,14 +6,14 @@ source /usr/share/yunohost/helpers
 
 ynh_app_config_validate() {
     # Depending of the status of the $enable_registration we should default value of the hidden fields
-    if [[ "$enable_registration" == "true" ]]; then
+    if [ "$enable_registration" == 'true' ]; then
         # Must enable password authentication when free registration is enabled as any user must be able to authenticate
         password_enabled=true
     else
         registrations_require_3pid=email
         disable_msisdn_registration=true
     fi
-    if [[ "$enable_notifs" != "true" ]]; then
+    if [ "$enable_notifs" != 'true' ]; then
         notif_for_new_users=false
     fi
     _ynh_app_config_validate
