@@ -1,0 +1,235 @@
+http:
+  # Public URL base used when building absolute public URLs
+  public_base: https://{{ domain_auth }}/
+
+  # OIDC issuer advertised by the service. Defaults to `public_base`
+  issuer: https://{{ domain_auth }}/
+
+  listeners:
+    - name: web
+      resources:
+        # Serves the .well-known/openid-configuration document
+        - name: discovery
+        # Serves the human-facing pages, such as the login page
+        - name: human
+        # Serves the OAuth 2.0/OIDC endpoints
+        - name: oauth
+        # Serves the Matrix C-S API compatibility endpoints
+        - name: compat
+        # Serve the GraphQL API used by the frontend,
+        - name: graphql
+      binds:
+        - address: "[::]:{{ port_mas }}"
+      proxy_protocol: false
+    - name: internal
+      resources:
+        - name: health
+      binds:
+        - host: localhost
+          port: {{ port_mas_internal }}
+      proxy_protocol: false
+  trusted_proxies:
+    - 127.0.0.1/8
+    - ::1/128
+
+database:
+  host: 127.0.0.1
+  port: 5432
+  username: {{ db_user }}
+  password: {{ db_pwd }}
+  database: {{ db_name_mas }}
+  max_connections: 10
+  min_connections: 0
+  connect_timeout: 30
+  idle_timeout: 600
+  max_lifetime: 1800
+
+email:
+  from: '"Matrix Authentication Service" <{{ app }}@{{ domain }}>'
+  reply_to: '"Matrix Authentication Service" <{{ app }}@{{ domain }}>'
+  transport: smtp
+  mode: starttls
+  hostname: {{ domain }}
+  port: 587
+  username: {{ app }}
+  password: {{ mail_pwd }}
+
+secrets:
+  encryption: {{ mas_secrets_encryption }}
+  keys:
+    {% for kid in mas_keys_list.splitlines() %}
+    - kid: {{ kid }}
+      key_file: "/etc/matrix-{{ app }}/mas_keys/{{ kid }}.key"
+    {%- endfor %}
+
+passwords:
+  # Whether to enable the password database.
+  # If disabled, users will only be able to log in using upstream OIDC providers
+  enabled: {{ password_enabled }}
+
+  # Minimum complexity required for passwords, estimated by the zxcvbn algorithm
+  # Must be between 0 and 4, default is 3
+  # See https://github.com/dropbox/zxcvbn#usage for more information
+  minimum_complexity: 3
+
+  # List of password hashing schemes being used
+  # /!\ Only change this if you know what you're doing
+  schemes:
+    - version: 1
+      # We bcrypt for compatibility with synapse while we do the import
+      algorithm: bcrypt
+
+account:
+  # Whether users are allowed to change their email addresses.
+  #
+  # Defaults to `true`.
+  email_change_allowed: true
+
+  # Whether users are allowed to change their display names
+  #
+  # Defaults to `true`.
+  # This should be in sync with the policy in the homeserver configuration.
+  displayname_change_allowed: true
+
+  # Whether to enable self-service password registration
+  #
+  # Defaults to `false`.
+  # This has no effect if password login is disabled.
+  password_registration_enabled: {{ enable_registration }}
+
+  # Whether users are allowed to change their passwords
+  #
+  # Defaults to `true`.
+  # This has no effect if password login is disabled.
+  password_change_allowed: true
+
+  # Whether email-based password recovery is enabled
+  #
+  # Defaults to `false`.
+  # This has no effect if password login is disabled.
+  password_recovery_enabled: false
+
+  # Whether users are allowed to delete their own account
+  #
+  # Defaults to `true`.
+  account_deactivation_allowed: true
+
+  # Whether users can log in with their email address.
+  #
+  # Defaults to `false`.
+  # This has no effect if password login is disabled.
+  login_with_email_allowed: false
+
+
+policy:
+  # This data is being passed to the policy
+  data:
+    # # Users which are allowed to ask for admin access. If possible, use the
+    # # can_request_admin flag on users instead.
+    # admin_users:
+    #   - person1
+    #   - person2
+
+    # # Client IDs which are allowed to ask for admin access with a
+    # # client_credentials grant
+    # admin_clients:
+    #   - 01H8PKNWKKRPCBW4YGH1RWV279
+    #   - 01HWQCPA5KF10FNCETY9402WGF
+
+    # # Dynamic Client Registration
+    # client_registration:
+    #   # don't require URIs to be on the same host. default: false
+    #   allow_host_mismatch: false
+    #   # allow non-SSL and localhost URIs. default: false
+    #   allow_insecure_uris: false
+    #   # don't require clients to provide a client_uri. default: false
+    #   allow_missing_client_uri: false
+
+    # # Restrictions on user registration
+    # registration:
+    #   # If specified, the username (localpart) *must* match one of the allowed
+    #   # usernames. If unspecified, all usernames are allowed.
+    #   allowed_usernames:
+    #     # Exact usernames that are allowed
+    #     literals: ["alice", "bob"]
+    #     # Substrings that match allowed usernames
+    #     substrings: ["user"]
+    #     # Regular expressions that match allowed usernames
+    #     regexes: ["^[a-z]+$"]
+    #     # Prefixes that match allowed usernames
+    #     prefixes: ["user-"]
+    #     # Suffixes that match allowed usernames
+    #     suffixes: ["-corp"]
+    #   # If specified, the username (localpart) *must not* match one of the
+    #   # banned usernames. If unspecified, all usernames are allowed.
+    #   banned_usernames:
+    #     # Exact usernames that are banned
+    #     literals: ["admin", "root"]
+    #     # Substrings that match banned usernames
+    #     substrings: ["admin", "root"]
+    #     # Regular expressions that match banned usernames
+    #     regexes: ["^admin$", "^root$"]
+    #     # Prefixes that match banned usernames
+    #     prefixes: ["admin-", "root-"]
+    #     # Suffixes that match banned usernames
+    #     suffixes: ["-admin", "-root"]
+
+    # Restrict what email addresses can be added to a user
+    {%- if allowed_local_3pids_email %}
+    emails:
+      # If specified, the email address *must* match one of the allowed addresses.
+      # If unspecified, all email addresses are allowed.
+      allowed_addresses:
+        # Regular expressions that match allowed emails
+        regexes: [{%- for pattern in allowed_local_3pids_email.strip(',').split(',') %} {% if loop.index > 1 %}, {% endif %}{{ pattern }} {%- endfor %}]
+    {%- endif %}
+
+      # # If specified, the email address *must not* match one of the banned addresses.
+      # # If unspecified, all email addresses are allowed.
+      # banned_addresses:
+      #   # Exact emails that are banned
+      #   literals: ["alice@evil.corp", "bob@evil.corp"]
+      #   # Emails that contains those substrings are banned
+      #   substrings: ["evil"]
+      #   # Regular expressions that match banned emails
+      #   regexes: ["@evil\\.corp$"]
+      #   # Suffixes that match banned emails
+      #   suffixes: ["@evil.corp"]
+      #   # Prefixes that match banned emails
+      #   prefixes: ["alice@"]
+
+    # requester:
+    #   # List of IP addresses and CIDRs that are not allowed to register
+    #   banned_ips:
+    #     - 192.168.0.1
+    #     - 192.168.1.0/24
+    #     - fe80::/64
+    #
+    #   # User agent patterns that are not allowed to register
+    #   banned_user_agents:
+    #     literals: ["Pretend this is Real;"]
+    #     substrings: ["Chrome"]
+    #     regexes: ["Chrome 1.*;"]
+    #     prefixes: ["Mozilla/"]
+    #     suffixes: ["Safari/605.1.15"]
+
+matrix:
+  kind: synapse
+  # The homeserver name, as per the `server_name` in the Synapse configuration file
+  homeserver: {{ server_name }}
+  # Shared secret used to authenticate the service to the homeserver
+  # This must be of high entropy, because leaking this secret would allow anyone to perform admin actions on the homeserver
+  secret: "{{ mas_synapse_secret }}"
+  # URL to which the homeserver is accessible from the service
+  endpoint: http://localhost:{{ port_synapse }}/
+
+clients:
+  # Confidential client
+  - client_id: {{ mas_client_id_synapse }}
+    client_auth_method: client_secret_basic
+    client_secret: "{{ mas_synapse_oidc_secret }}"
+
+
+
+
+
