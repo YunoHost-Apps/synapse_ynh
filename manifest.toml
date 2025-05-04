@@ -112,6 +112,7 @@ ram.runtime = "1G"
     main.protected = true
 
     server_api.url = "/_matrix"
+    server_api.additional_urls = ["/client"]
     server_api.label = "Server access for client apps"
     server_api.allowed = "visitors"
     server_api.auth_header = false
@@ -124,6 +125,12 @@ ram.runtime = "1G"
     admin_api.auth_header = false
     admin_api.show_tile = false
     admin_api.protected = true
+
+    server_client_infos.url = "/.well-known/matrix"
+    server_client_infos.allowed = "visitors"
+    server_client_infos.auth_header = false
+    server_client_infos.show_tile = false
+    server_client_infos.protected = true
 
     livekit.url = "/livekit"
     livekit.label = "Element call backend"
