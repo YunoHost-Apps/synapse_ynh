@@ -86,14 +86,14 @@ upgrade_app() {
         sed -r -i "s|$prev_checksum|$new_checksum|" ../manifest.toml
 
         # Update livekit
-        wget -O checksum.txt "https://github.com/livekit/livekit/releases/download/v${livekit_version}/checksums.txt"
+        wget -O checksums.txt "https://github.com/livekit/livekit/releases/download/v${livekit_version}/checksums.txt"
         for arch in amd64 arm64 armhf; do
-            sed -r -i "s|url\s*=(.*)/livekit/livekit/releases/download/v[[:alnum:].]{4,10}/livekit_[[:alnum:].]{4,10}_linux_${arch}.tar.gz|${arch}.url =\1/livekit/livekit/releases/download/v${livekit_version}/livekit_${livekit_version}_linux_${arch}.tar.gz|"  ../manifest.toml
-            prev_checksum=$(get_from_manifest ".resources.sources.livekit.${arch}.sha256")
-            new_checksum=$(grep -F "livekit_${livekit_version}_linux_${arch}.tar.gz" | cut -d' ' -f1)
+            sed -r -i "s|${arch}\.url\s*=(.*)/livekit/livekit/releases/download/v[[:alnum:].]{4,10}/livekit_[[:alnum:].]{4,10}_linux_${arch}.tar.gz|${arch}.url =\1/livekit/livekit/releases/download/v${livekit_version}/livekit_${livekit_version}_linux_${arch}.tar.gz|"  ../manifest.toml
+            prev_checksum="$(get_from_manifest ".resources.sources.livekit.${arch}.sha256")"
+            new_checksum="$(grep -F "livekit_${livekit_version}_linux_${arch}.tar.gz" checksums.txt | cut -d' ' -f1)"
             sed -r -i "s|$prev_checksum|$new_checksum|" ../manifest.toml
         done
-        rm checksum.txt
+        rm checksums.txt
 
         git commit -a -m "Upgrade $app_name to $app_version"
         git push gitea auto_update:auto_update
