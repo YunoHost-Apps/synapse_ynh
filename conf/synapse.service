@@ -1,6 +1,6 @@
 [Unit]
 Description=Synapse Matrix homeserver
-After=network.target
+After=network.target postgresql.service
 
 [Service]
 Type=simple
