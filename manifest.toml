@@ -89,7 +89,7 @@ ram.runtime = "1G"
     arm64.url = "https://github.com/livekit/livekit/releases/download/v1.8.4/livekit_1.8.4_linux_arm64.tar.gz"
     arm64.sha256 = "02f7a7b252d9bd1298e5bc3e301a138cc7d1bc00dc6855fd4c566ff61fb06324"
     armhf.url = "https://github.com/livekit/livekit/releases/download/v1.8.4/livekit_1.8.4_linux_armv7.tar.gz"
-    armhf.sha256 = "02f7a7b252d9bd1298e5bc3e301a138cc7d1bc00dc6855fd4c566ff61fb06324"
+    armhf.sha256 = "0157cbb419bc82943c44e4a0548939c04c0f06a4789563f0339de7c359d09814"
 
     [resources.system_user]
     allow_email = true
