@@ -19,6 +19,9 @@ ynh_systemctl --service="$app".service --action=stop
 ynh_script_progression "Updating NGINX configuration..."
 
 ynh_config_change_url_nginx
+if [ "$domain" != "$old_domain" ]; then
+    mv "/etc/nginx/conf.d/${old_domain}.d/${app}.conf.inc" "/etc/nginx/conf.d/${domain}.d/${app}.conf.inc"
+fi
 configure_nginx
 
 #=================================================
@@ -26,6 +29,10 @@ configure_nginx
 #=================================================
 
 ynh_script_progression "Updating Synapse config..."
+
+# Force enable it because some client like Element X don't support CAS and so require to have password authentication enabled
+password_enabled=true
+
 ynh_config_add --jinja --template="homeserver.yaml" --destination="/etc/matrix-$app/homeserver.yaml"
 ynh_config_add --template="log.yaml" --destination="/etc/matrix-$app/log.yaml"
 

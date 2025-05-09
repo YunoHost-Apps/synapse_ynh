@@ -14,13 +14,14 @@ services = ["__APP__"]
         no = "false"
         help = "Defaults to 'false'. If 'true', it is highly recommended to use either captcha, email, or token-based verification to avoid SPAM."
 
-        [main.welcome.password_enabled]
-        ask = "Enable Password Login"
-        type = "boolean"
-        yes = "true"
-        no = "false"
-        help = "If disabled, Login with Non-YunoHost Users impossible. But it simplies Login process if your Matrix server only has YunoHost SSO Users."
-        visible = "! enable_registration"
+        # Disabled for matrix V2 because some client like Element X don't support cas and so require to have password authentication enabled
+        # [main.welcome.password_enabled]
+        # ask = "Enable Password Login"
+        # type = "boolean"
+        # yes = "true"
+        # no = "false"
+        # help = "If disabled, Login with Non-YunoHost Users impossible. But it simplies Login process if your Matrix server only has YunoHost SSO Users."
+        # visible = "! enable_registration"
 
         [main.welcome.registrations_require_3pid]
         ask = "Registration requires all following 3PID personal identifier"
@@ -233,3 +234,10 @@ services = ["__APP__"]
             yes = "true"
             no = "false"
             help = "Enabling TLS/DTLS is really recommanded but it could bring some issues depending of the server certificate. There are some known issues with let's encrypt (https://github.com/element-hq/element-android/issues/1533), so if you have issues it could be better to disable this feature."
+
+            [advanced.security.allow_to_send_request_to_localhost]
+            ask = "Allow synapse to send request to localhost"
+            type = "boolean"
+            yes = "true"
+            no = "false"
+            help = "This could be needed by example if you self host on the same Yunohost instance a ntfy server for notifications. In this case to allow synapse to contact the ntfy server you will need to enable this settings."
