@@ -176,6 +176,7 @@ ensure_vars_set() {
     ynh_app_setting_set_default --app="$app" --key=enable_3pid_lookup --value=false
     ynh_app_setting_set_default --app="$app" --key=push_include_content --value=true
     ynh_app_setting_set_default --app="$app" --key=enable_dtls_for_audio_video_turn_call --value=true
+    ynh_app_setting_set_default --app="$app" --key=allow_to_send_request_to_localhost --value=false
 
     ynh_app_setting_set_default --app="$app" --key=livekit_secret --value="$(ynh_string_random --length=40)"
 }
