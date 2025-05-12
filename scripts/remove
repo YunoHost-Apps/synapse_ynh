@@ -12,6 +12,7 @@ source /usr/share/yunohost/helpers
 
 # Remove a service from the admin panel, added by `yunohost service add`
 yunohost service remove "$app"
+yunohost service remove "$app"-mas
 yunohost service remove "$app"-coturn
 yunohost service remove "$app"-livekit
 yunohost service remove "$app"-lk-jwt
@@ -21,7 +22,9 @@ yunohost service remove "$app"-lk-jwt
 #=================================================
 ynh_script_progression "Stopping and removing the systemd service"
 
+ynh_config_remove_systemd "$app-mas.service"
 ynh_config_remove_systemd
+ynh_config_remove_systemd "$app"-mas
 ynh_config_remove_systemd "$app"-coturn
 ynh_config_remove_systemd "$app"-livekit
 ynh_config_remove_systemd "$app"-lk-jwt
@@ -42,9 +45,6 @@ ynh_script_progression "Removing NGINX web server configuration"
 
 # Remove the dedicated nginx config
 ynh_config_remove_nginx
-
-# Remove the dedicated php-fpm config
-ynh_config_remove_phpfpm
 
 #=================================================
 # REMOVE LOGROTATE CONFIGURATION

@@ -26,9 +26,6 @@ ynh_backup "$install_dir"
 # BACKUP THE NGINX CONFIGURATION
 #=================================================
 
-# BACKUP THE PHP-FPM CONFIGURATION
-ynh_backup "/etc/php/$php_version/fpm/pool.d/$app.conf"
-
 ynh_backup "/etc/nginx/conf.d/$domain.d/$app.conf"
 ynh_backup "/etc/nginx/conf.d/${domain}.d/${app}.conf.inc"
 
@@ -63,6 +60,7 @@ ynh_backup "/etc/matrix-$app"
 #=================================================
 
 ynh_backup "/etc/systemd/system/$app.service"
+ynh_backup "/etc/systemd/system/$app-mas.service"
 ynh_backup "/etc/systemd/system/$app-coturn.service"
 ynh_backup /etc/systemd/system/"$app"-livekit.service
 ynh_backup /etc/systemd/system/"$app"-lk-jwt.service

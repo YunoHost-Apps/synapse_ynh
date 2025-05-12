@@ -7,6 +7,10 @@ location = /.well-known/matrix/server {
 location = /.well-known/matrix/client {
     return 200 '{
         "m.homeserver": { "base_url": "https://__DOMAIN__" },
+        "org.matrix.msc2965.authentication": {
+            "issuer": "https://__DOMAIN_AUTH__/",
+            "account": "https://__DOMAIN_AUTH__/account"
+        },
         "im.vector.riot.jitsi": {"preferredDomain": "__JITSI_SERVER__"},
         "im.vector.riot.e2ee": {"default": __E2E_ENABLED_BY_DEFAULT_CLIENT_CONFIG__ },
         "org.matrix.msc4143.rtc_foci": [
