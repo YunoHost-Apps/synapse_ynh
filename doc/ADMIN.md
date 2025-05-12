@@ -23,7 +23,7 @@ So you can follow this process to set the user as admin:
     - On the Yunohost Webadmin, go on: Applications > Synapse > Main Settings > On the "Add admin user" section you can select the user to set as admin.
     - You can run this following script:
 ```bash
-/opt/yunohost/matrix-__APP__/set_admin_user.sh '@<user_to_be_admin>:<domain.tld>'
+__INSTALL_DIR__/set_admin_user.sh '@<user_to_be_admin>:<domain.tld>'
 ```
 
 ## Access by federation
@@ -71,7 +71,7 @@ To prevent the situation when the server is behind a NAT, the public IP is writt
 If you have a dynamic IP address, you also might need to update this config automatically. To do that just edit a file named `/etc/cron.d/coturn_config_rotate` and add the following content (just adapt the `<synapse_instance_name>` which could be `synapse` or maybe `synapse__2`).
 
 ```
-*/15 * * * * root bash /opt/yunohost/matrix-<synapse_instance_name>/Coturn_config_rotate.sh;
+*/15 * * * * root bash /var/www/<synapse_instance_name>/Coturn_config_rotate.sh;
 ```
 
 ## OpenVPN
