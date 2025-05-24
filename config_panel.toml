@@ -133,6 +133,25 @@ services = ["__APP__"]
         help = "Used to be called 'riot_base_url', still supported"
         visible = "enable_notifs"
 
+    [main.contacts]
+    name.en = "Contact for the administrator of the synapse instance"
+    help.en = "Related to the Matrix [MSC 1929](https://github.com/matrix-org/matrix-spec-proposals/blob/hs/proposal-admin-contact-1/proposals/1929-admin-contact.md) used to provide an administrator contact in case of abuse on the instance."
+
+        [main.contacts.contact_admin_email]
+        ask = "Email contact of the instance admin"
+        help = '( e.g. admin@hello.example )'
+        type = "email"
+
+        [main.contacts.contact_admin_matrix_id]
+        ask = "Matrix ID of the instance admin"
+        help = '( e.g. @admin:hello.example )'
+        type = "string"
+
+        [main.contacts.contact_support_page]
+        ask = "Contact page for the instance"
+        help = '( e.g. https://domain.tld/support.html )'
+        type = "url"
+
     [main.admin_users]
     name = "Add admin user"
 

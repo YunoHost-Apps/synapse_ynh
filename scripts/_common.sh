@@ -116,8 +116,11 @@ configure_nginx() {
     then
         ynh_config_add --template="server_name.conf" --destination="/etc/nginx/conf.d/${server_name}.d/${app}_server_name.conf"
     fi
+    if [ -z "$contact_admin_email" ] && [ -z "$contact_admin_matrix_id" ]; then
+        ynh_print_warn "It seem that you didn't set a admin contact. Please set a admin contact (email or/and matrix ID) from the config panel in 'Main settings' > 'Contact for the administrator of the synapse instance'"
+    fi
 
-    ynh_config_add --template='nginx.conf.inc' --destination="/etc/nginx/conf.d/${domain}.d/${app}.conf.inc"
+    ynh_config_add --jinja --template='nginx.conf.inc' --destination="/etc/nginx/conf.d/${domain}.d/${app}.conf.inc"
 
     # Create a dedicated NGINX config
     ynh_config_add_nginx
@@ -133,10 +136,10 @@ configure_php() {
 }
 
 ensure_vars_set() {
-    ynh_app_setting_set_default --app="$app" --key=report_stats --value=false
-    ynh_app_setting_set_default --app="$app" --key=e2e_enabled_by_default --value=invite
-    ynh_app_setting_set_default --app="$app" --key=turnserver_pwd --value="$(ynh_string_random --length=30)"
-    ynh_app_setting_set_default --app="$app" --key=turnserver_cli_pwd --value="$(ynh_string_random --length=30)"
+    ynh_app_setting_set_default --key=report_stats --value=false
+    ynh_app_setting_set_default --key=e2e_enabled_by_default --value=invite
+    ynh_app_setting_set_default --key=turnserver_pwd --value="$(ynh_string_random --length=30)"
+    ynh_app_setting_set_default --key=turnserver_cli_pwd --value="$(ynh_string_random --length=30)"
 
     if [ -z "${web_client_location:-}" ]
     then
@@ -151,34 +154,38 @@ ensure_vars_set() {
         ynh_app_setting_set --key=web_client_location --value="$web_client_location"
     fi
 
-    ynh_app_setting_set_default --app="$app" --key=jitsi_server --value=jitsi.riot.im
+    ynh_app_setting_set_default --key=jitsi_server --value=jitsi.riot.im
 
-    ynh_app_setting_set_default --app="$app" --key=client_base_url --value="$web_client_location"
-    ynh_app_setting_set_default --app="$app" --key=invite_client_location --value="$web_client_location"
+    ynh_app_setting_set_default --key=client_base_url --value="$web_client_location"
+    ynh_app_setting_set_default --key=invite_client_location --value="$web_client_location"
 
-    ynh_app_setting_set_default --app="$app" --key=allow_public_rooms_without_auth --value="${allow_public_rooms:-false}"
-    ynh_app_setting_set_default --app="$app" --key=allow_public_rooms_over_federation --value="${allow_public_rooms:-false}"
-    ynh_app_setting_set_default --app="$app" --key=max_upload_size --value=100M
-    ynh_app_setting_set_default --app="$app" --key=disable_msisdn_registration --value=true
-    ynh_app_setting_set_default --app="$app" --key=account_threepid_delegates_msisdn --value=''
-    ynh_app_setting_set_default --app="$app" --key=registrations_require_3pid --value=email
-    ynh_app_setting_set_default --app="$app" --key=allowed_local_3pids_email --value=''
-    ynh_app_setting_set_default --app="$app" --key=allowed_local_3pids_msisdn --value=''
-    ynh_app_setting_set_default --app="$app" --key=account_threepid_delegates_msisdn --value=''
-    ynh_app_setting_set_default --app="$app" --key=allow_guest_access --value=false
-    ynh_app_setting_set_default --app="$app" --key=default_identity_server --value='https://matrix.org'
-    ynh_app_setting_set_default --app="$app" --key=auto_join_rooms --value=''
-    ynh_app_setting_set_default --app="$app" --key=autocreate_auto_join_rooms --value=false
-    ynh_app_setting_set_default --app="$app" --key=auto_join_rooms_for_guests --value=true
-    ynh_app_setting_set_default --app="$app" --key=enable_notifs --value=true
-    ynh_app_setting_set_default --app="$app" --key=notif_for_new_users --value=true
-    ynh_app_setting_set_default --app="$app" --key=enable_group_creation --value=true
-    ynh_app_setting_set_default --app="$app" --key=enable_3pid_lookup --value=false
-    ynh_app_setting_set_default --app="$app" --key=push_include_content --value=true
-    ynh_app_setting_set_default --app="$app" --key=enable_dtls_for_audio_video_turn_call --value=true
-    ynh_app_setting_set_default --app="$app" --key=allow_to_send_request_to_localhost --value=false
+    ynh_app_setting_set_default --key=allow_public_rooms_without_auth --value="${allow_public_rooms:-false}"
+    ynh_app_setting_set_default --key=allow_public_rooms_over_federation --value="${allow_public_rooms:-false}"
+    ynh_app_setting_set_default --key=max_upload_size --value=100M
+    ynh_app_setting_set_default --key=disable_msisdn_registration --value=true
+    ynh_app_setting_set_default --key=account_threepid_delegates_msisdn --value=''
+    ynh_app_setting_set_default --key=registrations_require_3pid --value=email
+    ynh_app_setting_set_default --key=allowed_local_3pids_email --value=''
+    ynh_app_setting_set_default --key=allowed_local_3pids_msisdn --value=''
+    ynh_app_setting_set_default --key=account_threepid_delegates_msisdn --value=''
+    ynh_app_setting_set_default --key=allow_guest_access --value=false
+    ynh_app_setting_set_default --key=default_identity_server --value='https://matrix.org'
+    ynh_app_setting_set_default --key=auto_join_rooms --value=''
+    ynh_app_setting_set_default --key=autocreate_auto_join_rooms --value=false
+    ynh_app_setting_set_default --key=auto_join_rooms_for_guests --value=true
+    ynh_app_setting_set_default --key=enable_notifs --value=true
+    ynh_app_setting_set_default --key=notif_for_new_users --value=true
+    ynh_app_setting_set_default --key=enable_group_creation --value=true
+    ynh_app_setting_set_default --key=enable_3pid_lookup --value=false
+    ynh_app_setting_set_default --key=push_include_content --value=true
+    ynh_app_setting_set_default --key=enable_dtls_for_audio_video_turn_call --value=true
+    ynh_app_setting_set_default --key=allow_to_send_request_to_localhost --value=false
 
-    ynh_app_setting_set_default --app="$app" --key=livekit_secret --value="$(ynh_string_random --length=40)"
+    ynh_app_setting_set_default --key=livekit_secret --value="$(ynh_string_random --length=40)"
+
+    ynh_app_setting_set_default --key=contact_admin_email --value=''
+    ynh_app_setting_set_default --key=contact_admin_matrix_id --value=''
+    ynh_app_setting_set_default --key=contact_support_page --value=''
 }
 
 set_permissions() {
