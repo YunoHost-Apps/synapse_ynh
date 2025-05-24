@@ -66,14 +66,6 @@ services = ["__APP__"]
         no = "false"
         help = "Setting to false means that if the rooms are not manually created, users cannot be auto-joined. Auto-created rooms will be public and federated by default, this can be customised in CLI with the settings auto_join_*."
 
-        [main.welcome.notif_for_new_users]
-        ask = "Enable email notifications for new users"
-        type = "boolean"
-        yes = "true"
-        no = "false"
-        help = "Defaults to 'true'."
-        visible = "enable_notifs"
-
     [main.privacy]
     name = "Data Privacy"
 
@@ -126,6 +118,14 @@ services = ["__APP__"]
         yes = "true"
         no = "false"
         help = "Defaults to 'false'."
+
+        [main.experience.notif_for_new_users]
+        ask = "Enable email notifications for new users"
+        type = "boolean"
+        yes = "true"
+        no = "false"
+        help = "Defaults to 'true'."
+        visible = "enable_notifs"
 
         [main.experience.client_base_url]
         ask = "URL for client links within the email notifications"
