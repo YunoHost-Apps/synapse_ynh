@@ -404,7 +404,7 @@ turn_allow_guests: {{ allow_guest_access }}
 # you use either captcha, email, or token-based verification to verify that new users are not bots. In order to enable registration
 # without any verification, you must also set `enable_registration_without_verification`, found below.
 #
-enable_registration: {{ enable_registration }}
+# enable_registration: false
 
 # Time that an access token remains valid for, if the session is NOT
 # using refresh tokens.
@@ -653,49 +653,6 @@ old_signing_keys:
 trusted_key_servers:
   - server_name: "matrix.org"
 
-
-## Single sign-on integration ##
-
-# The following settings can be used to make Synapse use a single sign-on
-# provider for authentication, instead of its internal password database.
-#
-# You will probably also want to set the following options to `false` to
-# disable the regular login/registration flows:
-#   * enable_registration
-#   * password_config.enabled
-#
-# You will also want to investigate the settings under the "sso" configuration
-# section below.
-
-# Enable Central Authentication Service (CAS) for registration and login.
-#
-cas_config:
-  # Uncomment the following to enable authorization against a CAS server.
-  # Defaults to false.
-  #
-  enabled: true
-
-  # The URL of the CAS authorization endpoint.
-  #
-  server_url: "https://{{ domain }}/_matrix/cas_server.php"
-
-  # The attribute of the CAS response to use as the display name.
-  #
-  # If unset, no displayname will be set.
-  #
-  #displayname_attribute: name
-
-  # It is possible to configure Synapse to only allow logins if CAS attributes
-  # match particular values. All of the keys in the mapping below must exist
-  # and the values must match the given value. Alternately if the given value
-  # is None then any value is allowed (the attribute just must exist).
-  # All of the listed attributes must match for the login to be permitted.
-  #
-  #required_attributes:
-  #  userGroup: "staff"
-  #  department: None
-
-
 # Additional settings to use with single-sign on systems such as OpenID Connect,
 # SAML2 and CAS.
 #
@@ -738,7 +695,7 @@ sso:
 password_config:
    # Uncomment to disable password login
    #
-   enabled: {{ password_enabled }}
+   # enabled: false
 
    # Uncomment to disable authentication against the local password
    # database. This is ignored if `enabled` is false, and is only useful
@@ -785,21 +742,6 @@ password_config:
       # Defaults to 'false'.
       #
       #require_uppercase: true
-
-password_providers:
-   - module: "ldap_auth_provider.LdapAuthProvider"
-     config:
-       enabled: true
-       mode: "search"
-       uri: "ldap://localhost"
-       start_tls: false
-       base: "ou=users,dc=yunohost,dc=org"
-       attributes:
-          uid: "uid"
-          mail: "mail"
-          name: "givenName"
-       filter: "(&(objectClass=posixAccount)(permission=cn={{ app }}.main,ou=permission,dc=yunohost,dc=org))"
-
 
 
 # Configuration for sending emails from Synapse.
@@ -1018,6 +960,32 @@ experimental_features:
     msc4222_enabled: true
     # MSC4140: Delayed events are required for proper call participation signalling. If disabled it is very likely that you end up with stuck calls in Matrix rooms
     msc4140_enabled: true
+
+    msc3861:
+        enabled: true
+
+        # Synapse will call `{issuer}/.well-known/openid-configuration` to get the OIDC configuration
+        issuer: http://localhost:{{ port_mas }}/
+
+        # Matches the `client_id` in the auth service config
+        client_id: {{ mas_client_id_synapse }}
+        # Matches the `client_auth_method` in the auth service config
+        client_auth_method: client_secret_basic
+        # Matches the `client_secret` in the auth service config
+        client_secret: "{{ mas_synapse_oidc_secret }}"
+
+        # Matches the `matrix.secret` in the auth service config
+        admin_token: "{{ mas_synapse_secret }}"
+
+        # URL to advertise to clients where users can self-manage their account
+        # Defaults to the URL advertised by MAS, e.g. `https://{public_mas_domain}/account/`
+        account_management_url: "https://{{ domain_auth }}/account/"
+
+        # URL which Synapse will use to introspect access tokens
+        # Defaults to the URL advertised by MAS, e.g. `https://{public_mas_domain}/oauth2/introspect`
+        # This is useful to override if Synapse has a way to call the auth service's
+        # introspection endpoint directly, skipping intermediate reverse proxies
+        introspection_endpoint: "http://localhost:{{ port_mas }}/oauth2/introspect"
 
 # The maximum allowed duration by which sent events can be delayed, as
 # per MSC4140.

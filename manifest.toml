@@ -22,7 +22,6 @@ yunohost = ">= 11.2.30"
 helpers_version = "2.1"
 architectures = [
     "amd64",
-    "armhf",
     "arm64"
 ]
 multi_instance = true
@@ -91,6 +90,16 @@ ram.runtime = "1G"
     armhf.url = "https://github.com/livekit/livekit/releases/download/v1.8.4/livekit_1.8.4_linux_armv7.tar.gz"
     armhf.sha256 = ""
 
+    [resources.sources.mas]
+    prefetch = true
+    extract = true
+    in_subdir = false
+
+    amd64.url = "https://github.com/element-hq/matrix-authentication-service/releases/download/v0.15.0/mas-cli-x86_64-linux.tar.gz"
+    amd64.sha256 = "b51f1cc0a3706b723fc6ab745200c076a1ccb7cb8b0d922aec018c42354cd24d"
+    arm64.url = "https://github.com/element-hq/matrix-authentication-service/releases/download/v0.15.0/mas-cli-aarch64-linux.tar.gz"
+    arm64.sha256 = "34fb0961fc4ae7e79ecc7b916d2ccd0bd879202155b68ee93581d1b6a0b22819"
+
     [resources.system_user]
     allow_email = true
     home = "/var/www/__APP__"
@@ -103,13 +112,22 @@ ram.runtime = "1G"
     [resources.data_dir]
     dir = "/home/yunohost.app/__APP__"
 
+    [resources.extradomains]
+    auth.name = "auth"
+
     [resources.permissions]
     main.url = "/"
-    main.additional_urls = ["/_matrix/cas_server.php/login"]
-    main.label = "Server SSO"
+    main.label = "Main app permission"
     main.auth_header = true
     main.show_tile = false
     main.protected = true
+
+    auth.url = "__DOMAIN_AUTH__/"
+    auth.label = "Matrix Authentication Service"
+    auth.allowed = "visitors"
+    auth.show_tile = true
+    auth.auth_header = false
+    auth.protected = false
 
     server_api.url = "/_matrix"
     server_api.additional_urls = ["/client"]
@@ -143,6 +161,8 @@ ram.runtime = "1G"
     synapse_tls.default = 8448
     synapse_tls.exposed = "TCP"
     synapse.default = 8008
+    mas.default = 8081
+    mas_internal.default = 8082
     turnserver_tls.default = 5349
     turnserver_tls.exposed = "Both"
     turnserver_alt_tls.default = 5350
@@ -159,4 +179,5 @@ ram.runtime = "1G"
                 "build-essential", "libffi-dev", "libssl-dev", "libxml2-dev", "libxslt1-dev", "zlib1g-dev", "libjpeg-dev", "libpq-dev"]
 
     [resources.database]
-    type = "postgresql"
+    main.type = "postgresql"
+    mas.type = "postgresql"
