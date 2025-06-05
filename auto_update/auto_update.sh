@@ -4,10 +4,10 @@ set -eu
 
 readonly app_name=synapse
 
-source auto_update_config.sh
-
 readonly debian_version_name_1=bullseye
 readonly debian_version_name_2=bookworm
+
+source auto_update_config.sh
 
 get_from_manifest() {
     result=$(python3 <<EOL
@@ -87,10 +87,14 @@ upgrade_app() {
 
         # Update livekit
         wget -O checksums.txt "https://github.com/livekit/livekit/releases/download/v${livekit_version}/checksums.txt"
+        sed -r -i "s|\.url\s*=(.*)/livekit/livekit/releases/download/v[[:alnum:].]{4,10}/livekit_[[:alnum:].]{4,10}_linux_|.url =\1/livekit/livekit/releases/download/v${livekit_version}/livekit_${livekit_version}_linux_|"  ../manifest.toml
         for arch in amd64 arm64 armhf; do
-            sed -r -i "s|${arch}\.url\s*=(.*)/livekit/livekit/releases/download/v[[:alnum:].]{4,10}/livekit_[[:alnum:].]{4,10}_linux_${arch}.tar.gz|${arch}.url =\1/livekit/livekit/releases/download/v${livekit_version}/livekit_${livekit_version}_linux_${arch}.tar.gz|"  ../manifest.toml
             prev_checksum="$(get_from_manifest ".resources.sources.livekit.${arch}.sha256")"
-            new_checksum="$(grep -F "livekit_${livekit_version}_linux_${arch}.tar.gz" checksums.txt | cut -d' ' -f1)"
+            if [ "$arch" == armhf ]; then
+                new_checksum="$(grep -F "livekit_${livekit_version}_linux_armv7.tar.gz" checksums.txt | cut -d' ' -f1)"
+            else
+                new_checksum="$(grep -F "livekit_${livekit_version}_linux_${arch}.tar.gz" checksums.txt | cut -d' ' -f1)"
+            fi
             sed -r -i "s|$prev_checksum|$new_checksum|" ../manifest.toml
         done
         rm checksums.txt
