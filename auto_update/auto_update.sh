@@ -4,7 +4,7 @@ set -eu
 
 readonly app_name=synapse
 
-readonly debian_version_name_1=bullseye
+readonly debian_version_name_1=trixie
 readonly debian_version_name_2=bookworm
 
 source auto_update_config.sh
