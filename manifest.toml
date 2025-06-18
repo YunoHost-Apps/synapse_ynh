@@ -67,10 +67,10 @@ ram.runtime = "1G"
     armhf.url = "https://github.com/YunoHost-Apps/synapse_python_build/releases/download/v1.132.0/matrix-synapse_1.132.0-bookworm-bin1_armv7l.tar.gz"
     armhf.sha256 = "c515f2a89a385eae276fe93b998b67aff976e6c38b4debf13903a050ad4b3550"
 
-    [resources.sources.synapse_prebuilt_armv7_bullseye]
+    [resources.sources.synapse_prebuilt_armv7_trixie]
     prefetch = false
-    armhf.url = "https://github.com/YunoHost-Apps/synapse_python_build/releases/download/v1.131.0/matrix-synapse_1.131.0-bullseye-bin1_armv7l.tar.gz"
-    armhf.sha256 = "1b0ea9cd0f32d8b2db8762e18254ce47b55fca56d1d2d5de8fa129f403530ebe"
+    armhf.url = "https://github.com/YunoHost-Apps/synapse_python_build/releases/download/v1.132.0/matrix-synapse_1.132.0-trixie-bin1_armv7l.tar.gz"
+    armhf.sha256 = "ad3ee44a9f7a7a55e97f2017fee8f9cb99eede6b0b6c8d84ac5ea8417e2b52f1"
 
     [resources.sources.lk_jwt]
     prefetch = true
