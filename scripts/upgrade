@@ -133,8 +133,7 @@ fi
 #=================================================
 
 # Fix issue about certificates access
-if [ ! $(grep "ssl-cert:x:[0-9]*:.*$app" /etc/group) ]
-then
+if ! grep -q "ssl-cert:x:[0-9]*:.*$app" /etc/group; then
     ynh_script_progression "Use standard access for certificate..."
 
     adduser $app ssl-cert
@@ -352,7 +351,7 @@ ynh_config_add --template=../sources/set_admin_user.sh --destination="$install_d
 mkdir -p /etc/matrix-$app/app-service
 if [ -e /etc/matrix-$app/conf.d/app_service.yaml ]; then
     # ensure that the file is empty if no app service are installed (fix issue #385)
-    if [ ! "$(ls -A /etc/matrix-$app/app-service)" ]; then
+    if [ -z "$(ls -A /etc/matrix-$app/app-service)" ]; then
         echo "" > /etc/matrix-$app/conf.d/app_service.yaml
     fi
 else
