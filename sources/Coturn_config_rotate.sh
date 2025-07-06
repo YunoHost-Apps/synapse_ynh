@@ -13,9 +13,10 @@ source /usr/share/yunohost/helpers
 
 # Must load db_name var to load _common.sh
 db_name=$(ynh_app_setting_get --key=db_name)
+domain=$(ynh_app_setting_get  --key=domain)
+
 source ../scripts/_common.sh
 
-domain=$(ynh_app_setting_get  --key=domain)
 port_cli=$(ynh_app_setting_get --key=port_cli)
 turnserver_pwd=$(ynh_app_setting_get --key=turnserver_pwd)
 turnserver_cli_pwd=$(ynh_app_setting_get --key=turnserver_cli_pwd)
