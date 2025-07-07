@@ -9,7 +9,7 @@ source /usr/share/yunohost/helpers
 #=================================================
 
 if systemctl is-active "$app".service --quiet; then
-    ynh_print_warn "It's hightly recommended to make your backup when the service is stopped. Please stop $app service with this command before to run the backup 'systemctl stop $app.service'"
+    ynh_print_warn "It's highly recommended to make your backup when the service is stopped. Please stop $app service with this command before to run the backup 'systemctl stop $app.service'"
 fi
 
 ynh_print_info "Declaring files to be backed up..."
