@@ -1033,3 +1033,10 @@ rc_message:
 rc_delayed_event_mgmt:
   per_second: 1
   burst_count: 20
+
+# Fix message:
+# This server is configured to use 'matrix.org' as its trusted key server via the
+# 'trusted_key_servers' config option. 'matrix.org' is a good choice for a key
+# server since it is long-lived, stable and trusted. However, some admins may
+# wish to use another server for this purpose.
+suppress_key_server_warning: true
