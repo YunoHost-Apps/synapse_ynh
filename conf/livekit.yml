@@ -167,9 +167,9 @@ logging:
 # Default room config
 # Each room created will inherit these settings. If rooms are created explicitly with CreateRoom, they will take
 # precedence over defaults
-# room:
-#   # allow rooms to be automatically created when participants join, defaults to true
-#   # auto_create: false
+room:
+  # allow rooms to be automatically created when participants join, defaults to true
+  auto_create: false
 #   # number of seconds to keep the room open if no one joins
 #   empty_timeout: 300
 #   # number of seconds to keep the room open after everyone leaves
