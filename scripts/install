@@ -254,7 +254,7 @@ ynh_script_progression --message="Configuring permissions..." --weight=1
 
 if yunohost --output-as plain domain list | grep -q "^$server_name$"; then
     ynh_""permission_create --permission=server_client_infos --url=$server_name/.well-known/matrix \
-                          --label="Server info for clients. (well-known)" --show_tile=false --allowed=visitors \
+                          --show_tile=false --allowed=visitors \
                           --auth_header=false --protected=true
 else
     ynh_print_warn "Note yunohost won't be able to manage the required config for $server_name. So please add the needed DNS config as described on the documentation"
