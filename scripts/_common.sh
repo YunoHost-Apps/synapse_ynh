@@ -1,5 +1,5 @@
 readonly python_version="$(python3 -V | cut -d' ' -f2 | cut -d. -f1-2)"
-go_version=1.24.2
+#REMOVEME? go_version=1.24.2
 readonly domains_list="$(yunohost --output-as json domain list  | jq -r '.domains | .[]')"
 #
 # TODO Ideally we must have a dedicated domain for this but for now it's not supported
@@ -61,7 +61,7 @@ install_sources() {
     # Install livekit jwt
     ynh_setup_source --source_id=lk_jwt --dest_dir="$install_dir/lk_jwt"
 
-    ynh_hide_warnings ynh_go_install
+    #REMOVEME? ynh_hide_warnings #REMOVEME? ynh_go_install
     chown "$app" -R "$install_dir"
 
     pushd "$install_dir/lk_jwt"
