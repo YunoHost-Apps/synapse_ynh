@@ -18,7 +18,7 @@ cpe = "cpe:2.3:a:matrix:synapse"
 fund = "https://matrix.org/support/#"
 
 [integration]
-yunohost = ">= 12.0.12"
+yunohost = ">= 12.1.17"
 helpers_version = "2.1"
 architectures = [
     "amd64",
@@ -160,3 +160,6 @@ ram.runtime = "1G"
 
     [resources.database]
     type = "postgresql"
+
+    [resources.go]
+    version = "1.24.2"
