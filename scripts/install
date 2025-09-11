@@ -10,6 +10,10 @@ source /usr/share/yunohost/helpers
 
 ynh_app_setting_set --key=php_upload_max_filesize --value=100M
 
+# workaround to mark this app as a webapp, otherwise package check will not consider this as a webapp
+false && \
+ynh_config_add_nginx
+
 #=================================================
 # RETRIEVE ARGUMENTS FROM THE MANIFEST
 #=================================================
