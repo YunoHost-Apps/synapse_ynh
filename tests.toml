@@ -13,3 +13,65 @@ test_format = 1.0
     test_upgrade_from.76235b65ff64f2ed39facf7485b4bbe516701976.name = "Before helper 2.1 (branch old_version_for_CI_10)"
 
     test_upgrade_from.92e630366e39aca49dbeb66c9d1b3c3bc2e03b31.name = "Before element call backend"
+
+
+    # -------------------------------
+    # Curl tests to validate that the app works
+    # -------------------------------
+    [default.curl_tests]
+    root.path = "/"
+    root.logged_on_sso = false
+    root.expect_content = "This is where Synapse is installed."
+
+    matrix.path = "/_matrix/"
+    matrix.logged_on_sso = false
+    matrix.expect_content = "\\{\"errcode\":\"M_UNRECOGNIZED\",\"error\":\"Unrecognized request\"\\}"
+    matrix.expect_return_code = 404
+
+    synapse.path = "/_synapse/"
+    synapse.logged_on_sso = false
+    synapse.expect_content = "\\{\"errcode\":\"M_UNRECOGNIZED\",\"error\":\"Unrecognized request\"\\}"
+    synapse.expect_return_code = 404
+
+    # Fake service url to just redirect to the main page and see if the browser is correctly redirected
+    cas.path = "/_matrix/cas_server.php/login?service=https://__DOMAIN__/?x"
+    cas.logged_on_sso = true
+    cas.expect_content = "This is where Synapse is installed."
+
+    livekit_jwt.path = "/livekit/jwt/"
+    livekit_jwt.logged_on_sso = false
+    livekit_jwt.expect_content = "404 page not found"
+    livekit_jwt.expect_return_code = 404
+
+    livekit_sfu.path = "/livekit/sfu/"
+    livekit_sfu.logged_on_sso = false
+    livekit_sfu.expect_content = "OK"
+
+    well_known_server.path = "/.well-known/matrix/server"
+    well_known_server.logged_on_sso = false
+    well_known_server.expect_content = "\\{\"m\\.server\": \"__DOMAIN__:84\\d+\"\\}"
+
+    well_known_support.path = "/.well-known/matrix/support"
+    well_known_support.logged_on_sso = false
+    well_known_support.expect_content = '\{[\s\n]*"contacts": \[[\s\n]*\][\s\n]*\}'
+
+    [default.curl_tests.well_known_client]
+    path = "/.well-known/matrix/client"
+    logged_on_sso = false
+    expect_content = """
+\\{\
+[\\n\\s]*\\"m.homeserver\\":[\\s\\n]*\\{[\\s\\n]*\\"base_url\\":[\\s\\n]*\\"https://__DOMAIN__\\"[\\s\\n]*\\},\
+[\\n\\s]*\\"im.vector.riot.jitsi\\":[\\s\\n]*\\{\\"preferredDomain\\":[\\s\\n]*\\"jitsi.riot.im\\"\\},\
+[\\n\\s]*\\"im.vector.riot.e2ee\\":[\\s\\n]*\\{\\"default\\":[\\s\\n]*(true|false)[\\s\\n]*\\},\
+[\\n\\s]*\\"org.matrix.msc4143.rtc_foci\\":[\\s\\n]*\\[\
+[\\n\\s]*\\{\
+[\\n\\s]*\\"type\\":[\\s\\n]*\\"livekit\\",\
+[\\n\\s]*\\"livekit_service_url\\":[\\s\\n]*\\"https://__DOMAIN__/livekit/jwt\\"\
+[\\n\\s]*\\},\
+[\\n\\s]*\\{\
+[\\n\\s]*\\"type\\":[\\s\\n]*\\"nextgen_new_foci_type\\",\
+[\\n\\s]*\\"props_for_nextgen_foci\\":[\\s\\n]*\\"val\\"\
+[\\n\\s]*\\}\
+[\\n\\s]*\\]\
+[\\n\\s]*\\}\
+"""
