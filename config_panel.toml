@@ -96,7 +96,7 @@ services = ["__APP__"]
         type = "boolean"
         yes = "true"
         no = "false"
-        help.en = "Send content message and sender information in push notification. Set it to "no"(false) if you want to increase privacy when GAFAM notification service is used (ie: when element client is downloaded thrue Gplay store)."
+        help.en = "Send content message and sender information in push notification. Set it to \"no\"(false) if you want to increase privacy when GAFAM notification service is used (ie: when element client is downloaded thrue Gplay store)."
         help.fr = "Envoyer le contenu du message et les informations relatives à l'expéditeur dans une notification push. Définissez cette option sur « non » (faux) si vous souhaitez renforcer la confidentialité lorsque le service de notification GAFAM est utilisé (c'est-à-dire lorsque le client élément est téléchargé via le magasin Gplay)."
 
     [main.experience]
