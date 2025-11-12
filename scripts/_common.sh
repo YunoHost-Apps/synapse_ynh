@@ -216,3 +216,32 @@ set_permissions() {
     chmod u=rwX,g=rX,o= -R /var/log/matrix-"$app"
     setfacl -R -m user:turnserver:rwX  /var/log/matrix-"$app"
 }
+
+
+clean_db_huge_because_mautrix() {
+    cd /etc/matrix-synapse/clean-unreferenced
+    systemctl stop synapse
+    # generate the list of orphan event
+    #SYNAPSE HAS TO BE STOPPED OTHERWISE IMPORTANT EVENTS MAY BE ERASED
+    #see erikjohnston/synapse-find-unreferenced-state-groups#8
+    rust-synapse-find-unreferenced-state-groups -p "postgresql://$db_user:$db_pwd@localhost/$db_name" -o "/etc/matrix-synapse/clean-unreferenced/unreferenced.csv"
+    #systemctl restart synapse
+    
+    su -c /usr/bin/psql postgres
+    echo "size before cleanup"
+    #postgres=# 
+    SELECT pg_size_pretty( pg_database_size( 'synapse' ) );
+    \c synapse
+    #synapse=# 
+    CREATE TEMPORARY TABLE unreffed(id BIGINT PRIMARY KEY);
+    COPY unreffed FROM '/home/user/unreferenced.csv' WITH (FORMAT 'csv');
+    DELETE FROM state_groups_state WHERE state_group IN (SELECT id FROM unreffed);
+    DELETE FROM state_group_edges WHERE state_group IN (SELECT id FROM unreffed);
+    DELETE FROM state_groups WHERE id IN (SELECT id FROM unreffed);
+    REINDEX (verbose) DATABASE synapse;
+    VACUUM;
+    echo "size after cleanup"
+    SELECT pg_size_pretty( pg_database_size( 'synapse' ) );
+    # If db is not cleaned regularly, e.g. at backup, then space freed in the DB should be released on disk:
+    #synapse=# VACUUM FULL;
+}
