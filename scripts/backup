@@ -41,6 +41,10 @@ fi
 # BACKUP THE POSTGRESQL DATABASE
 #=================================================
 
+# Clean DB before backup if mautrix bridge installed
+clean_db_huge_because_mautrix
+# Clean DB before backup in all cases
+#clean_db
 ynh_psql_dump_db > ${YNH_CWD}/dump.sql
 
 #=================================================
