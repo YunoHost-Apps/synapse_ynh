@@ -87,7 +87,7 @@ yunohost firewall allow Both 49153:49193
 
 You might also need to open these ports (if it is not automatically done) on your ISP box.
 
-To prevent the situation when the server is behind a NAT, the public IP is written in the turnserver config. By this the turnserver can send its real public IP to the client. For more information see [the coturn example config file](https://github.com/coturn/coturn/blob/master/examples/etc/turnserver.conf#L102-L120).So if your IP changes, you could run the script `/opt/yunohost/matrix-<synapse_instance_name>/Coturn_config_rotate.sh` to update your config.
+To prevent the situation when the server is behind a NAT, the public IP is written in the turnserver config. By this the turnserver can send its real public IP to the client. For more information see [the coturn example config file](https://github.com/coturn/coturn/blob/master/examples/etc/turnserver.conf#L102-L120).So if your IP changes, you could run the script `__INSTALL_DIR__/Coturn_config_rotate.sh` to update your config.
 
 If you have a dynamic IP address, you also might need to update this config automatically. To do that just edit a file named `/etc/cron.d/coturn_config_rotate` and add the following content.
 
