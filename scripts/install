@@ -10,11 +10,15 @@ source /usr/share/yunohost/helpers
 
 ynh_app_setting_set --key=php_upload_max_filesize --value=100M
 
+# workaround to mark this app as a webapp, otherwise package check will not consider this as a webapp
+false && \
+ynh_config_add_nginx
+
 #=================================================
 # RETRIEVE ARGUMENTS FROM THE MANIFEST
 #=================================================
 
-if [ "$server_name" == "Same than the domain" ]; then
+if [ -z "$server_name" ]; then
     server_name="$domain"
     ynh_app_setting_set --key=server_name --value="$server_name"
 fi
@@ -26,6 +30,8 @@ fi
 ynh_script_progression "Storing installation settings..."
 
 ensure_vars_set
+
+mkdir -p "$install_dir"/{cas,venv}
 
 if [ "$is_free_registration" -eq 0 ]
 then
@@ -105,7 +111,7 @@ install_sources
 # WARNING : theses command are used in INSTALL, UPGRADE
 # For any update do it in all files
 
-cp ../sources/cas_server.php "$install_dir"/
+cp ../sources/cas_server.php "$install_dir"/cas/
 
 #=================================================
 # CREATE SYNAPSE CONFIG
@@ -114,7 +120,7 @@ cp ../sources/cas_server.php "$install_dir"/
 ynh_script_progression "Creating Synapse config..."
 
 # Generate config
-"$code_dir"/bin/python -m synapse.app.homeserver --keys-directory /etc/matrix-"$app"/ --generate-config --server-name "$server_name" --report-stats=no -c homeserver.yml
+"$install_dir/venv"/bin/python -m synapse.app.homeserver --keys-directory /etc/matrix-"$app"/ --generate-config --server-name "$server_name" --report-stats=no -c homeserver.yml
 
 # Get random values from config
 registration_shared_secret="$(grep -E "^registration_shared_secret:" homeserver.yml | cut -d'"' -f2)"
@@ -136,6 +142,9 @@ ynh_config_add_systemd  --template=synapse.service
 
 cp ../conf/default_coturn /etc/matrix-"$app"/coturn_env
 ynh_config_add_systemd --service="$app"-coturn --template=synapse-coturn.service
+get_lk_node_ip
+ynh_config_add_systemd --service="$app"-livekit --template=synapse-livekit.service
+ynh_config_add_systemd --service="$app"-lk-jwt --template=synapse-lk-jwt.service
 
 #=================================================
 # NGINX CONFIGURATION
@@ -145,7 +154,7 @@ ynh_script_progression "Configuring NGINX web server..."
 # Create a dedicated php-fpm config
 ynh_script_progression "Configuring application..."
 
-ynh_config_add_phpfpm
+configure_php
 
 configure_nginx
 
@@ -153,6 +162,9 @@ configure_nginx
 # SET SYNAPSE CONFIG
 #=================================================
 ynh_script_progression "Configuring Synapse..."
+
+# Force enable it because some client like Element X don't support CAS and so require to have password authentication enabled
+password_enabled=true
 
 ynh_config_add --jinja --template="homeserver.yaml" --destination="/etc/matrix-$app/homeserver.yaml"
 ynh_config_add --template="log.yaml" --destination="/etc/matrix-$app/log.yaml"
@@ -163,6 +175,14 @@ ynh_config_add --template="log.yaml" --destination="/etc/matrix-$app/log.yaml"
 ynh_script_progression "Configuring Coturn..."
 
 configure_coturn
+
+#=================================================
+# SET Element call CONFIG
+#=================================================
+ynh_script_progression "Configuring Element call backend..." --weight=1
+
+ynh_config_add --template=livekit.yml --destination=/etc/matrix-"$app"/livekit.yml
+ynh_config_add --template=lk-jwt.conf --destination=/etc/matrix-"$app"/lk-jwt.conf
 
 #=================================================
 # SETUP LOGROTATE
@@ -178,9 +198,9 @@ ynh_config_add_logrotate "/var/log/matrix-$app"
 # WARNING : theses command are used in INSTALL, UPGRADE
 # For any update do it in all files
 
-ynh_config_add --template="../sources/Coturn_config_rotate.sh" --destination="$code_dir/Coturn_config_rotate.sh"
-ynh_config_add --template="../sources/update_synapse_for_appservice.sh" --destination="$code_dir/update_synapse_for_appservice.sh"
-ynh_config_add --template=../sources/set_admin_user.sh --destination="$code_dir"/set_admin_user.sh
+ynh_config_add --template="../sources/Coturn_config_rotate.sh" --destination="$install_dir/Coturn_config_rotate.sh"
+ynh_config_add --template="../sources/update_synapse_for_appservice.sh" --destination="$install_dir/update_synapse_for_appservice.sh"
+ynh_config_add --template=../sources/set_admin_user.sh --destination="$install_dir"/set_admin_user.sh
 
 #=================================================
 # SETUP PERMISSIONS
@@ -189,9 +209,7 @@ ynh_config_add --template=../sources/set_admin_user.sh --destination="$code_dir"
 ynh_script_progression "Configuring permissions..."
 
 if yunohost --output-as plain domain list | grep -q "^$server_name$"; then
-    ynh_""permission_create --permission=server_client_infos --url="$server_name"/.well-known/matrix \
-                          --label="Server info for clients. (well-known)" --show_tile=false --allowed=visitors \
-                          --auth_header=false --protected=true
+    ynh_""permission_url --permission=server_client_infos --add_url="$server_name"/.well-known/matrix
 else
     ynh_print_warn "Note yunohost won't be able to manage the required config for $server_name. So please add the needed DNS config as described on the documentation"
 fi
@@ -218,6 +236,8 @@ set_permissions data
 
 yunohost service add "$app" --log "/var/log/matrix-$app/homeserver.log" --needs_exposed_ports "$port_synapse_tls" --description 'Main matrix server service.'
 yunohost service add "$app"-coturn --needs_exposed_ports "$port_turnserver_tls" --description 'Turn server for matrix server. Used for audio and video call.'
+yunohost service add "$app"-livekit --description 'Livekit server for element call.'
+yunohost service add "$app"-lk-jwt --description 'RTC Livekit JWT service for element call.'
 
 #=================================================
 # RELOAD SERVICES
@@ -226,13 +246,15 @@ ynh_script_progression "Restarting Synapse services..."
 
 ynh_systemctl --service="$app"-coturn.service --action=restart
 ynh_systemctl --service="$app".service --action=restart --wait_until="Synapse now listening on TCP port $port_synapse_tls" --log_path="/var/log/matrix-$app/homeserver.log" --timeout=300
+ynh_systemctl --service="$app"-livekit.service --action=restart
+ynh_systemctl --service="$app"-lk-jwt.service --action=restart
 
 #=================================================
 # SETUP FAIL2BAN
 #=================================================
 ynh_script_progression "Configuring Fail2Ban..."
 
-ynh_config_add_fail2ban
+ynh_config_add_fail2ban --logpath=/var/log/matrix-"$app"/homeserver.log
 
 #=================================================
 # END OF SCRIPT

@@ -14,13 +14,14 @@ services = ["__APP__"]
         no = "false"
         help = "Defaults to 'false'. If 'true', it is highly recommended to use either captcha, email, or token-based verification to avoid SPAM."
 
-        [main.welcome.password_enabled]
-        ask = "Enable Password Login"
-        type = "boolean"
-        yes = "true"
-        no = "false"
-        help = "If disabled, Login with Non-YunoHost Users impossible. But it simplies Login process if your Matrix server only has YunoHost SSO Users."
-        visible = "! enable_registration"
+        # Disabled for matrix V2 because some client like Element X don't support cas and so require to have password authentication enabled
+        # [main.welcome.password_enabled]
+        # ask = "Enable Password Login"
+        # type = "boolean"
+        # yes = "true"
+        # no = "false"
+        # help = "If disabled, Login with Non-YunoHost Users impossible. But it simplies Login process if your Matrix server only has YunoHost SSO Users."
+        # visible = "! enable_registration"
 
         [main.welcome.registrations_require_3pid]
         ask = "Registration requires all following 3PID personal identifier"
@@ -65,14 +66,6 @@ services = ["__APP__"]
         no = "false"
         help = "Setting to false means that if the rooms are not manually created, users cannot be auto-joined. Auto-created rooms will be public and federated by default, this can be customised in CLI with the settings auto_join_*."
 
-        [main.welcome.notif_for_new_users]
-        ask = "Enable email notifications for new users"
-        type = "boolean"
-        yes = "true"
-        no = "false"
-        help = "Defaults to 'true'."
-        visible = "enable_notifs"
-
     [main.privacy]
     name = "Data Privacy"
 
@@ -98,11 +91,13 @@ services = ["__APP__"]
         help = "Disabled by default. If disabled, users on other homeserver will not be able to look for a public room on your homeserver. They will have to type the ID of the room to join."
 
         [main.privacy.push_include_content]
-        ask = "Disable content sharing inside push notification"
+        ask.en = "Content sharing inside push notification"
+        ask.fr = "Partage de contenu dans les notifications push"
         type = "boolean"
         yes = "true"
         no = "false"
-        help = "Send content message and sender information in push notification. Set to false increase privacy when GAFAM notification service is used (ie: when element client is downloaded thrue Gplay store)."
+        help.en = "Send content message and sender information in push notification. Set it to \"no\"(false) if you want to increase privacy when GAFAM notification service is used (ie: when element client is downloaded thrue Gplay store)."
+        help.fr = "Envoyer le contenu du message et les informations relatives à l'expéditeur dans une notification push. Définissez cette option sur « non » (faux) si vous souhaitez renforcer la confidentialité lorsque le service de notification GAFAM est utilisé (c'est-à-dire lorsque le client élément est téléchargé via le magasin Gplay)."
 
     [main.experience]
     name = "User Experience"
@@ -126,11 +121,38 @@ services = ["__APP__"]
         no = "false"
         help = "Defaults to 'false'."
 
+        [main.experience.notif_for_new_users]
+        ask = "Enable email notifications for new users"
+        type = "boolean"
+        yes = "true"
+        no = "false"
+        help = "Defaults to 'true'."
+        visible = "enable_notifs"
+
         [main.experience.client_base_url]
         ask = "URL for client links within the email notifications"
         type = "url"
         help = "Used to be called 'riot_base_url', still supported"
         visible = "enable_notifs"
+
+    [main.contacts]
+    name.en = "Contact for the administrator of the synapse instance"
+    help.en = "Related to the Matrix [MSC 1929](https://github.com/matrix-org/matrix-spec-proposals/blob/hs/proposal-admin-contact-1/proposals/1929-admin-contact.md) used to provide an administrator contact in case of abuse on the instance."
+
+        [main.contacts.contact_admin_email]
+        ask = "Email contact of the instance admin"
+        help = '( e.g. admin@hello.example )'
+        type = "email"
+
+        [main.contacts.contact_admin_matrix_id]
+        ask = "Matrix ID of the instance admin"
+        help = '( e.g. @admin:hello.example )'
+        type = "string"
+
+        [main.contacts.contact_support_page]
+        ask = "Contact page for the instance"
+        help = '( e.g. https://domain.tld/support.html )'
+        type = "url"
 
     [main.admin_users]
     name = "Add admin user"
@@ -233,3 +255,10 @@ services = ["__APP__"]
             yes = "true"
             no = "false"
             help = "Enabling TLS/DTLS is really recommanded but it could bring some issues depending of the server certificate. There are some known issues with let's encrypt (https://github.com/element-hq/element-android/issues/1533), so if you have issues it could be better to disable this feature."
+
+            [advanced.security.allow_to_send_request_to_localhost]
+            ask = "Allow synapse to send request to localhost"
+            type = "boolean"
+            yes = "true"
+            no = "false"
+            help = "This could be needed by example if you self host on the same Yunohost instance a ntfy server for notifications. In this case to allow synapse to contact the ntfy server you will need to enable this settings."

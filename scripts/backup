@@ -9,7 +9,7 @@ source /usr/share/yunohost/helpers
 #=================================================
 
 if systemctl is-active "$app".service --quiet; then
-    ynh_print_warn "It's hightly recommended to make your backup when the service is stopped. Please stop $app service with this command before to run the backup 'systemctl stop $app.service'"
+    ynh_print_warn "It's highly recommended to make your backup when the service is stopped. Please stop $app service with this command before to run the backup 'systemctl stop $app.service'"
 fi
 
 ynh_print_info "Declaring files to be backed up..."
@@ -20,7 +20,6 @@ ynh_print_info "Declaring files to be backed up..."
 # BACKUP THE APP MAIN DIR
 #=================================================
 
-ynh_backup "$code_dir"
 ynh_backup "$install_dir"
 
 #=================================================
@@ -31,6 +30,8 @@ ynh_backup "$install_dir"
 ynh_backup "/etc/php/$php_version/fpm/pool.d/$app.conf"
 
 ynh_backup "/etc/nginx/conf.d/$domain.d/$app.conf"
+ynh_backup "/etc/nginx/conf.d/${domain}.d/${app}.conf.inc"
+
 # Backup only server name config if it exist
 if [ -e "/etc/nginx/conf.d/${server_name}.d/${app}_server_name.conf" ]; then
     ynh_backup "/etc/nginx/conf.d/${server_name}.d/${app}_server_name.conf"
@@ -63,6 +64,8 @@ ynh_backup "/etc/matrix-$app"
 
 ynh_backup "/etc/systemd/system/$app.service"
 ynh_backup "/etc/systemd/system/$app-coturn.service"
+ynh_backup /etc/systemd/system/"$app"-livekit.service
+ynh_backup /etc/systemd/system/"$app"-lk-jwt.service
 
 #=================================================
 # BACKUP SYNAPSE DATA

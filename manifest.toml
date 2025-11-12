@@ -5,12 +5,12 @@ name = "Synapse"
 description.en = "Instant messaging server which uses Matrix"
 description.fr = "Serveur de messagerie instantané basé sur Matrix"
 
-version = "1.121.1~ynh1"
+version = "1.141.0~ynh1"
 
 maintainers = ["Josué Tille"]
 
 [upstream]
-license = "Apache-2.0"
+license = "AGPL-3.0,Apache-2.0"
 website = "https://matrix.org/"
 code = "https://github.com/element-hq/synapse"
 admindoc = "https://matrix-org.github.io/synapse/latest/welcome_and_overview.html"
@@ -18,9 +18,13 @@ cpe = "cpe:2.3:a:matrix:synapse"
 fund = "https://matrix.org/support/#"
 
 [integration]
-yunohost = ">= 11.2.30"
+yunohost = ">= 12.1.17"
 helpers_version = "2.1"
-architectures = "all"
+architectures = [
+    "amd64",
+    "armhf",
+    "arm64"
+]
 multi_instance = true
 ldap = true
 sso = "not_relevant"
@@ -34,11 +38,14 @@ ram.runtime = "1G"
     type = "domain"
 
     [install.server_name]
-    ask.en = "If your Synapse domain is a subdomain, you can choose a name for your Synapse server to have your Matrix user-ids looking like @user:domain.org instead of @user:synapse.domain.org"
-    ask.fr = "Si votre domaine pour Synapse est un sous-domaine, vous pouvez choisir un nom pour votre serveur Synapse afin que vos identifiants Matrix soient @utilisateur:domain.org plutôt que @utilisateur:synapse.domain.org"
+    ask.en = "Chose a server name if (optional)"
+    ask.fr = "Choissez un nom de serveur (optionnel)"
+    help.en = "If your Synapse domain is a subdomain, you can choose a name for your Synapse server to have your Matrix user-ids looking like @user:domain.org instead of @user:synapse.domain.org. Leave the value empty to use the same value than the domain."
+    help.fr = "Si votre domaine pour Synapse est un sous-domaine, vous pouvez choisir un nom pour votre serveur Synapse afin que vos identifiants Matrix soient @utilisateur:domain.org plutôt que @utilisateur:synapse.domain.org. Laissez la valeur vide afin d'utiliser le même nom que le domaine."
     type = "string"
     example = "domain.org"
-    default = "Same than the domain"
+    default = ""
+    optional = true
 
     [install.is_free_registration]
     ask.en = "Is it a server with free registration?"
@@ -47,13 +54,6 @@ ram.runtime = "1G"
     help.fr = "Un serveur public signifie que n'importe qui pourra s'enregistrer sur ce serveur."
     type = "boolean"
     default = false
-
-    [install.jitsi_server]
-    ask.en = "Jitsi server address for conferencing?"
-    ask.fr = "Adresse du serveur Jitsi pour les conférences ?"
-    type = "string"
-    example = "domain.org"
-    default = "jitsi.riot.im"
 
     [install.init_main_permission]
     help.en = "Define the users allowed to access to synapse. Setting this to 'visitors' don't make sens in this case."
@@ -64,17 +64,36 @@ ram.runtime = "1G"
 [resources]
     [resources.sources.synapse_prebuilt_armv7_bookworm]
     prefetch = false
-    armhf.url = "https://github.com/YunoHost-Apps/synapse_python_build/releases/download/v1.121.1/matrix-synapse_1.121.1-bookworm-bin1_armv7l.tar.gz"
-    armhf.sha256 = "a2461cc23c864517a3e47c4f7edb5789513fc17da869047ddc3c96ae7cbcb6d8"
+    armhf.url = "https://github.com/YunoHost-Apps/synapse_python_build/releases/download/v1.141.0/matrix-synapse_1.141.0-bookworm-bin1_armv7l.tar.gz"
+    armhf.sha256 = "c27ed8160f9e87632d4291c202b6b7ebe109729946d8460657c341d1c193f572"
 
-    [resources.sources.synapse_prebuilt_armv7_bullseye]
+    [resources.sources.synapse_prebuilt_armv7_trixie]
     prefetch = false
-    armhf.url = "https://github.com/YunoHost-Apps/synapse_python_build/releases/download/v1.121.1/matrix-synapse_1.121.1-bullseye-bin1_armv7l.tar.gz"
-    armhf.sha256 = "173b27ba8e7f942c461878b27d95b47959193967cb7a8b2180400a38507cdc83"
+    armhf.url = "https://github.com/YunoHost-Apps/synapse_python_build/releases/download/v1.141.0/matrix-synapse_1.141.0-trixie-bin1_armv7l.tar.gz"
+    armhf.sha256 = "88d657a067275803273f164e049df0f2c144a8ce856fb88892f12bda961c86d4"
+
+    [resources.sources.lk_jwt]
+    prefetch = true
+    extract = true
+
+    url = "https://github.com/element-hq/lk-jwt-service/archive/refs/tags/v0.3.0.tar.gz"
+    sha256 = "c6baa2d2d4fab036616f901a583866b95d336f9ddadbf73a209d4de88494e921"
+
+    [resources.sources.livekit]
+    prefetch = true
+    extract = true
+    in_subdir = false
+
+    amd64.url = "https://github.com/livekit/livekit/releases/download/v1.9.2/livekit_1.9.2_linux_amd64.tar.gz"
+    amd64.sha256 = "5e55f9c657b7fc09bc24bf8eb8989a6485efdc6ba22ee38e883d2bcff0f50476"
+    arm64.url = "https://github.com/livekit/livekit/releases/download/v1.9.2/livekit_1.9.2_linux_arm64.tar.gz"
+    arm64.sha256 = "2f4430cfe6292e0f7fa08d5c1a8fcb5fb2f5a7350f2a3d589a939e4a2a6e36ab"
+    armhf.url = "https://github.com/livekit/livekit/releases/download/v1.9.2/livekit_1.9.2_linux_armv7.tar.gz"
+    armhf.sha256 = "7c605fa4bc96f377c391b371bfbc2ed562230b389e81763cf2b77bffacc69c22"
 
     [resources.system_user]
     allow_email = true
-    home = "/opt/yunohost/matrix-__APP__"
+    home = "/var/www/__APP__"
 
     [resources.install_dir]
     dir = "/var/www/__APP__"
@@ -93,6 +112,7 @@ ram.runtime = "1G"
     main.protected = true
 
     server_api.url = "/_matrix"
+    server_api.additional_urls = ["/client"]
     server_api.label = "Server access for client apps"
     server_api.allowed = "visitors"
     server_api.auth_header = false
@@ -106,6 +126,19 @@ ram.runtime = "1G"
     admin_api.show_tile = false
     admin_api.protected = true
 
+    server_client_infos.url = "/.well-known/matrix"
+    server_client_infos.allowed = "visitors"
+    server_client_infos.auth_header = false
+    server_client_infos.show_tile = false
+    server_client_infos.protected = true
+
+    livekit.url = "/livekit"
+    livekit.label = "Element call backend"
+    livekit.allowed = "visitors"
+    livekit.auth_header = false
+    livekit.show_tile = false
+    livekit.protected = true
+
     [resources.ports]
     synapse_tls.default = 8448
     synapse_tls.exposed = "TCP"
@@ -115,6 +148,10 @@ ram.runtime = "1G"
     turnserver_alt_tls.default = 5350
     turnserver_alt_tls.exposed = "Both"
     cli.default = 5766
+    livekit.default = 7880
+    livekit_rtc.default = 7881
+    livekit_rtc.exposed = "TCP"
+    livekit_jwt.default = 8080
 
     [resources.apt]
     packages = ["coturn", "acl", "postgresql", "php8.3-fpm",
@@ -123,3 +160,6 @@ ram.runtime = "1G"
 
     [resources.database]
     type = "postgresql"
+
+    [resources.go]
+    version = "1.24.2"

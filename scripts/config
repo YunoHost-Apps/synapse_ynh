@@ -6,14 +6,14 @@ source /usr/share/yunohost/helpers
 
 ynh_app_config_validate() {
     # Depending of the status of the $enable_registration we should default value of the hidden fields
-    if $enable_registration; then
+    if [ "$enable_registration" == 'true' ]; then
         # Must enable password authentication when free registration is enabled as any user must be able to authenticate
         password_enabled=true
     else
         registrations_require_3pid=email
         disable_msisdn_registration=true
     fi
-    if ! $enable_notifs; then
+    if [ "$enable_notifs" != 'true' ]; then
         notif_for_new_users=false
     fi
     _ynh_app_config_validate
@@ -22,6 +22,10 @@ ynh_app_config_validate() {
 ynh_app_config_apply() {
     _ynh_app_config_apply
     configure_nginx
+
+    # Force enable it because some client like Element X don't support CAS and so require to have password authentication enabled
+    password_enabled=true
+
     ynh_config_add --jinja --template="homeserver.yaml" --destination="/etc/matrix-$app/homeserver.yaml"
     ynh_config_add --template="log.yaml" --destination="/etc/matrix-$app/log.yaml"
     set_permissions
