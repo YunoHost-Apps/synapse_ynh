@@ -44,3 +44,6 @@ location = /.well-known/matrix/support {
         {%- endif %}
     }';
 }
+
+
+# Workaround to fix false positive of the linter proxy_params_with_auth
