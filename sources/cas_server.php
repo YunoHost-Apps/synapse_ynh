@@ -2,7 +2,7 @@
 
 /*
 This is simple implementation of a CAS server to provide a SSO with synapse and Riot
-The authentication mecanisme is documented here: https://matrix.org/docs/spec/client_server/latest#sso-client-login
+The authentication mechanism is documented here: https://matrix.org/docs/spec/client_server/latest#sso-client-login
 
 Note that it's not a full implementation of a CAS server, but just the minimum to work with synapse and Riot.
 
@@ -23,7 +23,7 @@ switch ($url) {
         // Get the session created by the client request
         session_id($_GET['ticket']);
         session_start();
-        // Check if this user was cleanly authenticated
+        // Check if this user was properly authenticated
         if ($_SESSION['user_authenticated']) {
             // Give the authentication information to the server
             ?>
@@ -51,11 +51,11 @@ switch ($url) {
         $ticket = bin2hex(random_bytes(50));
 
         // Use the Ticket number as the session ID.
-        // This give the possiblity in the next request from the server to to find this session and the information related to.
+        // This gives the possiblity in the next request from the server to find this session and the related information.
         session_id($ticket);
         session_start();
 
-        // If the user is authenticated by ssowat save the username and set it as cleanly authenticated
+        // If the user is authenticated by ssowat save the username and set it as properly authenticated
         if (array_key_exists('REMOTE_USER', $_SERVER) && strlen($_SERVER['REMOTE_USER']) > 0) {
             $_SESSION['user_authenticated'] = true;
             $_SESSION['user'] = $_SERVER['REMOTE_USER'];
@@ -63,7 +63,7 @@ switch ($url) {
             header('Status: 302 Moved Temporarily', false, 302);
             header('Location: ' . $_GET['service'] . '&ticket=' . $ticket);
         } else {
-            echo "Authentication Fail.";
+            echo "Authentication failed.";
         }
         session_commit();
     break;
