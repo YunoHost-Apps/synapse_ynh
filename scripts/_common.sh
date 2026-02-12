@@ -45,7 +45,9 @@ install_sources() {
         # Install synapse in virtualenv
         local pip3="$install_dir/venv"/bin/pip3
 
-        $pip3 install --upgrade setuptools wheel pip cffi
+        # Fix pkg_ressources removal in setuptools. Used in ldap-auth-plugin.
+        $pip3 install --upgrade 'setuptools==81.0.0'
+        $pip3 install --upgrade wheel pip cffi
         $pip3 install --upgrade -r "$YNH_APP_BASEDIR/conf/requirement_$(lsb_release --codename --short).txt"
     fi
 
