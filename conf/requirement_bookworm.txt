@@ -47,7 +47,8 @@ requests==2.32.4
 rpds-py==0.26.0
 semantic-version==2.10.0
 service-identity==24.2.0
-setuptools-rust==1.11.1
+setuptools==80.10.2
+setuptools-rust==1.11.0
 signedjson==1.1.4
 six==1.17.0
 sortedcontainers==2.4.0
