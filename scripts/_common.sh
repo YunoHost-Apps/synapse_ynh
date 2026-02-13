@@ -56,6 +56,11 @@ install_sources() {
         patch < "$YNH_APP_BASEDIR"/scripts/patch/ldap_auth_filter_anonymous_user.patch
         popd
     fi
+    if ! grep -F -q '# Fix parse_version import Applied' "$install_dir/venv/lib/python$python_version/site-packages/ldap_auth_provider.py"; then
+        pushd "$install_dir/venv/lib/python$python_version/site-packages"
+        patch < "$YNH_APP_BASEDIR"/scripts/patch/fix_pkg_resources_imports.patch
+        popd
+    fi
 
     # Install livekit jwt
     ynh_setup_source --source_id=lk_jwt --dest_dir="$install_dir/lk_jwt"
