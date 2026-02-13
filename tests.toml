@@ -4,15 +4,15 @@ test_format = 1.0
 
 [default]
 
-    test_upgrade_from.beb3a4e202909101a61cb0a024227452e64bd522.name = "Before packaging v2 (branch old_version_for_CI_6)"
+    test_upgrade_from.f8d91f9.name = "Before packaging v2 (branch old_version_for_CI_6)"
 
-    test_upgrade_from.df0cca387a3dcf912162bf5e3e6cdca07012b493.name = "Before Matrix v2 implementation (branch old_version_for_CI_8)"
+    test_upgrade_from.6266f3f.name = "Before Matrix v2 implementation (branch old_version_for_CI_8)"
 
-    test_upgrade_from.bca67e42d34f51eca7d1df0efebd0d11c3ac27c6.name = "Before sliding sync proxy removal (branch old_version_for_CI_9)"
+    test_upgrade_from.a5692b8.name = "Before sliding sync proxy removal (branch old_version_for_CI_9)"
 
-    test_upgrade_from.76235b65ff64f2ed39facf7485b4bbe516701976.name = "Before helper 2.1 (branch old_version_for_CI_10)"
+    test_upgrade_from.bd9b37c.name = "Before helper 2.1 (branch old_version_for_CI_10)"
 
-    test_upgrade_from.92e630366e39aca49dbeb66c9d1b3c3bc2e03b31.name = "Before element call backend"
+    test_upgrade_from.8c5eb0c.name = "Before element call backend (branch old_version_for_CI_11)"
 
 
     # -------------------------------

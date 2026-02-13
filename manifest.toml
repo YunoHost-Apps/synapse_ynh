@@ -5,7 +5,7 @@ name = "Synapse"
 description.en = "Instant messaging server which uses Matrix"
 description.fr = "Serveur de messagerie instantané basé sur Matrix"
 
-version = "1.144.0~ynh1"
+version = "1.147.0~ynh1"
 
 maintainers = ["Josué Tille"]
 
@@ -18,7 +18,7 @@ cpe = "cpe:2.3:a:matrix:synapse"
 fund = "https://matrix.org/support/#"
 
 [integration]
-yunohost = ">= 12.1.17"
+yunohost = ">= 12.1.38"
 helpers_version = "2.1"
 architectures = [
     "amd64",
@@ -27,10 +27,10 @@ architectures = [
 ]
 multi_instance = true
 ldap = true
-sso = "not_relevant"
+sso = true
 disk = "250M"
 ram.build = "500M"
-ram.runtime = "1G"
+ram.runtime = "3G"
 
 [install]
     [install.domain]
@@ -64,32 +64,32 @@ ram.runtime = "1G"
 [resources]
     [resources.sources.synapse_prebuilt_armv7_bookworm]
     prefetch = false
-    armhf.url = "https://github.com/YunoHost-Apps/synapse_python_build/releases/download/v1.144.0/matrix-synapse_1.144.0-bookworm-bin1_armv7l.tar.gz"
-    armhf.sha256 = "309150de22c8d959c5c1b0555d9b4a58ef03a5e092313774c9f3d7b8037fbca7"
+    armhf.url = "https://github.com/YunoHost-Apps/synapse_python_build/releases/download/v1.147.0/matrix-synapse_1.147.0-bookworm-bin1_armv7l.tar.gz"
+    armhf.sha256 = "157de7f58bca2e3d7813473fa229d88c5d3b1472574098f96cb7b5f50d2fbd5e"
 
     [resources.sources.synapse_prebuilt_armv7_trixie]
     prefetch = false
-    armhf.url = "https://github.com/YunoHost-Apps/synapse_python_build/releases/download/v1.144.0/matrix-synapse_1.144.0-trixie-bin1_armv7l.tar.gz"
-    armhf.sha256 = "69afb657f46cc9aa479d9fe43ddc558006e1df92891edc50c2b705e2d9cba498"
+    armhf.url = "https://github.com/YunoHost-Apps/synapse_python_build/releases/download/v1.147.0/matrix-synapse_1.147.0-trixie-bin1_armv7l.tar.gz"
+    armhf.sha256 = "4e9f76d5ce4cdbe6b0528b4f508c7f8b405706df50ab686e912c65351a3aee99"
 
     [resources.sources.lk_jwt]
     prefetch = true
     extract = true
 
-    url = "https://github.com/element-hq/lk-jwt-service/archive/refs/tags/v0.4.0.tar.gz"
-    sha256 = "0821a438dc6e3bb8dbd5726758521175e8cd7f67bb0fc790b32e06f386feb871"
+    url = "https://github.com/element-hq/lk-jwt-service/archive/refs/tags/v0.4.1.tar.gz"
+    sha256 = "bded9f3390145a966b1afd6a3f9b7027a6d9b437b0caa5bd64ebe99573c26902"
 
     [resources.sources.livekit]
     prefetch = true
     extract = true
     in_subdir = false
 
-    amd64.url = "https://github.com/livekit/livekit/releases/download/v1.9.7/livekit_1.9.7_linux_amd64.tar.gz"
-    amd64.sha256 = "9e13fd7709677caf844286e86715eece4cc39c1bbf8be2b0b8d677e85d2c50f6"
-    arm64.url = "https://github.com/livekit/livekit/releases/download/v1.9.7/livekit_1.9.7_linux_arm64.tar.gz"
-    arm64.sha256 = "80da662c43a0bf4ef4794d0cba50d117ae52510721c0f2731cf5d9627d863fd7"
-    armhf.url = "https://github.com/livekit/livekit/releases/download/v1.9.7/livekit_1.9.7_linux_armv7.tar.gz"
-    armhf.sha256 = "f3b80203e62019c5215418bee74f8d8db4ebafdb66906a818a668f72983683db"
+    amd64.url = "https://github.com/livekit/livekit/releases/download/v1.9.11/livekit_1.9.11_linux_amd64.tar.gz"
+    amd64.sha256 = "9aec26a7a3a2ece916711792070b4db1eeb39ec3b3914e84b0b4f0e5d4d70d6d"
+    arm64.url = "https://github.com/livekit/livekit/releases/download/v1.9.11/livekit_1.9.11_linux_arm64.tar.gz"
+    arm64.sha256 = "1ce2d5a78906aac7e3208db72e7f3c5e966261090dbe69ba341a74041d8f5115"
+    armhf.url = "https://github.com/livekit/livekit/releases/download/v1.9.11/livekit_1.9.11_linux_armv7.tar.gz"
+    armhf.sha256 = "3524580b3cd36eb80d6f69369555147be97a37817ed76bb73b6c5fd0cdae0e7e"
 
     [resources.system_user]
     allow_email = true
@@ -154,7 +154,7 @@ ram.runtime = "1G"
     livekit_jwt.default = 8080
 
     [resources.apt]
-    packages = ["coturn", "acl", "postgresql", "php8.3-fpm",
+    packages = ["coturn", "acl", "postgresql", "php8.4-fpm",
                 "python3-dev", "python3-venv", "python3-pip", "python3-setuptools", "python3-lxml",
                 "build-essential", "libffi-dev", "libssl-dev", "libxml2-dev", "libxslt1-dev", "zlib1g-dev", "libjpeg-dev", "libpq-dev"]
 
@@ -162,4 +162,4 @@ ram.runtime = "1G"
     type = "postgresql"
 
     [resources.go]
-    version = "1.24.2"
+    version = "1.25"
