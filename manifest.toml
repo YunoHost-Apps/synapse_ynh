@@ -91,6 +91,18 @@ ram.runtime = "1G"
     armhf.url = "https://github.com/livekit/livekit/releases/download/v1.9.2/livekit_1.9.2_linux_armv7.tar.gz"
     armhf.sha256 = "7c605fa4bc96f377c391b371bfbc2ed562230b389e81763cf2b77bffacc69c22"
 
+    [resources.sources.find_unref_prebuilt]
+    prefetch = true
+    extract = true
+    in_subdir = false
+
+    amd64.url = "https://github.com/YunoHost-Apps/synapse_python_build/releases/download/e873f9a/synapse-find-unreferenced-state-groups_e873f9a-bin1_amd64.tar.gz"
+    amd64.sha256 = ""
+    arm64.url = "https://github.com/YunoHost-Apps/synapse_python_build/releases/download/e873f9a/synapse-find-unreferenced-state-groups_e873f9a-bin1_arm64.tar.gz"
+    arm64.sha256 = ""
+    armhf.url = "https://github.com/YunoHost-Apps/synapse_python_build/releases/download/e873f9a/synapse-find-unreferenced-state-groups_e873f9a-bin1_armv7.tar.gz"
+    armhf.sha256 = ""
+
     [resources.system_user]
     allow_email = true
     home = "/var/www/__APP__"
