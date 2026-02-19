@@ -68,6 +68,10 @@ install_sources() {
 
     # Install livekit server for element-call
     ynh_setup_source --source_id=livekit --dest_dir="$install_dir/livekit"
+
+    # Install synapse-find-unreferenced-state-groups prebuilt
+    ynh_setup_source --source_id=find_unref_prebuilt --dest_dir="$install_dir/find_unref_prebuilt"
+
 }
 
 get_lk_node_ip() {
