@@ -1,0 +1,52 @@
+#!/bin/sh
+#
+# synapse_clean_unreferenced_states cron weekly
+
+0 0 * * 1 root
+
+# This should be set by cron, but apparently isn't always; see
+# https://bugs.debian.org/209185.  Add fallbacks so that start-stop-daemon
+# can be found.
+export PATH="$PATH:/usr/local/sbin:/usr/sbin:/sbin"
+
+# For synapse unreferenced states cleanup
+export PGPASSWORD=__DB_PWD__ #{{ db_pwd }}
+export DBUSER=__DB_USER__ #{{ db_user }}
+export DBNAME=__DB_NAME__ #{{ db_name }}
+export install_dir="/var/www/$DBUSER"
+
+df -h
+if $(systemctl stop $DBUSER); then
+    $install_dir/find_unref_prebuilt/rust-synapse-find-unreferenced-state-groups -p "postgresql://$DBUSER:$PGPASSWORD@localhost/$DBNAME" -o "$install_dir/find_unref_prebuilt/unreferenced.csv"
+    systemctl restart synapse
+    su -c /usr/bin/psql postgres
+    SELECT pg_size_pretty( pg_database_size( 'synapse' ) );
+    \c synapse
+    CREATE TEMPORARY TABLE unreffed(id BIGINT PRIMARY KEY);COPY unreffed FROM '$install_dir/find_unref_prebuilt/unreferenced.csv' WITH (FORMAT 'csv');DELETE FROM state_groups_state WHERE state_group IN (SELECT id FROM unreffed);DELETE FROM state_group_edges WHERE state_group IN (SELECT id FROM unreffed);DELETE FROM state_groups WHERE id IN (SELECT id FROM unreffed);
+    \q
+    echo "Synapse unreferenced states deleted from psql"
+    if $(systemctl stop synapse); then
+        su -c /usr/bin/psql postgres
+        SELECT pg_size_pretty( pg_database_size( 'synapse' ) );
+        \c synapse
+        REINDEX DATABASE synapse;
+        \q
+        echo "Synapse psql REINDEXed"
+        systemctl restart synapse
+    else
+    echo "Could not stop synapse for psql REINDEX"
+    fi
+    su -c /usr/bin/psql postgres
+    SELECT pg_size_pretty( pg_database_size( 'synapse' ) );
+    \c synapse
+    VACUUM FULL;
+    SELECT pg_size_pretty( pg_database_size( 'synapse' ) );
+    \q
+    echo "Synapse psql VACUUMed"
+else
+    echo "Could not stop synapse for cleaning unreferenced-state-groups"
+fi
+systemctl restart synapse
+df -h
+
+exit 0
