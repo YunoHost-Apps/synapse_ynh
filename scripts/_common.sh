@@ -183,6 +183,10 @@ ensure_vars_set() {
     ynh_app_setting_set_default --key=push_include_content --value=true
     ynh_app_setting_set_default --key=enable_dtls_for_audio_video_turn_call --value=true
     ynh_app_setting_set_default --key=allow_to_send_request_to_localhost --value=false
+    ynh_app_setting_set_default --key=presence_enabled --value=true
+    ynh_app_setting_set_default --key=require_auth_for_profile_requests --value=false
+    ynh_app_setting_set_default --key=allow_profile_lookup_over_federation --value=true
+    ynh_app_setting_set_default --key=limit_profile_requests_to_users_who_share_rooms --value=false
 
     ynh_app_setting_set_default --key=livekit_secret --value="$(ynh_string_random --length=40)"
 
