@@ -26,11 +26,11 @@ if [ -n "$(ls "/etc/matrix-$app/app-service/")" ]; then
     chmod 600 "/etc/matrix-$app/app-service/"*
 
     # Add synapse_clean_unreferenced_states cron
-    ynh_config_add --template="synapse_clean_unreferenced_states" --destination="/etc/cron.d/synapse_clean_unreferenced_states"
+    ynh_config_add --template="synapse_clean_unreferenced_states" --destination="/etc/cron.d/$app_clean_unreferenced_states"
 else
     echo "" > "$service_config_file"    
     # Remove synapse_clean_unreferenced_states cron
-    ynh_safe_rm /etc/cron.d/synapse_clean_unreferenced_states
+    ynh_safe_rm /etc/cron.d/$app_clean_unreferenced_states
 fi
 chown "$app" "$service_config_file"
 chmod 600 "$service_config_file"
