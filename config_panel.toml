@@ -171,6 +171,13 @@ services = ["__APP__"]
 name = "Resource Usage"
 services = ["__APP__"]
 
+    [resources.event]
+    name = "Manage Messages and Events growth and clean-up"
+        [resources.event.cron_time]
+        ask = "Cron schedule to clean unrefenced state events"
+        type = "string"
+        help = "Running this cleanup can /10 the database size when using Bridges. Use Cron Syntax https://www.man7.org/linux/man-pages/man5/crontab.5.html"
+
     [resources.media]
     name = "Manage Media growth and clean-up"
 
