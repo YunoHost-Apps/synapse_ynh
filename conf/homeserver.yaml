@@ -69,6 +69,16 @@ allow_public_rooms_without_auth: {{ allow_public_rooms_without_auth }}
 #
 allow_public_rooms_over_federation: {{ allow_public_rooms_over_federation }}
 
+# The default room version for newly created rooms.
+#
+# Known room versions are listed here:
+# https://spec.matrix.org/latest/rooms/#complete-list-of-room-versions
+#
+# For example, for room version 1, default_room_version should be set
+# to "1".
+#
+default_room_version: "12"
+
 # Prevent outgoing requests from being sent to the following blacklisted IP address
 # CIDR ranges. If this option is not specified then it defaults to private IP
 # address ranges (see the example below).
