@@ -49,19 +49,6 @@ install_sources() {
         $pip3 install --upgrade -r "$YNH_APP_BASEDIR/conf/requirement_$(lsb_release --codename --short).txt"
     fi
 
-    # Apply patch for LDAP auth if needed
-    # Note that we put patch into scripts dir because /source are not stored and can't be used on restore
-    if ! grep -F -q '# LDAP Filter anonymous user Applied' "$install_dir/venv/lib/python$python_version/site-packages/ldap_auth_provider.py"; then
-        pushd "$install_dir/venv/lib/python$python_version/site-packages"
-        patch < "$YNH_APP_BASEDIR"/scripts/patch/ldap_auth_filter_anonymous_user.patch
-        popd
-    fi
-    if ! grep -F -q '# Fix parse_version import Applied' "$install_dir/venv/lib/python$python_version/site-packages/ldap_auth_provider.py"; then
-        pushd "$install_dir/venv/lib/python$python_version/site-packages"
-        patch < "$YNH_APP_BASEDIR"/scripts/patch/fix_pkg_resources_imports.patch
-        popd
-    fi
-
     # Install livekit jwt
     ynh_setup_source --source_id=lk_jwt --dest_dir="$install_dir/lk_jwt"
 
