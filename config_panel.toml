@@ -90,6 +90,34 @@ services = ["__APP__"]
         no = "false"
         help = "Disabled by default. If disabled, users on other homeserver will not be able to look for a public room on your homeserver. They will have to type the ID of the room to join."
 
+        [main.privacy.presence_enabled]
+        ask = "Presence tracking"
+        type = "boolean"
+        yes = "true"
+        no = "false"
+        help = "Enabled by default. Presence tracking allows users to see the state (e.g online/offline) of other local and remote users. If disabled, users will not be able to see the presence status of the homeserver's users."
+
+        [main.privacy.allow_profile_lookup_over_federation]
+        ask = "Allow profile lookup over federation"
+        type = "boolean"
+        yes = "true"
+        no = "false"
+        help = "Enabled by default. By default, the Federation allows other homeservers to obtain profile data of any user on this homeserver. You can disable this possibility with this option."
+
+        [main.privacy.require_auth_for_profile_requests]
+        ask = "Require authentication to retrive profile"
+        type = "boolean"
+        yes = "true"
+        no = "false"
+        help = "Disabled by default. Whether to require authentication to retrieve profile data (avatars, display names) of other users through client applications. Note that profile data is also available via the federation, unless \"Allow profile lookup over federation\" is also disabled."
+
+        [main.privacy.limit_profile_requests_to_users_who_share_rooms]
+        ask = "Limit profile request to users who share rooms"
+        type = "boolean"
+        yes = "true"
+        no = "false"
+        help = "Disabled by default. Use this option to require a user to share a room with another user in order to retrieve their profile information. Only checked for local users. This option will not impact profile requests from federation."
+
         [main.privacy.push_include_content]
         ask.en = "Content sharing inside push notification"
         ask.fr = "Partage de contenu dans les notifications push"
