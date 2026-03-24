@@ -5,7 +5,7 @@ name = "Synapse"
 description.en = "Instant messaging server which uses Matrix"
 description.fr = "Serveur de messagerie instantané basé sur Matrix"
 
-version = "1.149.1~ynh1"
+version = "1.150.0~ynh1"
 
 maintainers = ["Josué Tille"]
 
@@ -64,13 +64,13 @@ ram.runtime = "3G"
 [resources]
     [resources.sources.synapse_prebuilt_armv7_bookworm]
     prefetch = false
-    armhf.url = "https://github.com/YunoHost-Apps/synapse_python_build/releases/download/v1.149.1/matrix-synapse_1.149.1-bookworm-bin1_armv7l.tar.gz"
-    armhf.sha256 = "99f85dd39b93cb3da29685ba57e272695f9584c8421d83c16d27788575998053"
+    armhf.url = "https://github.com/YunoHost-Apps/synapse_python_build/releases/download/v1.150.0/matrix-synapse_1.150.0-bookworm-bin1_armv7l.tar.gz"
+    armhf.sha256 = "83d886c66c464fc30d52c3aeed68a682b1bb58adb999aeba658dad826ece119f"
 
     [resources.sources.synapse_prebuilt_armv7_trixie]
     prefetch = false
-    armhf.url = "https://github.com/YunoHost-Apps/synapse_python_build/releases/download/v1.149.1/matrix-synapse_1.149.1-trixie-bin1_armv7l.tar.gz"
-    armhf.sha256 = "878ecd02ece9007fd786d05ac4f4c3174670e67034ad3ef8cd0fbddc34be1f94"
+    armhf.url = "https://github.com/YunoHost-Apps/synapse_python_build/releases/download/v1.150.0/matrix-synapse_1.150.0-trixie-bin1_armv7l.tar.gz"
+    armhf.sha256 = "0cd8a7f398a0b10b97892fa71ab121f7c55752b279365ac32b935eb2edf4f2a4"
 
     [resources.sources.lk_jwt]
     prefetch = true
@@ -84,12 +84,12 @@ ram.runtime = "3G"
     extract = true
     in_subdir = false
 
-    amd64.url = "https://github.com/livekit/livekit/releases/download/v1.9.12/livekit_1.9.12_linux_amd64.tar.gz"
-    amd64.sha256 = "80333fb3b7995ae927ca81216efe073109f6b08639c3b1b7b9a3e147ff708c76"
-    arm64.url = "https://github.com/livekit/livekit/releases/download/v1.9.12/livekit_1.9.12_linux_arm64.tar.gz"
-    arm64.sha256 = "6266b1316235497a05645241aa544b04c59d6416dbef0182972b4153de41272c"
-    armhf.url = "https://github.com/livekit/livekit/releases/download/v1.9.12/livekit_1.9.12_linux_armv7.tar.gz"
-    armhf.sha256 = "3fec526a76816a7078e6489361c2c5cc65f5d9b8721820b6598a435f8dd1b2c1"
+    amd64.url = "https://github.com/livekit/livekit/releases/download/v1.10.0/livekit_1.10.0_linux_amd64.tar.gz"
+    amd64.sha256 = "49182bac7f1e60912278aa834c3b48516a844178e8ed1d330f29ef0a9980f386"
+    arm64.url = "https://github.com/livekit/livekit/releases/download/v1.10.0/livekit_1.10.0_linux_arm64.tar.gz"
+    arm64.sha256 = "36a1cfdd35d6219e34f42931254760368406e53f202e4305ff9567261f5dfa90"
+    armhf.url = "https://github.com/livekit/livekit/releases/download/v1.10.0/livekit_1.10.0_linux_armv7.tar.gz"
+    armhf.sha256 = "05148cc936ce81988c9a8117421f88217ad6eb7f521f0614e56a55abacb39b75"
 
     [resources.system_user]
     allow_email = true
