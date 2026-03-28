@@ -282,7 +282,7 @@ services = ["__APP__"]
             type = "boolean"
             yes = "true"
             no = "false"
-            help = "Enabling TLS/DTLS is really recommanded but it could bring some issues depending of the server certificate. There are some known issues with let's encrypt (https://github.com/element-hq/element-android/issues/1533), so if you have issues it could be better to disable this feature."
+            help = "Enabling TLS/DTLS is really recommanded but it could bring some issues depending of the server certificate. There are some known issues with let's encrypt ( https://github.com/element-hq/element-android/issues/1533 ), so if you have issues it could be better to disable this feature."
 
             [advanced.security.allow_to_send_request_to_localhost]
             ask = "Allow synapse to send request to localhost"
