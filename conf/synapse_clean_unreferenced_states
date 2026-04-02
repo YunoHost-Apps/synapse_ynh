@@ -9,44 +9,46 @@
 # can be found.
 export PATH="$PATH:/usr/local/sbin:/usr/sbin:/sbin"
 
-# For synapse unreferenced states cleanup
-export PGPASSWORD=__DB_PWD__ #{{ db_pwd }}
-export DBUSER=__DB_USER__ #{{ db_user }}
-export DBNAME=__DB_NAME__ #{{ db_name }}
-export install_dir="/var/www/$DBUSER"
+YNH_HELPERS_VERSION=2.1
+app=__APP__
+YNH_APP_BASEDIR=/etc/yunohost/apps/"$app"
+YNH_APP_ACTION=''
+
+source /usr/share/yunohost/helpers
+
+db_name=$(ynh_app_setting_get --key=db_name)
+db_user=$(ynh_app_setting_get --key=db_user)
+db_pwd=$(ynh_app_setting_get --key=db_pwd)
+server_name=$(ynh_app_setting_get --key=server_name)
+install_dir="/var/www/$app"
 
 df -h
-if $(systemctl stop $DBUSER); then
-    $install_dir/find_unref_prebuilt/rust-synapse-find-unreferenced-state-groups -p "postgresql://$DBUSER:$PGPASSWORD@localhost/$DBNAME" -o "$install_dir/find_unref_prebuilt/unreferenced.csv"
-    systemctl restart synapse
-    su -c /usr/bin/psql postgres
-    SELECT pg_size_pretty( pg_database_size( 'synapse' ) );
-    \c synapse
-    CREATE TEMPORARY TABLE unreffed(id BIGINT PRIMARY KEY);COPY unreffed FROM '$install_dir/find_unref_prebuilt/unreferenced.csv' WITH (FORMAT 'csv');DELETE FROM state_groups_state WHERE state_group IN (SELECT id FROM unreffed);DELETE FROM state_group_edges WHERE state_group IN (SELECT id FROM unreffed);DELETE FROM state_groups WHERE id IN (SELECT id FROM unreffed);
-    \q
+if $(systemctl stop $app); then
+    $install_dir/find_unref_prebuilt/rust-synapse-find-unreferenced-state-groups -p "postgresql://$db_user:$db_pwd@localhost/$db_name" -o "$install_dir/find_unref_prebuilt/unreferenced.csv"
+    systemctl restart $app
+    ynh_psql_db_shell <<< "SELECT pg_size_pretty( pg_database_size( '$db_name' ) )"
+    ynh_psql_db_shell <<< "CREATE TEMPORARY TABLE unreffed(id BIGINT PRIMARY KEY)"
+    ynh_psql_db_shell <<< "COPY unreffed FROM '$install_dir/find_unref_prebuilt/unreferenced.csv' WITH (FORMAT 'csv')"
+    ynh_psql_db_shell <<< "DELETE FROM state_groups_state WHERE state_group IN (SELECT id FROM unreffed)"
+    ynh_psql_db_shell <<< "DELETE FROM state_group_edges WHERE state_group IN (SELECT id FROM unreffed)"
+    ynh_psql_db_shell <<< "DELETE FROM state_groups WHERE id IN (SELECT id FROM unreffed)"
     echo "Synapse unreferenced states deleted from psql"
-    if $(systemctl stop synapse); then
-        su -c /usr/bin/psql postgres
-        SELECT pg_size_pretty( pg_database_size( 'synapse' ) );
-        \c synapse
-        REINDEX DATABASE synapse;
-        \q
-        echo "Synapse psql REINDEXed"
-        systemctl restart synapse
+    if $(systemctl stop $app); then
+        ynh_psql_db_shell <<< "SELECT pg_size_pretty( pg_database_size( '$db_name' ) )"
+        ynh_psql_db_shell <<< "REINDEX DATABASE $db_name"
+        echo "$app psql REINDEXed"
+        systemctl restart $app
     else
-    echo "Could not stop synapse for psql REINDEX"
+    echo "Could not stop $app for psql REINDEX"
     fi
-    su -c /usr/bin/psql postgres
-    SELECT pg_size_pretty( pg_database_size( 'synapse' ) );
-    \c synapse
-    VACUUM FULL;
-    SELECT pg_size_pretty( pg_database_size( 'synapse' ) );
-    \q
-    echo "Synapse psql VACUUMed"
+    ynh_psql_db_shell <<< "SELECT pg_size_pretty( pg_database_size( '$db_name' ) )"
+    ynh_psql_db_shell <<< "VACUUM FULL"
+    ynh_psql_db_shell <<< "SELECT pg_size_pretty( pg_database_size( '$db_name' ) )"
+    echo "$app psql VACUUMed"
 else
-    echo "Could not stop synapse for cleaning unreferenced-state-groups"
+    echo "Could not stop $app for cleaning unreferenced-state-groups"
 fi
-systemctl restart synapse
+systemctl restart $app
 df -h
 
 exit 0
