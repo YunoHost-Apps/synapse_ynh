@@ -1,0 +1,1 @@
+0 0 * * 1 root __INSTALL_DIR__/synapse_clean_unreferenced_states.bash
