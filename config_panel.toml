@@ -174,9 +174,9 @@ services = ["__APP__"]
     [resources.event]
     name = "Manage Messages and Events growth and clean-up"
         [resources.event.cron_time]
-        ask = "Cron schedule to clean unrefenced state events"
+        ask = "Cron schedule to clean unreferenced state events"
         type = "string"
-        help = "Running this cleanup can /10 the database size when using Bridges. Use Cron Syntax https://www.man7.org/linux/man-pages/man5/crontab.5.html"
+        help = "Before activating, ensure to have the size of synapse DB available as free space. e.g. '0 0 * * 1' to run every Monday at 00:00. '* * 31 2 *' to deactivate. Running this cleanup can /10 the database size when using Bridges. Use Cron Syntax https://www.man7.org/linux/man-pages/man5/crontab.5.html"
 
     [resources.media]
     name = "Manage Media growth and clean-up"
