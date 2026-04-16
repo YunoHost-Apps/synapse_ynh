@@ -17,15 +17,21 @@ install_dir="/var/www/$app"
 
 df -h
 if $(systemctl stop $app); then
+    # Ensure that nobody restarts synapse while following script is running
     mv /etc/systemd/system/$app.service /root
     systemctl daemon-reload
-    # Ensure that nobody restarts synapse while this is running
-    $install_dir/rust-synapse-find-unreferenced-state-groups -p "postgresql://$db_user:$db_pwd@localhost/$db_name" -o "$install_dir/unreferenced.csv"
+    tempcsv=$(mktemp --tmpdir unreferenced-state-groups.csv.XXXXXXXXXX)
+    # generate the list of orphan event
+    #SYNAPSE HAS TO BE STOPPED OTHERWISE IMPORTANT EVENTS MAY BE ERASED
+    # see https://github.com/erikjohnston/synapse-find-unreferenced-state-groups/pull/8/changes
+    $install_dir/rust-synapse-find-unreferenced-state-groups -p "postgresql://$db_user:$db_pwd@localhost/$db_name" -o "$tempcsv"
+    chown postgres $tempcsv
     mv /root/$app.service /etc/systemd/system
     systemctl daemon-reload
     systemctl restart $app
     ynh_psql_db_shell <<< "SELECT pg_size_pretty( pg_database_size( '$db_name' ) );"
-    ynh_psql_db_shell <<< "CREATE TEMPORARY TABLE unreffed(id BIGINT PRIMARY KEY);COPY unreffed FROM '$install_dir/unreferenced.csv' WITH (FORMAT 'csv');DELETE FROM state_groups_state WHERE state_group IN (SELECT id FROM unreffed);DELETE FROM state_group_edges WHERE state_group IN (SELECT id FROM unreffed);DELETE FROM state_groups WHERE id IN (SELECT id FROM unreffed);"
+    ynh_psql_db_shell <<< "CREATE TEMPORARY TABLE unreffed(id BIGINT PRIMARY KEY);COPY unreffed FROM '$tempcsv' WITH (FORMAT 'csv');DELETE FROM state_groups_state WHERE state_group IN (SELECT id FROM unreffed);DELETE FROM state_group_edges WHERE state_group IN (SELECT id FROM unreffed);DELETE FROM state_groups WHERE id IN (SELECT id FROM unreffed);"
+    rm -f $tempcsv
     echo "Synapse unreferenced states deleted from psql"
     if $(systemctl stop $app); then
         ynh_psql_db_shell <<< "SELECT pg_size_pretty( pg_database_size( '$db_name' ) );"
