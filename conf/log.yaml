@@ -48,13 +48,15 @@ handlers:
         formatter: precise
 
 loggers:
+    synapse:
+        level: ERROR
     synapse.storage.SQL:
         # beware: increasing this to DEBUG will make synapse log sensitive
         # information such as access tokens.
-        level: INFO
+        level: ERROR
 
 root:
-    level: INFO
+    level: ERROR
 
     # Write logs to the `buffer` handler, which will buffer them together in memory,
     # then write them to a file.
