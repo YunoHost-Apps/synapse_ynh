@@ -14,9 +14,9 @@ test_format = 1.0
 
     test_upgrade_from.8c5eb0c.name = "Before element call backend (branch old_version_for_CI_11)"
 
-    test_upgrade_from.0524323ad93f2d279dd11c3eff68e0d6c12deae2.name = "V1.133.0"
+    test_upgrade_from.e97894df4ba7bd319772f37c1e0da73450d402e0.name = "V1.133.0 (branch old_version_for_CI_12)"
 
-    test_upgrade_from.5577f5edccec400cb3b59050ebf02500b2e7f9c5.name = "V1.139.2"
+    test_upgrade_from.83e832723322e3bbe3c3b7b4324ad04614c70f3c.name = "V1.139.2 (branch old_version_for_CI_13)"
 
 
     # -------------------------------
