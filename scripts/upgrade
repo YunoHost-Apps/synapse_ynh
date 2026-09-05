@@ -246,6 +246,16 @@ ynh_safe_rm /opt/yunohost/matrix-"$app"
 ynh_safe_rm "/etc/nginx/conf.d/${domain}.d/${app}_server_name.conf"
 
 #=================================================
+# MIGRATION : fix colations
+#=================================================
+
+if [ -n "$(LC_ALL=C sudo -u postgres psql -qAt --dbname="$db_name" --command="SELECT datcollversion FROM pg_database where datname='$db_name';")" ]; then
+    ynh_script_progression "Fixing DB collation version..."
+    ynh_psql_db_shell \
+        <<< "update pg_database set datcollate='C', datctype='C', datcollversion=NULL where datname='$db_name';"
+fi
+
+#=================================================
 # DOWNLOAD, CHECK AND UNPACK SOURCE
 #=================================================
 
