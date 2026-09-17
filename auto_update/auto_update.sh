@@ -81,9 +81,11 @@ upgrade_app() {
         new_checksum=$(sha256sum archive.tar.gz | cut -d' ' -f1)
         rm archive.tar.gz
 
-        sed -r -i "s|url\s*=(.*)/element-hq/lk-jwt-service/archive/refs/tags/v[[:alnum:].]{4,10}\.tar\.gz|url =\1/element-hq/lk-jwt-service/archive/refs/tags/v${lk_jwt_version}.tar.gz|"  ../manifest.toml
-        prev_checksum=$(get_from_manifest ".resources.sources.lk_jwt.sha256")
-        sed -r -i "s|$prev_checksum|$new_checksum|" ../manifest.toml
+        # Disabled for now because we need to:
+        # Migrate to the new rust version and use the prebuilt binary instead
+#         sed -r -i "s|url\s*=(.*)/element-hq/lk-jwt-service/archive/refs/tags/v[[:alnum:].]{4,10}\.tar\.gz|url =\1/element-hq/lk-jwt-service/archive/refs/tags/v${lk_jwt_version}.tar.gz|"  ../manifest.toml
+#         prev_checksum=$(get_from_manifest ".resources.sources.lk_jwt.sha256")
+#         sed -r -i "s|$prev_checksum|$new_checksum|" ../manifest.toml
 
         # Update livekit
         wget -O checksums.txt "https://github.com/livekit/livekit/releases/download/v${livekit_version}/checksums.txt"
