@@ -34,6 +34,7 @@ ynh_script_progression "Removing app main directory"
 ynh_safe_rm /etc/matrix-"$app"
 ynh_safe_rm "/etc/nginx/conf.d/${server_name}.d/${app}_server_name.conf"
 ynh_safe_rm "/etc/nginx/conf.d/${domain}.d/${app}.conf.inc"
+ynh_safe_rm "/etc/cron.d/$app_clean_unreferenced_states"
 
 #=================================================
 # REMOVE NGINX CONFIGURATION

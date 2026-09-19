@@ -36,6 +36,21 @@ run__add_admin_user() {
     ynh_psql_db_shell <<< "UPDATE users SET admin = 1 WHERE name = '@$add_admin_user_username:$server_name'"
 }
 
+set__cron_time() {
+    cron="/etc/cron.d/$app_clean_unreferenced_states"
+    cron_line=$(cat $cron | grep " root")
+    new_cron_line=$cron_line
+    echo $new_cron_line | sed 's/.*\( root\)/\1/'
+    new_cron_line="$cron_time$new_cron_line"
+    ynh_replace --match=$cron_line --replace=$new_cron_line --file="$config"
+}
+
+get__cron_time() {
+    cron="/etc/cron.d/$app_clean_unreferenced_states"
+    cron_time=$(cat $cron | grep " root")
+    echo $cron_time | sed 's/.*\( root\)/\1/'
+}
+
 #=================================================
 # SELECT THE ACTION FOLLOWING THE GIVEN ARGUMENT
 #=================================================
