@@ -215,6 +215,20 @@ listeners:
 #
 admin_contact: 'mailto:root'
 
+# Message retention policy and purge jobs
+# https://element-hq.github.io/synapse/latest/usage/configuration/config_documentation.html#retention
+retention:
+  enabled: true
+  default_policy:
+    min_lifetime: 1d
+    max_lifetime: 1y # Default lifetime for a created room
+  allowed_lifetime_min: 1d
+  allowed_lifetime_max: 5y # Maximum lifetime that can be forced in an individual room
+  #purge_jobs:
+  #- longest_max_lifetime: 3d
+  #  interval: 12h
+  #- shortest_max_lifetime: 3d
+  #  interval: 1d
 
 ## TLS ##
 
@@ -316,6 +330,13 @@ media_storage_providers:
 # See https://matrix-org.github.io/synapse/latest/reverse_proxy.html.
 #
 max_upload_size: {{ max_upload_size }}
+
+# Media retention policy 
+# https://element-hq.github.io/synapse/latest/usage/configuration/config_documentation.html#media_retention
+media_retention:
+  local_media_lifetime: 1y
+  remote_media_lifetime: 30d #remote media can be retrieved from remote server
+
 
 # Is the preview URL API enabled?
 #
