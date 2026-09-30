@@ -22,7 +22,6 @@ yunohost = ">= 12.1.38"
 helpers_version = "2.1"
 architectures = [
     "amd64",
-    "armhf",
     "arm64"
 ]
 multi_instance = true
@@ -62,22 +61,16 @@ ram.runtime = "3G"
     default = "all_users"
 
 [resources]
-    [resources.sources.synapse_prebuilt_armv7_bookworm]
-    prefetch = false
-    armhf.url = "https://github.com/YunoHost-Apps/synapse_python_build/releases/download/v1.161.0/matrix-synapse_1.161.0-bookworm-bin1_armv7l.tar.gz"
-    armhf.sha256 = "ea7ca9f73131a6ed0bfd4bae968987f32fae7709d54853cfcdfc59b8a5b055f8"
-
-    [resources.sources.synapse_prebuilt_armv7_trixie]
-    prefetch = false
-    armhf.url = "https://github.com/YunoHost-Apps/synapse_python_build/releases/download/v1.161.0/matrix-synapse_1.161.0-trixie-bin1_armv7l.tar.gz"
-    armhf.sha256 = "0afbaadab1b60fed1609babccb8e3836a1df2ac3f4788f903e031172e4c9eb19"
 
     [resources.sources.lk_jwt]
     prefetch = true
-    extract = true
+    extract = false
+    rename = "lk-jwt-service"
 
-    url = "https://github.com/element-hq/lk-jwt-service/archive/refs/tags/v0.6.0.tar.gz"
-    sha256 = "ea64a331f68fae1b4662689a10c604ba5bb31d1a9477ea810752a381240a7580"
+    amd64.url = "https://github.com/element-hq/lk-jwt-service/releases/download/v0.7.0/lk-jwt-service_linux_amd64"
+    amd64.sha256 = "2214a409832b75d6aa633773af2cdc8b3b5f36f4ea96dcf9a909656ab400c570"
+    arm64.url = "https://github.com/element-hq/lk-jwt-service/releases/download/v0.7.0/lk-jwt-service_linux_arm64"
+    arm64.sha256 = "01be41de40308c91977d92284b1ea8de120a30f248107f2aebc6fbf8503c1fcf"
 
     [resources.sources.livekit]
     prefetch = true
@@ -88,8 +81,6 @@ ram.runtime = "3G"
     amd64.sha256 = "6634aeeb2fb1366b6723708ae4320b9d5408106a4c63457c5e845ae3979c90e2"
     arm64.url = "https://github.com/livekit/livekit/releases/download/v1.13.7/livekit_1.13.7_linux_arm64.tar.gz"
     arm64.sha256 = "5d167fdf52cf43c0c72972f25325364479f41f854bfef651056eab2504da5de9"
-    armhf.url = "https://github.com/livekit/livekit/releases/download/v1.13.7/livekit_1.13.7_linux_armv7.tar.gz"
-    armhf.sha256 = "48c0150f09fd0ab9baa5fa85af87af99f8f364ecc1256731efb5c62636269fd9"
 
     [resources.system_user]
     allow_email = true
@@ -160,6 +151,3 @@ ram.runtime = "3G"
 
     [resources.database]
     type = "postgresql"
-
-    [resources.go]
-    version = "1.25"
