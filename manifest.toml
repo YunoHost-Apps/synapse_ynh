@@ -5,7 +5,7 @@ name = "Synapse"
 description.en = "Instant messaging server which uses Matrix"
 description.fr = "Serveur de messagerie instantané basé sur Matrix"
 
-version = "1.161.0~ynh1"
+version = "1.162.0~ynh1"
 
 maintainers = ["Josué Tille"]
 
