@@ -23,40 +23,17 @@ install_sources() {
     mkdir -p "$install_dir/venv"
     chown "$app":root -R "$install_dir/venv"
 
-    if [ -n "$(uname -m | grep arm)" ]
-    then
-        # Clean old file, sometimes it could make some big issues if we don't do this!!
-        ynh_safe_rm "$install_dir/venv"/bin
-        ynh_safe_rm "$install_dir/venv"/lib
-        ynh_safe_rm "$install_dir/venv"/include
-        ynh_safe_rm "$install_dir/venv"/share
+    # Install virtualenv if it don't exist
+    test -e "$install_dir/venv"/bin/python3 || python3 -m venv "$install_dir/venv"
 
-        ynh_setup_source --dest_dir="$install_dir/venv"/ --source_id="synapse_prebuilt_armv7_$(lsb_release --codename --short)"
+    # Install synapse in virtualenv
+    local pip3="$install_dir/venv"/bin/pip3
 
-        # Fix multi-instance support
-        for f in "$install_dir/venv"/bin/*; do
-            ynh_replace_regex --match='#!/opt/yunohost/matrix-synapse' --replace='#!'"$install_dir/venv" --file="$f"
-        done
-    else
-
-        # Install virtualenv if it don't exist
-        test -e "$install_dir/venv"/bin/python3 || python3 -m venv "$install_dir/venv"
-
-        # Install synapse in virtualenv
-        local pip3="$install_dir/venv"/bin/pip3
-
-        $pip3 install --upgrade setuptools wheel pip cffi
-        $pip3 install --upgrade -r "$YNH_APP_BASEDIR/conf/requirement_$(lsb_release --codename --short).txt"
-    fi
+    $pip3 install --upgrade setuptools wheel pip cffi
+    $pip3 install --upgrade -r "$YNH_APP_BASEDIR/conf/requirement_$(lsb_release --codename --short).txt"
 
     # Install livekit jwt
     ynh_setup_source --source_id=lk_jwt --dest_dir="$install_dir/lk_jwt"
-
-    chown "$app" -R "$install_dir"
-
-    pushd "$install_dir/lk_jwt"
-    ynh_hide_warnings ynh_exec_as_app go build -o lk-jwt-service .
-    popd
 
     # Install livekit server for element-call
     ynh_setup_source --source_id=livekit --dest_dir="$install_dir/livekit"
@@ -189,6 +166,8 @@ set_permissions() {
     chmod 750 "$install_dir"/Coturn_config_rotate.sh
     chmod 700 "$install_dir"/update_synapse_for_appservice.sh
     chmod 700 "$install_dir"/set_admin_user.sh
+    chmod 700 "$install_dir"/livekit/livekit-server
+    chmod 700 "$install_dir"/lk_jwt/lk-jwt-service
 
     chmod 640 "$install_dir"/cas/cas_server.php
     chown "$app":www-data "$install_dir" "$install_dir"/cas "$install_dir"/cas/cas_server.php
