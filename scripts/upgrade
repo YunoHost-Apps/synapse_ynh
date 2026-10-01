@@ -256,6 +256,15 @@ if [ -n "$(LC_ALL=C sudo -u postgres psql -qAt --dbname="$db_name" --command="SE
 fi
 
 #=================================================
+# MIGRATION : Cleanup legacy go code for lk-jwt
+#=================================================
+
+if [ -e "$install_dir/go" ]; then
+    ynh_safe_rm "$install_dir/go"
+    ynh_safe_rm "$install_dir/lk_jwt"
+fi
+
+#=================================================
 # DOWNLOAD, CHECK AND UNPACK SOURCE
 #=================================================
 

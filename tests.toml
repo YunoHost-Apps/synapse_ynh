@@ -42,10 +42,10 @@ test_format = 1.0
     cas.logged_on_sso = true
     cas.expect_content = "This is where Synapse is installed."
 
-    livekit_jwt.path = "/livekit/jwt/"
+    livekit_jwt.path = "/livekit/jwt/get_token"
     livekit_jwt.logged_on_sso = false
-    livekit_jwt.expect_content = "404 page not found"
-    livekit_jwt.expect_return_code = 404
+    livekit_jwt.expect_content = ""
+    livekit_jwt.expect_return_code = 405
 
     livekit_sfu.path = "/livekit/sfu/"
     livekit_sfu.logged_on_sso = false
