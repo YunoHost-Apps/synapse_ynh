@@ -45,7 +45,7 @@ build_requirement() {
     local deb_py_version="$1"
     local deb_name="$2"
 
-    venv_dir="$(mktemp -d)"
+    venv_dir="/tmp/synpase_py_${deb_py_version}"
     ~/.pyenv/versions/"${deb_py_version}"/bin/python -m venv "$venv_dir"
     "$venv_dir/bin/pip3" install --upgrade pip pip-tools
     cat << EOF > "$venv_dir/requirements.in"
@@ -53,8 +53,10 @@ matrix-synapse==$app_version
 matrix-synapse-ldap3
 matrix-synapse[postgres]==$app_version
 lxml
+beautifulsoup4
 EOF
     "$venv_dir/bin/pip-compile" "$venv_dir/requirements.in" --output-file "../conf/requirement_${deb_name}.txt"
+    rm -r "$venv_dir"
 }
 
 upgrade_app() {
