@@ -5,7 +5,7 @@ name = "Synapse"
 description.en = "Instant messaging server which uses Matrix"
 description.fr = "Serveur de messagerie instantané basé sur Matrix"
 
-version = "1.162.0~ynh1"
+version = "1.163.0~ynh1"
 
 maintainers = ["Josué Tille"]
 
@@ -67,20 +67,20 @@ ram.runtime = "3G"
     extract = false
     rename = "lk-jwt-service"
 
-    amd64.url = "https://github.com/element-hq/lk-jwt-service/releases/download/v0.7.0/lk-jwt-service_linux_amd64"
-    amd64.sha256 = "2214a409832b75d6aa633773af2cdc8b3b5f36f4ea96dcf9a909656ab400c570"
-    arm64.url = "https://github.com/element-hq/lk-jwt-service/releases/download/v0.7.0/lk-jwt-service_linux_arm64"
-    arm64.sha256 = "01be41de40308c91977d92284b1ea8de120a30f248107f2aebc6fbf8503c1fcf"
+    amd64.url = "https://github.com/element-hq/lk-jwt-service/releases/download/v0.9.0/lk-jwt-service_linux_amd64"
+    amd64.sha256 = "bb0e23dc8ae3d256a51cb70cfc7551b0023e8c4cbcf02bad55d62a546b1afe35"
+    arm64.url = "https://github.com/element-hq/lk-jwt-service/releases/download/v0.9.0/lk-jwt-service_linux_arm64"
+    arm64.sha256 = "9305dbfe26f835455283f1b82124ebe101236e035066d9a629141160dada24b0"
 
     [resources.sources.livekit]
     prefetch = true
     extract = true
     in_subdir = false
 
-    amd64.url = "https://github.com/livekit/livekit/releases/download/v1.13.7/livekit_1.13.7_linux_amd64.tar.gz"
-    amd64.sha256 = "6634aeeb2fb1366b6723708ae4320b9d5408106a4c63457c5e845ae3979c90e2"
-    arm64.url = "https://github.com/livekit/livekit/releases/download/v1.13.7/livekit_1.13.7_linux_arm64.tar.gz"
-    arm64.sha256 = "5d167fdf52cf43c0c72972f25325364479f41f854bfef651056eab2504da5de9"
+    amd64.url = "https://github.com/livekit/livekit/releases/download/v1.13.10/livekit_1.13.10_linux_amd64.tar.gz"
+    amd64.sha256 = "c25a3e45fb922e9a93c6443d10c0ed041ba64342097e38632331736630283165"
+    arm64.url = "https://github.com/livekit/livekit/releases/download/v1.13.10/livekit_1.13.10_linux_arm64.tar.gz"
+    arm64.sha256 = "ff60607e1931ff078576882fa11c087aa5821d635ac0c47f56ff77e203e32006"
 
     [resources.system_user]
     allow_email = true
