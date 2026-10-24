@@ -55,7 +55,7 @@ matrix-synapse[postgres]==$app_version
 lxml
 beautifulsoup4
 EOF
-    "$venv_dir/bin/pip-compile" "$venv_dir/requirements.in" --output-file "../conf/requirement_${deb_name}.txt"
+    "$venv_dir/bin/pip-compile" "$venv_dir/requirements.in" --upgrade --output-file "../conf/requirement_${deb_name}.txt"
     rm -r "$venv_dir"
 }
 
