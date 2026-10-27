@@ -5,7 +5,7 @@ name = "Synapse"
 description.en = "Instant messaging server which uses Matrix"
 description.fr = "Serveur de messagerie instantané basé sur Matrix"
 
-version = "1.163.2~ynh1"
+version = "1.164.0~ynh1"
 
 maintainers = ["Josué Tille"]
 
@@ -77,10 +77,10 @@ ram.runtime = "3G"
     extract = true
     in_subdir = false
 
-    amd64.url = "https://github.com/livekit/livekit/releases/download/v1.13.10/livekit_1.13.10_linux_amd64.tar.gz"
-    amd64.sha256 = "c25a3e45fb922e9a93c6443d10c0ed041ba64342097e38632331736630283165"
-    arm64.url = "https://github.com/livekit/livekit/releases/download/v1.13.10/livekit_1.13.10_linux_arm64.tar.gz"
-    arm64.sha256 = "ff60607e1931ff078576882fa11c087aa5821d635ac0c47f56ff77e203e32006"
+    amd64.url = "https://github.com/livekit/livekit/releases/download/v1.13.11/livekit_1.13.11_linux_amd64.tar.gz"
+    amd64.sha256 = "1e9ee90ca301e1842b2887fc77cb122759756a9c8aeb4334ee91de3325ec43fb"
+    arm64.url = "https://github.com/livekit/livekit/releases/download/v1.13.11/livekit_1.13.11_linux_arm64.tar.gz"
+    arm64.sha256 = "2af6ce091d6b3c79d1677f8ff1bbb91a8007f40b2325c059b52d38383c0830b6"
 
     [resources.system_user]
     allow_email = true
