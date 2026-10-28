@@ -74,7 +74,7 @@ markupsafe==3.0.4
     # via jinja2
 matrix-common==1.3.0
     # via matrix-synapse
-matrix-synapse[postgres]==1.164.0
+matrix-synapse[postgres]==1.164.1
     # via -r /tmp/synpase_py_3.13.5/requirements.in
 matrix-synapse-ldap3==0.4.0
     # via -r /tmp/synpase_py_3.13.5/requirements.in
