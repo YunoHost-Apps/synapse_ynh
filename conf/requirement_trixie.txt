@@ -74,11 +74,11 @@ markupsafe==3.0.4
     # via jinja2
 matrix-common==1.3.0
     # via matrix-synapse
-matrix-synapse[postgres]==1.163.2
+matrix-synapse[postgres]==1.164.1
     # via -r /tmp/synpase_py_3.13.5/requirements.in
 matrix-synapse-ldap3==0.4.0
     # via -r /tmp/synpase_py_3.13.5/requirements.in
-msgpack==1.2.3
+msgpack==1.2.4
     # via matrix-synapse
 multipart==2.0.1
     # via treq
@@ -89,7 +89,7 @@ packaging==26.3
     #   incremental
     #   matrix-synapse
     #   matrix-synapse-ldap3
-phonenumbers==9.0.41
+phonenumbers==9.0.42
     # via matrix-synapse
 pillow==13.0.0
     # via matrix-synapse
@@ -97,7 +97,7 @@ prometheus-client==0.26.0
     # via matrix-synapse
 psycopg2==2.9.13
     # via matrix-synapse
-pyasn1==0.6.4
+pyasn1==0.6.5
     # via
     #   ldap3
     #   matrix-synapse
