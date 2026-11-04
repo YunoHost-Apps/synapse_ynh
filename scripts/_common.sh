@@ -23,48 +23,17 @@ install_sources() {
     mkdir -p "$install_dir/venv"
     chown "$app":root -R "$install_dir/venv"
 
-    if [ -n "$(uname -m | grep arm)" ]
-    then
-        # Clean old file, sometimes it could make some big issues if we don't do this!!
-        ynh_safe_rm "$install_dir/venv"/bin
-        ynh_safe_rm "$install_dir/venv"/lib
-        ynh_safe_rm "$install_dir/venv"/include
-        ynh_safe_rm "$install_dir/venv"/share
+    # Install virtualenv if it don't exist
+    test -e "$install_dir/venv"/bin/python3 || python3 -m venv "$install_dir/venv"
 
-        ynh_setup_source --dest_dir="$install_dir/venv"/ --source_id="synapse_prebuilt_armv7_$(lsb_release --codename --short)"
+    # Install synapse in virtualenv
+    local pip3="$install_dir/venv"/bin/pip3
 
-        # Fix multi-instance support
-        for f in "$install_dir/venv"/bin/*; do
-            ynh_replace_regex --match='#!/opt/yunohost/matrix-synapse' --replace='#!'"$install_dir/venv" --file="$f"
-        done
-    else
-
-        # Install virtualenv if it don't exist
-        test -e "$install_dir/venv"/bin/python3 || python3 -m venv "$install_dir/venv"
-
-        # Install synapse in virtualenv
-        local pip3="$install_dir/venv"/bin/pip3
-
-        $pip3 install --upgrade setuptools wheel pip cffi
-        $pip3 install --upgrade -r "$YNH_APP_BASEDIR/conf/requirement_$(lsb_release --codename --short).txt"
-    fi
-
-    # Apply patch for LDAP auth if needed
-    # Note that we put patch into scripts dir because /source are not stored and can't be used on restore
-    if ! grep -F -q '# LDAP Filter anonymous user Applied' "$install_dir/venv/lib/python$python_version/site-packages/ldap_auth_provider.py"; then
-        pushd "$install_dir/venv/lib/python$python_version/site-packages"
-        patch < "$YNH_APP_BASEDIR"/scripts/patch/ldap_auth_filter_anonymous_user.patch
-        popd
-    fi
+    $pip3 install --upgrade setuptools wheel pip cffi
+    $pip3 install --upgrade -r "$YNH_APP_BASEDIR/conf/requirement_$(lsb_release --codename --short).txt"
 
     # Install livekit jwt
     ynh_setup_source --source_id=lk_jwt --dest_dir="$install_dir/lk_jwt"
-
-    chown "$app" -R "$install_dir"
-
-    pushd "$install_dir/lk_jwt"
-    ynh_hide_warnings ynh_exec_as_app go build -o lk-jwt-service .
-    popd
 
     # Install livekit server for element-call
     ynh_setup_source --source_id=livekit --dest_dir="$install_dir/livekit"
@@ -178,6 +147,10 @@ ensure_vars_set() {
     ynh_app_setting_set_default --key=push_include_content --value=true
     ynh_app_setting_set_default --key=enable_dtls_for_audio_video_turn_call --value=true
     ynh_app_setting_set_default --key=allow_to_send_request_to_localhost --value=false
+    ynh_app_setting_set_default --key=presence_enabled --value=true
+    ynh_app_setting_set_default --key=require_auth_for_profile_requests --value=false
+    ynh_app_setting_set_default --key=allow_profile_lookup_over_federation --value=true
+    ynh_app_setting_set_default --key=limit_profile_requests_to_users_who_share_rooms --value=false
 
     ynh_app_setting_set_default --key=livekit_secret --value="$(ynh_string_random --length=40)"
 
@@ -193,6 +166,8 @@ set_permissions() {
     chmod 750 "$install_dir"/Coturn_config_rotate.sh
     chmod 700 "$install_dir"/update_synapse_for_appservice.sh
     chmod 700 "$install_dir"/set_admin_user.sh
+    chmod 700 "$install_dir"/livekit/livekit-server
+    chmod 700 "$install_dir"/lk_jwt/lk-jwt-service
 
     chmod 640 "$install_dir"/cas/cas_server.php
     chown "$app":www-data "$install_dir" "$install_dir"/cas "$install_dir"/cas/cas_server.php

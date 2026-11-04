@@ -572,6 +572,12 @@ autocreate_auto_join_rooms: {{ autocreate_auto_join_rooms }}
 #
 auto_join_rooms_for_guests: {{ auto_join_rooms_for_guests }}
 
+# The default room version for newly created rooms on this server.
+# Known room versions are listed here https://spec.matrix.org/latest/rooms/#complete-list-of-room-versions
+# For example, for room version 1, default_room_version should be set to “1”.
+# Defaults to "10".
+#
+default_room_version: '12'
 
 ## Metrics ###
 
@@ -1063,3 +1069,29 @@ rc_delayed_event_mgmt:
 # server since it is long-lived, stable and trusted. However, some admins may
 # wish to use another server for this purpose.
 suppress_key_server_warning: true
+
+#
+# Privacy settings for users
+#
+
+# Presence tracking allows users to see the state (e.g online/offline) of other local and remote users.
+presence:
+  # Set to false to disable presence tracking on this homeserver. Defaults to true.
+  enabled: {{ presence_enabled }}
+
+# Whether to require authentication to retrieve profile data (avatars, display names) of other users through the client API.
+# Note that profile data is also available via the federation API,
+# unless allow_profile_lookup_over_federation is set to false.
+# Defaults to false.
+require_auth_for_profile_requests: {{ require_auth_for_profile_requests }}
+
+# Set to false to disable profile lookup over federation.
+# By default, the Federation API allows other homeservers to obtain profile data of any user on this homeserver.
+# Defaults to true.
+allow_profile_lookup_over_federation: {{ allow_profile_lookup_over_federation }}
+
+# Use this option to require a user to share a room with another user in order to retrieve their profile information.
+# Only checked on Client-Server requests.
+# Profile requests from other servers should be checked by the requesting server.
+# Defaults to false.
+limit_profile_requests_to_users_who_share_rooms: {{ limit_profile_requests_to_users_who_share_rooms }}
