@@ -93,6 +93,17 @@ configure_nginx() {
     ynh_config_add_nginx
 }
 
+configure_app_services() {
+    echo "app_service_config_files:" > "/etc/matrix-$app/conf.d/app_service.yaml"
+    echo "  - /etc/matrix-$app/app-service/livekit_jwt.yaml" >> /etc/matrix-"$app"/conf.d/app_service.yaml
+
+    for f in "/etc/matrix-$app/app-service/"*; do
+        if [ "$f" != "/etc/matrix-$app/app-service/livekit_jwt.yaml" ]; then
+            echo "  - $f" >> "/etc/matrix-$app/conf.d/app_service.yaml"
+        fi
+    done
+}
+
 configure_php() {
     ynh_config_add_phpfpm
     ynh_replace --match="chdir = $install_dir" \
@@ -153,6 +164,8 @@ ensure_vars_set() {
     ynh_app_setting_set_default --key=limit_profile_requests_to_users_who_share_rooms --value=false
 
     ynh_app_setting_set_default --key=livekit_secret --value="$(ynh_string_random --length=40)"
+    ynh_app_setting_set_default --key=livekit_as_token --value="$(ynh_string_random --length=40)"
+    ynh_app_setting_set_default --key=livekit_hs_token --value="$(ynh_string_random --length=40)"
 
     ynh_app_setting_set_default --key=contact_admin_email --value=''
     ynh_app_setting_set_default --key=contact_admin_matrix_id --value=''
@@ -186,6 +199,12 @@ set_permissions() {
     setfacl -R -m user:turnserver:rX  /etc/matrix-"$app"
 
     chmod 600 /etc/matrix-"$app"/"$server_name".signing.key
+    chown "$app" /etc/matrix-"$app"/conf.d/app_service.yaml
+    chmod 600 /etc/matrix-"$app"/conf.d/app_service.yaml
+    chown "$app" "/etc/matrix-$app/app-service/"*
+    chmod 600 "/etc/matrix-$app/app-service/"*
+    chown "$app" /etc/matrix-"$app"/livekit_key
+    chmod 600 /etc/matrix-"$app"/livekit_key
 
     chown "$app":root -R /var/log/matrix-"$app"
     chmod u=rwX,g=rX,o= -R /var/log/matrix-"$app"

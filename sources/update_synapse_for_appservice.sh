@@ -15,18 +15,18 @@ backup_app_service=$(mktemp)
 # Backup the previous config file
 cp "$service_config_file" "$backup_app_service"
 
-if [ -n "$(ls "/etc/matrix-$app/app-service/")" ]; then
-    echo "app_service_config_files:" > "$service_config_file"
+echo "app_service_config_files:" > "$service_config_file"
+echo "  - /etc/matrix-$app/app-service/livekit_jwt.yaml" >> /etc/matrix-"$app"/conf.d/app_service.yaml
 
-    for f in "/etc/matrix-$app/app-service/"*; do
+for f in "/etc/matrix-$app/app-service/"*; do
+    if [ "$f" != "/etc/matrix-$app/app-service/livekit_jwt.yaml" ]; then
         echo "  - $f" >> "$service_config_file"
-    done
+    fi
+done
 
-    chown "$app" "/etc/matrix-$app/app-service/"*
-    chmod 600 "/etc/matrix-$app/app-service/"*
-else
-    echo "" > "$service_config_file"
-fi
+chown "$app" "/etc/matrix-$app/app-service/"*
+chmod 600 "/etc/matrix-$app/app-service/"*
+
 chown "$app" "$service_config_file"
 chmod 600 "$service_config_file"
 

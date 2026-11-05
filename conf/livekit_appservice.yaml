@@ -1,0 +1,22 @@
+# WARNING: Don't edit this file. All change will be removed after each app upgrade
+#
+# Application service registration for lk-jwt-service (Element call / MatrixRTC).
+# This single file is used by both sides:
+#  - Synapse loads it as an application service registration (app_service_config_files)
+#  - lk-jwt-service reads the tokens from it (LIVEKIT_AS_REGISTRATION_FILE)
+# See https://github.com/element-hq/lk-jwt-service#-homeserver-wiring-application-service
+id: "LiveKit JWT service"
+as_token: "__LIVEKIT_AS_TOKEN__"
+hs_token: "__LIVEKIT_HS_TOKEN__"
+sender_localpart: "_lk_jwt_service"
+namespaces:
+  users:
+    - exclusive: false
+      regex: ".*"
+url: null # No event traffic required
+# Scope for room membership look-up (MSC4502)
+io.element.msc4502.scopes: [ "urn:matrix:client:io.element.msc4502:rooms:is_joined" ]
+# Proxy the /rtc/livekit requests on the Client-Server and Server-Server API
+# to lk-jwt-service (MSC4512)
+io.element.msc4512.proxy_prefix: "rtc/livekit"
+io.element.msc4512.proxy_url: "http://127.0.0.1:__PORT_LIVEKIT_JWT__"
