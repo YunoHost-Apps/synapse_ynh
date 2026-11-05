@@ -14,8 +14,8 @@ services = ["__APP__"]
         no = "false"
         help = "Defaults to 'false'. If 'true', it is highly recommended to use either captcha, email, or token-based verification to avoid SPAM."
 
-        # Disabled for matrix V2 because some client like Element X don't support cas and so require to have password authentication enabled
-        # [main.welcome.password_enabled]
+        # Disabled for matrix V2 because some client like Element X don't support cas and so require to have password authentication 
+        # [main.welcome.password_]
         # ask = "Enable Password Login"
         # type = "boolean"
         # yes = "true"
@@ -77,7 +77,7 @@ services = ["__APP__"]
         '''
         type = "markdown"
 
-        [main.privacy.e2e_enabled_by_default]
+        [main.privacy.e2e__by_default]
         ask = "End-to-End Encryption by default for locally-created Rooms"
         type = "select"
         choices = ["all", "invite", "off"]
@@ -199,13 +199,44 @@ services = ["__APP__"]
 name = "Resource Usage"
 services = ["__APP__"]
 
-    [resources.media]
+    [resources.media_retention]
     name = "Manage Media growth and clean-up"
 
-        [resources.media.max_upload_size]
+        [resources.media_retention.max_upload_size]
         ask = "Largest allowed media upload size in bytes"
         type = "string"
         help = "Defaults to: '10M' . Format : <value><[GMK]?>"
+
+        [resources.media_retention.local_media_lifetime]
+        ask = "Duration without access to a local media after which it will be purged"
+        type = "string"
+        help = "Defaults to null. Format : 1d/1y https://element-hq.github.io/synapse/latest/usage/configuration/config_documentation.html#media_retention"
+
+        [resources.media_retention.remote_media_lifetime]
+        ask = "Duration without access to a remote media after which it will be purged"
+        type = "string"
+        help = "Defaults to null. Format : 1d/1y"
+
+    [resources.retention]
+    name = "Manage Messages growth and clean-up"
+
+        [resources.retention.enabled]
+        ask = "Enforce message retention policies"
+        type = "boolean"
+        yes = "true"
+        no = "false"
+        help = "Defaults to false. see https://element-hq.github.io/synapse/latest/usage/configuration/config_documentation.html#retention "
+        bind = "retention>enabled:__INSTALL_DIR__/homeserver.yaml"
+
+        [resources.retention.max_lifetime]
+        ask = "Maximum message retention time of the default message retention policy"
+        type = "string"
+        help = "Defaults to null. Format : 1d/1y"
+
+        [resources.retention.allowed_lifetime_max]
+        ask = "Retention policy limit."
+        type = "string"
+        help = "Defaults to null. Format : 1d/1y. If a custom max_lifetime is set for a given room that’s beyond this bound, Synapse will cap the room’s policy to these limits when running purge jobs."
 
 [advanced]
 name = "Advanced Settings"
@@ -234,7 +265,7 @@ services = ["__APP__"]
         type = "boolean"
         yes = "true"
         no = "false"
-        help = "Guests can participate on this server in rooms with guest access enabled, without a password/email/etc."
+        help = "Guests can participate on this server in rooms with guest access , without a password/email/etc."
 
         [advanced.guests.auto_join_rooms_for_guests]
         ask = "Enable Auto Join Room for Guests"
@@ -264,7 +295,7 @@ services = ["__APP__"]
             type = "boolean"
             yes = "true"
             no = "false"
-            help = "Disabled by default. If enabled, anyone can query the Public Rooms Directory (access through the client API). This only makes sense if you want everyone to be able to scroll your public room to see what's interesting on your Homeserver"
+            help = "Disabled by default. If , anyone can query the Public Rooms Directory (access through the client API). This only makes sense if you want everyone to be able to scroll your public room to see what's interesting on your Homeserver"
 
     [advanced.registration]
     name = "Account Registration"
