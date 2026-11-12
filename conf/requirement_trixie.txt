@@ -16,7 +16,9 @@ attrs==26.1.0
     #   treq
     #   twisted
 automat==25.4.16
-    # via twisted
+    # via
+    #   matrix-synapse
+    #   twisted
 bcrypt==5.0.0
     # via matrix-synapse
 beautifulsoup4==4.15.0
@@ -74,7 +76,7 @@ markupsafe==3.0.4
     # via jinja2
 matrix-common==1.3.0
     # via matrix-synapse
-matrix-synapse[postgres]==1.164.1
+matrix-synapse[postgres]==1.165.0
     # via -r /tmp/synpase_py_3.13.5/requirements.in
 matrix-synapse-ldap3==0.4.0
     # via -r /tmp/synpase_py_3.13.5/requirements.in
@@ -89,7 +91,7 @@ packaging==26.3
     #   incremental
     #   matrix-synapse
     #   matrix-synapse-ldap3
-phonenumbers==9.0.42
+phonenumbers==9.0.43
     # via matrix-synapse
 pillow==13.0.0
     # via matrix-synapse
@@ -106,9 +108,9 @@ pyasn1-modules==0.4.2
     # via matrix-synapse
 pycparser==3.12
     # via cffi
-pydantic==2.14.1
+pydantic==2.14.3
     # via matrix-synapse
-pydantic-core==2.50.1
+pydantic-core==2.50.4
     # via pydantic
 pymacaroons==0.13.0
     # via matrix-synapse
@@ -125,7 +127,7 @@ pyparsing==3.3.3
     # via matrix-synapse
 pyrsistent==0.20.0
     # via matrix-synapse
-python-multipart==0.0.32
+python-multipart==0.0.33
     # via matrix-synapse
 pyyaml==6.0.3
     # via matrix-synapse
@@ -155,11 +157,11 @@ six==1.17.0
     # via pymacaroons
 sortedcontainers==2.4.0
     # via matrix-synapse
-soupsieve==3.0.4
+soupsieve==4.1
     # via beautifulsoup4
 treq==26.7.0
     # via matrix-synapse
-twisted[tls]==26.4.0
+twisted[tls]==26.10.0
     # via
     #   matrix-synapse
     #   matrix-synapse-ldap3
@@ -173,7 +175,7 @@ typing-extensions==4.16.0
     #   treq
     #   twisted
     #   typing-inspection
-typing-inspection==0.4.4
+typing-inspection==0.4.5
     # via pydantic
 unpaddedbase64==2.1.0
     # via
