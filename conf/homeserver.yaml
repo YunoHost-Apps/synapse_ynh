@@ -1024,6 +1024,12 @@ experimental_features:
     msc4222_enabled: true
     # MSC4140: Delayed events are required for proper call participation signalling. If disabled it is very likely that you end up with stuck calls in Matrix rooms
     msc4140_enabled: true
+    # MSC4502: Extended appservice privileges. Needed by lk-jwt-service (Element call
+    # backend running as an application service) for room membership look-up.
+    msc4502_enabled: true
+    # MSC4512: Appservice request proxying. Routes the MatrixRTC (MSC4195)
+    # requests to lk-jwt-service via the registration proxy_prefix/proxy_url.
+    msc4512_enabled: true
     # MSC 4028: Turn on push notifications for encrypted messages
     msc4028_push_encrypted_events: true
 
