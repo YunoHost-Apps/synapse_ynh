@@ -5,7 +5,7 @@ name = "Synapse"
 description.en = "Instant messaging server which uses Matrix"
 description.fr = "Serveur de messagerie instantané basé sur Matrix"
 
-version = "1.165.0~ynh1"
+version = "1.166.0~ynh1"
 
 maintainers = ["Josué Tille"]
 
@@ -67,10 +67,10 @@ ram.runtime = "3G"
     extract = false
     rename = "lk-jwt-service"
 
-    amd64.url = "https://github.com/element-hq/lk-jwt-service/releases/download/v0.9.0/lk-jwt-service_linux_amd64"
-    amd64.sha256 = "bb0e23dc8ae3d256a51cb70cfc7551b0023e8c4cbcf02bad55d62a546b1afe35"
-    arm64.url = "https://github.com/element-hq/lk-jwt-service/releases/download/v0.9.0/lk-jwt-service_linux_arm64"
-    arm64.sha256 = "9305dbfe26f835455283f1b82124ebe101236e035066d9a629141160dada24b0"
+    amd64.url = "https://github.com/element-hq/lk-jwt-service/releases/download/v0.10.0/lk-jwt-service_linux_amd64"
+    amd64.sha256 = "18bcd27802395900c3659c968a4af4baf5c7fe77444e1be2e7089228ee365432"
+    arm64.url = "https://github.com/element-hq/lk-jwt-service/releases/download/v0.10.0/lk-jwt-service_linux_arm64"
+    arm64.sha256 = "6bfd374776ec1a8519d7e11067f2b2caa331ab03204360410b4f501a34d504f7"
 
     [resources.sources.livekit]
     prefetch = true
