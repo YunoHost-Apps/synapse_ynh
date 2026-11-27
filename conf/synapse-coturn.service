@@ -8,7 +8,7 @@ User=turnserver
 Group=turnserver
 Type=notify
 EnvironmentFile=/etc/matrix-__APP__/coturn_env
-ExecStart=/usr/bin/turnserver -c /etc/matrix-__APP__/coturn.conf $EXTRA_OPTIONS --pidfile=
+ExecStart=/usr/bin/turnserver -c /etc/matrix-__APP__/coturn.conf $EXTRA_OPTIONS -L 0.0.0.0 --pidfile=
 Restart=on-failure
 InaccessibleDirectories=/home
 PrivateTmp=yes
